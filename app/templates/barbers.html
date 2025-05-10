@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h2>Peluqueros</h2>
+
+    <form method="POST" action="{{ url_for('add_barber') }}">
+        <input type="text" name="name" placeholder="Nombre del peluquero" required>
+        <button type="submit">Agregar</button>
+    </form>
+
+    <ul>
+        {% for barber in barbers %}
+            <li>
+                {{ barber.name }}
+                <a href="{{ url_for('delete_barber', id=barber.id) }}">Eliminar</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

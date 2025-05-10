@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestor de Pagos - Peluquería</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Gestor de Pagos</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Inicio</a> |
+            <a href="{{ url_for('list_barbers') }}">Peluqueros</a> |
+            <a href="{{ url_for('list_services') }}">Servicios</a> |
+            <a href="{{ url_for('add_payment') }}">Nuevo Pago</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

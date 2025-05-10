@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h2>Servicios</h2>
+
+    <form method="POST" action="{{ url_for('add_service') }}">
+        <label>Nombre del servicio:</label>
+        <input type="text" name="name" required>
+
+        <label>Precio ($):</label>
+        <input type="number" name="price" step="0.01" required>
+
+        <button type="submit">Agregar servicio</button>
+    </form>
+
+    <ul>
+        {% for service in services %}
+            <li>{{ service.name }} - ${{ service.price }}</li>
+        {% endfor %}
+    </ul>
+    
+{% endblock %}
