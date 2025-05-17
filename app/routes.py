@@ -1,30 +1,69 @@
-from flask import render_template, request, redirect, url_for
+from flask import current_app as app, render_template, request, redirect, url_for, session, flash
 from . import db
 from .models import Barber, Service, Appointment, Payment, PaymentMethodEnum
-from flask import current_app as app
+from .auth import login_required
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/barbers')
+### Adminstrador ###
+
+@app.route('/admin/barbers')
 def list_barbers():
     barbers = Barber.query.filter_by(active=True).all()
     return render_template('barbers.html', barbers=barbers)
 
-@app.route('/barbers/add', methods=['POST'])
+@app.route('/admin/barbers/add', methods=['POST'])
 def add_barber():
     name = request.form['name']
     db.session.add(Barber(name=name))
     db.session.commit()
     return redirect(url_for('list_barbers'))
 
-@app.route('/barbers/delete/<int:id>')
+@app.route('/admin/barbers/delete/<int:id>')
 def delete_barber(id):
     barber = Barber.query.get(id)
     barber.active = False
     db.session.commit()
     return redirect(url_for('list_barbers'))
+
+@app.route('/admin/services')
+def list_services():
+    services = Service.query.all()
+    return render_template('services.html', services=services)
+
+@app.route('/admin/services/add', methods=['POST'])
+def add_service():
+    name = request.form['name']
+    price = float(request.form['price'])
+    db.session.add(Service(name=name, price=price))
+    db.session.commit()
+    return redirect(url_for('list_services'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if (username == app.config['ADMIN_USERNAME'] and
+            password == app.config['ADMIN_PASSWORD']):
+            session['logged_in'] = True
+            return redirect(url_for('index'))
+        else:
+            flash('Usuario o contraseña incorrectos')
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    return redirect(url_for('login'))
+
+
+### Peluqueros ###
 
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():
@@ -51,17 +90,3 @@ def add_payment():
     barbers = Barber.query.filter_by(active=True).all()
     services = Service.query.all()
     return render_template('add_payment.html', barbers=barbers, services=services, methods=PaymentMethodEnum)
-
-@app.route('/services')
-def list_services():
-    services = Service.query.all()
-    return render_template('services.html', services=services)
-
-@app.route('/services/add', methods=['POST'])
-def add_service():
-    name = request.form['name']
-    price = float(request.form['price'])
-    db.session.add(Service(name=name, price=price))
-    db.session.commit()
-    return redirect(url_for('list_services'))
-
