@@ -1,19 +1,26 @@
 {% extends "layout.html" %}
 
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='barbers.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
+
 {% block content %}
-    <h2>Peluqueros</h2>
+  <h2>Peluqueros</h2>
 
-    <form method="POST" action="{{ url_for('add_barber') }}">
-        <input type="text" name="name" placeholder="Nombre del peluquero" required>
-        <button type="submit">Agregar</button>
-    </form>
+  <form method="POST" action="{{ url_for('add_barber') }}">
+    <input type="text" name="name" placeholder="Nombre del peluquero" required>
+    <button type="submit">Agregar</button>
+  </form>
 
-    <ul>
-        {% for barber in barbers %}
-            <li>
-                {{ barber.name }}
-                <a href="{{ url_for('delete_barber', id=barber.id) }}">Eliminar</a>
-            </li>
-        {% endfor %}
-    </ul>
+  <ul class="barber-list">
+    {% for barber in barbers %}
+      <li class="barber-item">
+        <span>{{ barber.name }}</span>
+        <a href="{{ url_for('delete_barber', id=barber.id) }}" class="delete-button" title="Eliminar">
+          <i class="fas fa-trash-alt"></i>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
 {% endblock %}
