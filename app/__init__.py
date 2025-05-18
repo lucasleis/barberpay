@@ -1,6 +1,7 @@
 from flask import Flask
 from .models import db
 import os
+from datetime import timedelta
 
 def create_app():
     app = Flask(__name__)
@@ -10,6 +11,8 @@ def create_app():
     app.secret_key = 'alguna_clave_secreta_segura'  # Reemplazala por algo más seguro
     app.config['ADMIN_USERNAME'] = 'admin'
     app.config['ADMIN_PASSWORD'] = 'secret' 
+    app.permanent_session_lifetime = timedelta(minutes=15)  # Duración de sesion deseada
+
 
     db.init_app(app)
 

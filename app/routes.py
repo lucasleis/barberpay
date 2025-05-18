@@ -10,38 +10,6 @@ def index():
 
 ### Adminstrador ###
 
-@app.route('/admin/barbers')
-def list_barbers():
-    barbers = Barber.query.filter_by(active=True).all()
-    return render_template('barbers.html', barbers=barbers)
-
-@app.route('/admin/barbers/add', methods=['POST'])
-def add_barber():
-    name = request.form['name']
-    db.session.add(Barber(name=name))
-    db.session.commit()
-    return redirect(url_for('list_barbers'))
-
-@app.route('/admin/barbers/delete/<int:id>')
-def delete_barber(id):
-    barber = Barber.query.get(id)
-    barber.active = False
-    db.session.commit()
-    return redirect(url_for('list_barbers'))
-
-@app.route('/admin/services')
-def list_services():
-    services = Service.query.all()
-    return render_template('services.html', services=services)
-
-@app.route('/admin/services/add', methods=['POST'])
-def add_service():
-    name = request.form['name']
-    price = float(request.form['price'])
-    db.session.add(Service(name=name, price=price))
-    db.session.commit()
-    return redirect(url_for('list_services'))
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -50,17 +18,78 @@ def login():
 
         if (username == app.config['ADMIN_USERNAME'] and
             password == app.config['ADMIN_PASSWORD']):
-            session['logged_in'] = True
-            return redirect(url_for('index'))
+            session.permanent = True
+            session['user'] = username 
+            return redirect(url_for('dashboard'))
         else:
-            flash('Usuario o contraseña incorrectos')
+            flash("Usuario o contraseña incorrectos.")
+            return redirect(url_for("login"))
 
+    # Si ya está logueado, redirigir directamente
+    if "user" in session:
+        return redirect(url_for("dashboard"))
+    
     return render_template('login.html')
 
-@app.route('/logout')
+@app.route("/logout")
 def logout():
-    session.pop('logged_in', None)
-    return redirect(url_for('login'))
+    session.pop("user", None)
+    return redirect(url_for("login"))
+
+@app.route('/dashboard')
+def dashboard():
+    if "user" in session:
+        return render_template('dashboard.html')
+    else:
+        return redirect(url_for("login"))
+
+@app.route('/admin/barbers')
+def list_barbers():
+    if "user" in session:
+        # return f"Bienvenido {session['user']}!"
+        barbers = Barber.query.filter_by(active=True).all()
+        return render_template('barbers.html', barbers=barbers)
+    else:
+        return redirect(url_for("login"))
+    
+@app.route('/admin/barbers/add', methods=['POST'])
+def add_barber():
+    if "user" in session:
+        name = request.form['name']
+        db.session.add(Barber(name=name))
+        db.session.commit()
+        return redirect(url_for('list_barbers'))
+    else:
+        return redirect(url_for("login"))
+
+@app.route('/admin/barbers/delete/<int:id>')
+def delete_barber(id):
+    if "user" in session:
+        barber = Barber.query.get(id)
+        barber.active = False
+        db.session.commit()
+        return redirect(url_for('list_barbers'))
+    else:
+        return redirect(url_for("login"))
+
+@app.route('/admin/services')
+def list_services():
+    if "user" in session:
+        services = Service.query.all()
+        return render_template('services.html', services=services)
+    else:
+        return redirect(url_for("login"))
+
+@app.route('/admin/services/add', methods=['POST'])
+def add_service():
+    if "user" in session:
+        name = request.form['name']
+        price = float(request.form['price'])
+        db.session.add(Service(name=name, price=price))
+        db.session.commit()
+        return redirect(url_for('list_services'))
+    else:
+        return redirect(url_for("login"))
 
 
 ### Peluqueros ###

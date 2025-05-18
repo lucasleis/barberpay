@@ -1,0 +1,45 @@
+.dashboard-container {
+  max-width: 600px;
+  margin: 60px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  font-family: "Segoe UI", sans-serif;
+  text-align: center;
+}
+
+.dashboard-container h2 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.welcome {
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+.admin-links {
+  list-style: none;
+  padding: 0;
+}
+
+.admin-links li {
+  margin: 15px 0;
+}
+
+.admin-links a {
+  text-decoration: none;
+  color: white;
+  background-color: #007bff;
+  padding: 12px 20px;
+  border-radius: 6px;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+}
+
+.admin-links a:hover {
+  background-color: #0056b3;
+}
