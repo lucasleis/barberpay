@@ -1,0 +1,51 @@
+.service-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.service-form input,
+.service-form button {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.service-form button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.service-form button:hover {
+  background-color: #218838;
+}
+
+.service-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.service-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #ddd;
+  font-family: sans-serif;
+}
+
+.delete-button {
+  color: #dc3545;
+  text-decoration: none;
+  font-size: 18px;
+  transition: color 0.2s ease;
+}
+
+.delete-button:hover {
+  color: #a71d2a;
+}

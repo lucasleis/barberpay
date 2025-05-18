@@ -91,6 +91,16 @@ def add_service():
     else:
         return redirect(url_for("login"))
 
+@app.route('/admin/services/delete/<int:id>')
+def delete_service(id):
+    if "user" in session:
+        service = Service.query.get(id)
+        db.session.delete(service)
+        db.session.commit()
+        return redirect(url_for('list_services'))
+    else:
+        return redirect(url_for("login"))
+
 
 ### Peluqueros ###
 
