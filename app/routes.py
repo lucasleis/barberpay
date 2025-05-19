@@ -135,10 +135,20 @@ def delete_payment_method(id):
     else:
         return redirect(url_for("login"))
 
+
 ### Peluqueros ###
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():
-    salon_id = session.get("salon_id")
+    salon_id = request.args.get("salon_id") or session.get("salon_id")
+
+    if not salon_id:
+        flash("No se puede determinar la peluquería.", "danger")
+        return redirect(url_for("index"))
+
+    # Cargar siempre los datos visibles
+    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    services = Servicio.query.filter_by(peluqueria_id=salon_id).all()
+    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
 
     if request.method == 'POST':
         barber_id = request.form.get('barber_id')
@@ -146,13 +156,16 @@ def add_payment():
         method_id = request.form.get('method')
         amount = request.form.get('amount')
 
-        # Validación básica
         if not (barber_id and service_id and method_id and amount):
             flash("Todos los campos son obligatorios.", "danger")
-            return redirect(url_for('add_payment'))
+            return render_template(
+                'add_payment.html',
+                barbers=barbers,
+                services=services,
+                methods=methods
+            )
 
         try:
-            # Crear el turno (Appointment)
             appointment = Appointment(
                 barber_id=barber_id,
                 service_id=service_id,
@@ -161,7 +174,6 @@ def add_payment():
             db.session.add(appointment)
             db.session.commit()
 
-            # Crear el pago asociado
             pago = Pago(
                 appointment_id=appointment.id,
                 payment_method_id=int(method_id),
@@ -177,11 +189,17 @@ def add_payment():
         except Exception as e:
             db.session.rollback()
             flash(f"Error al registrar el pago: {str(e)}", "danger")
-            return redirect(url_for('add_payment'))
+            return render_template(
+                'add_payment.html',
+                barbers=barbers,
+                services=services,
+                methods=methods
+            )
 
-    # GET: Mostrar formulario
-    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
-    services = Servicio.query.filter_by(peluqueria_id=salon_id).all()
-    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    return render_template(
+        'add_payment.html',
+        barbers=barbers,
+        services=services,
+        methods=methods
+    )
 
-    return render_template('add_payment.html', barbers=barbers, services=services, methods=methods)
