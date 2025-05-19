@@ -7,8 +7,9 @@
         - Agregar funcionalidad de agregar/eliminar cortes
     
 - Pagos:
-    - Arreglar ingresos de plata
-    - Mostrar ultimos cortes guardados
+    - Agregar input de propina
+    - Mostrar ultimos cortes guardados (diferenciar corte de propina)
+    - Por algun motivo esta mostrando los errores en el login
 
 - Testear
     - Validar tiempo de sesion

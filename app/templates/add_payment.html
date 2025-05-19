@@ -1,33 +1,170 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <h2>Registrar un nuevo pago</h2>
+<h2>Registrar un nuevo pago</h2>
 
-    <form method="POST">
-        <label for="barber_id">Peluquero:</label>
-        <select name="barber_id" required>
-            {% for b in barbers %}
-                <option value="{{ b.id }}">{{ b.name }}</option>
-            {% endfor %}
-        </select>
+<form method="POST" id="paymentForm">
+    <label for="barber_id">Peluquero:</label>
+    <select name="barber_id" required>
+        {% for b in barbers %}
+            <option value="{{ b.id }}">{{ b.name }}</option>
+        {% endfor %}
+    </select>
 
-        <label for="service_id">Servicio:</label>
-        <select name="service_id" required>
+    <label for="service_id">Servicio y precio:</label>
+    <div style="display: flex; gap: 1rem;">
+        <select name="service_id" id="serviceSelect" required>
             {% for s in services %}
-                <option value="{{ s.id }}">{{ s.name }} - ${{ s.precio }}</option>
+                <option value="{{ s.id }}" data-precio="{{ s.precio }}">
+                    {{ s.name }}
+                </option>
             {% endfor %}
         </select>
 
+        <input type="text" id="servicePrice" disabled placeholder="$" style="width: 100px;">
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between;">
         <label for="method">Método de pago:</label>
-        <select name="method" required>
+        <label style="font-size: 0.9rem;">
+            <input type="checkbox" id="multiPaymentToggle"> ¿Usar múltiples métodos?
+        </label>
+    </div>
+
+    <!-- Modo simple -->
+    <div id="singleMethodGroup" class="payment-method-group">
+        <select name="method">
             {% for method in methods %}
                 <option value="{{ method.id }}">{{ method.nombre }}</option>
             {% endfor %}
         </select>
+    </div>
 
-        <label for="amount">Propina:</label>
-        <input type="number" name="amount" step="0.01" placeholder="$" required>
+    <!-- Modo múltiple -->
+    <div id="multiMethodGroup" style="display: none;">
+        <div class="payment-method-group">
+            <select name="method1">
+                {% for method in methods %}
+                    <option value="{{ method.id }}">{{ method.nombre }}</option>
+                {% endfor %}
+            </select>
+            <input type="number" name="amount1" step="0.01" placeholder="Monto $" required>
+        </div>
 
-        <button type="submit">Guardar pago</button>
-    </form>
+        <div class="payment-method-group">
+            <select name="method2">
+                {% for method in methods %}
+                    <option value="{{ method.id }}">{{ method.nombre }}</option>
+                {% endfor %}
+            </select>
+            <input type="number" name="amount2" step="0.01" placeholder="Monto $" required>
+        </div>
+
+        <!-- Mensajes de error -->
+        <p id="multiPaymentError" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
+            La suma de los montos debe ser igual al precio del servicio.
+        </p>
+        <p id="methodRepeatError" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
+            Los métodos de pago deben ser diferentes.
+        </p>
+    </div>
+
+    <button type="submit">Guardar pago</button>
+</form>
+
+<script>
+    const serviceSelect = document.getElementById('serviceSelect');
+    const servicePrice = document.getElementById('servicePrice');
+    const toggle = document.getElementById('multiPaymentToggle');
+    const singleGroup = document.getElementById('singleMethodGroup');
+    const multiGroup = document.getElementById('multiMethodGroup');
+    const form = document.getElementById('paymentForm');
+    const errorMsg = document.getElementById('multiPaymentError');
+    const repeatError = document.getElementById('methodRepeatError');
+
+    function updatePrice() {
+        const selected = serviceSelect.options[serviceSelect.selectedIndex];
+        const precio = selected.getAttribute('data-precio');
+        servicePrice.value = `$${parseFloat(precio).toFixed(2)}`;
+    }
+
+    updatePrice();
+    serviceSelect.addEventListener('change', updatePrice);
+
+    toggle.addEventListener('change', function () {
+        if (this.checked) {
+            singleGroup.style.display = 'none';
+            multiGroup.style.display = 'block';
+            multiGroup.querySelectorAll('input').forEach(el => el.required = true);
+        } else {
+            singleGroup.style.display = 'flex';
+            multiGroup.style.display = 'none';
+            multiGroup.querySelectorAll('input').forEach(el => {
+                el.required = false;
+                el.classList.remove('input-error');
+            });
+            multiGroup.querySelectorAll('select').forEach(el => el.classList.remove('input-error'));
+            errorMsg.style.display = 'none';
+            repeatError.style.display = 'none';
+        }
+    });
+
+    form.addEventListener('submit', function (e) {
+        let valid = true;
+
+        if (toggle.checked) {
+            const price = parseFloat(serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-precio'));
+            const amount1 = parseFloat(form.querySelector('input[name="amount1"]').value) || 0;
+            const amount2 = parseFloat(form.querySelector('input[name="amount2"]').value) || 0;
+            const total = amount1 + amount2;
+
+            const method1 = form.querySelector('select[name="method1"]').value;
+            const method2 = form.querySelector('select[name="method2"]').value;
+
+            // Validación de monto exacto
+            if (total !== price) {
+                [form.querySelector('input[name="amount1"]'), form.querySelector('input[name="amount2"]')]
+                    .forEach(input => input.classList.add('input-error'));
+                errorMsg.style.display = 'block';
+                valid = false;
+            } else {
+                [form.querySelector('input[name="amount1"]'), form.querySelector('input[name="amount2"]')]
+                    .forEach(input => input.classList.remove('input-error'));
+                errorMsg.style.display = 'none';
+            }
+
+            // Validación de métodos distintos
+            if (method1 === method2) {
+                [form.querySelector('select[name="method1"]'), form.querySelector('select[name="method2"]')]
+                    .forEach(select => select.classList.add('input-error'));
+                repeatError.style.display = 'block';
+                valid = false;
+            } else {
+                [form.querySelector('select[name="method1"]'), form.querySelector('select[name="method2"]')]
+                    .forEach(select => select.classList.remove('input-error'));
+                repeatError.style.display = 'none';
+            }
+
+            if (!valid) {
+                e.preventDefault();
+            }
+        }
+    });
+
+    // Remueve errores al editar inputs
+    document.querySelectorAll('input[name="amount1"], input[name="amount2"]').forEach(input => {
+        input.addEventListener('input', () => {
+            input.classList.remove('input-error');
+            errorMsg.style.display = 'none';
+        });
+    });
+
+    document.querySelectorAll('select[name="method1"], select[name="method2"]').forEach(select => {
+        select.addEventListener('change', () => {
+            select.classList.remove('input-error');
+            repeatError.style.display = 'none';
+        });
+    });
+</script>
+
 {% endblock %}

@@ -88,3 +88,19 @@ select {
   background-size: 16px 16px;
   padding-right: 2rem; 
 }
+
+.input-error {
+    border: 1px solid red;
+    background-color: #ffe6e6;
+}
+
+.payment-method-group {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.input-error {
+    border: 1px solid red;
+    background-color: #ffe6e6;
+}
