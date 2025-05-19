@@ -9,14 +9,14 @@
   <h2>Métodos de Pago</h2>
 
   <form method="POST" action="{{ url_for('add_payment_method') }}">
-    <input type="text" name="name" placeholder="Nombre del método de pago" required>
+    <input type="text" name="nombre" placeholder="Nombre del método de pago" required>
     <button type="submit">Agregar</button>
-  </form>
+  </form>  
 
   <ul class="payment-method-list">
     {% for method in methods %}
       <li class="payment-method-item">
-        <span>{{ method.name }}</span>
+        <span>{{ method.nombre }}</span>
         <a href="{{ url_for('delete_payment_method', id=method.id) }}" class="delete-button" title="Eliminar">
           <i class="fas fa-trash-alt"></i>
         </a>

@@ -86,9 +86,9 @@ def list_services():
 def add_service():
     if "user" in session:
         name = request.form['name']
-        price = float(request.form['price'])
+        precio = float(request.form['precio'])
         salon_id = session.get('salon_id')
-        db.session.add(Servicio(name=name, price=price, peluqueria_id=salon_id))
+        db.session.add(Servicio(name=name, precio=precio, peluqueria_id=salon_id))
         db.session.commit()
         return redirect(url_for('list_services'))
     else:
@@ -107,8 +107,8 @@ def delete_service(id):
 @app.route('/admin/payment_methods')
 def list_payment_methods():
     if "user" in session:
-        #methods = MetodoPago.query.filter_by(active=True).all()
-        methods = MetodoPago.query.all()
+        methods = MetodoPago.query.filter_by(active=True).all()
+        #methods = MetodoPago.query.all()
         return render_template('payment_methods.html', methods=methods)
     else:
         return redirect(url_for("login"))
@@ -116,8 +116,10 @@ def list_payment_methods():
 @app.route('/admin/payment_methods/add', methods=['POST'])
 def add_payment_method():
     if "user" in session:
-        name = request.form['name']
-        db.session.add(MetodoPago(name=name))
+        print(request.form) 
+        nombre = request.form['nombre']
+        salon_id = session.get('salon_id')
+        db.session.add(MetodoPago(nombre=nombre, peluqueria_id=salon_id))
         db.session.commit()
         return redirect(url_for('list_payment_methods'))
     else:
@@ -127,7 +129,7 @@ def add_payment_method():
 def delete_payment_method(id):
     if "user" in session:
         method = MetodoPago.query.get(id)
-        method.active = False
+        db.session.delete(method)
         db.session.commit()
         return redirect(url_for('list_payment_methods'))
     else:

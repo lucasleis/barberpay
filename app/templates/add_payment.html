@@ -14,7 +14,7 @@
         <label for="service_id">Servicio:</label>
         <select name="service_id" required>
             {% for s in services %}
-                <option value="{{ s.id }}">{{ s.name }} - ${{ s.price }}</option>
+                <option value="{{ s.id }}">{{ s.name }} - ${{ s.precio }}</option>
             {% endfor %}
         </select>
 

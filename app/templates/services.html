@@ -10,14 +10,14 @@
 
   <form method="POST" action="{{ url_for('add_service') }}" class="service-form">
     <input type="text" name="name" placeholder="Nombre del servicio" required>
-    <input type="number" name="price" step="0.01" placeholder="Precio ($)" required>
+    <input type="number" name="precio" step="0.01" placeholder="Precio ($)" required>
     <button type="submit">Agregar servicio</button>
   </form>
 
   <ul class="service-list">
     {% for service in services %}
       <li class="service-item">
-        <span>{{ service.name }} - ${{ "%.2f"|format(service.price) }}</span>
+        <span>{{ service.name }} - ${{ "%.2f"|format(service.precio) }}</span>
         <a href="{{ url_for('delete_service', id=service.id) }}" class="delete-button" title="Eliminar">
           <i class="fas fa-trash-alt"></i>
         </a>

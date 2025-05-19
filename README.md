@@ -3,7 +3,8 @@
 
 ```
 docker run --name postgres-peluqueria -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=admin123 -e POSTGRES_DB=peluqueria_db -p 5432:5432 -d postgres
-``
+docker run --name postgres-peluqueria -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=admin123 -e POSTGRES_DB=peluqueria_db -p 5432:5432 -d harbor.extra/dockerhub/library/postgres:latest
+```
 
 # Acceder por consola a container postgres 
 ```
@@ -30,6 +31,7 @@ comandos para acceder a la bd por consola.
 4. Hacer un SELECT para ver datos de cualquier tabla
 ```
 SELECT * FROM empleados;
+INSERT INTO peluquerias (id, nombre) VALUES (1, 'Peluquería Central');
 ```
 
 5. Salir de psql
