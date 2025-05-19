@@ -1,9 +1,108 @@
-from flask import Flask 
+from flask import Flask
 from .models import db
 import os
 from datetime import timedelta
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
+# ==============================
+# Crear la base de datos y tablas si no existen
+# ==============================
+
+def ensure_database_and_tables():
+    DB_NAME = os.environ.get('DB_NAME', 'peluqueria_db')
+    DB_USER = os.environ.get('DB_USER', 'admin')
+    DB_PASSWORD = os.environ.get('DB_PASSWORD', 'admin123')
+    DB_HOST = os.environ.get('DB_HOST', 'localhost')
+    DB_PORT = os.environ.get('DB_PORT', '5432')
+
+    # Crear base de datos si no existe
+    conn = psycopg2.connect(
+        dbname='postgres',
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+    conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    cur = conn.cursor()
+    cur.execute(f"SELECT 1 FROM pg_database WHERE datname='{DB_NAME}';")
+    exists = cur.fetchone()
+    if not exists:
+        print(f"Base de datos '{DB_NAME}' no existe. Creándola...")
+        cur.execute(f"CREATE DATABASE {DB_NAME};")
+    else:
+        print(f"Base de datos '{DB_NAME}' ya existe.")
+    cur.close()
+    conn.close()
+
+    # Crear tablas en la base de datos creada
+    conn = psycopg2.connect(
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS peluquerias (
+            id SERIAL PRIMARY KEY,
+            nombre VARCHAR(100) NOT NULL,
+            direccion TEXT,
+            telefono VARCHAR(20)
+        );
+
+        CREATE TABLE IF NOT EXISTS barberos (
+            id SERIAL PRIMARY KEY,
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
+            name VARCHAR(100) NOT NULL,
+            active BOOLEAN DEFAULT TRUE
+        );
+
+        CREATE TABLE IF NOT EXISTS metodos_pago (
+            id SERIAL PRIMARY KEY,
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
+            nombre VARCHAR(50) UNIQUE NOT NULL,
+            active BOOLEAN DEFAULT TRUE
+        );
+
+        CREATE TABLE IF NOT EXISTS servicios (
+            id SERIAL PRIMARY KEY,
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
+            name VARCHAR(100) NOT NULL,
+            precio NUMERIC(10,2) NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS turnos (
+            id SERIAL PRIMARY KEY,
+            date TIMESTAMP NOT NULL DEFAULT NOW(),
+            barber_id INTEGER REFERENCES barberos(id),
+            service_id INTEGER REFERENCES servicios(id),
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS pagos (
+            id SERIAL PRIMARY KEY,
+            appointment_id INTEGER REFERENCES turnos(id),
+            amount NUMERIC(10,2) NOT NULL,
+            payment_method_id INTEGER REFERENCES metodos_pago(id),
+            date TIMESTAMP NOT NULL DEFAULT NOW(),
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
+        );
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
+    print("Tablas creadas o ya existentes.")
+
+# ==============================
+# Crear la app
+# ==============================
 
 def create_app():
+    ensure_database_and_tables() 
+
     app = Flask(__name__)
 
     # Configuración de la base de datos PostgreSQL desde variables de entorno
@@ -33,7 +132,7 @@ def create_app():
 
     # Crear tablas automáticamente si no existen
     with app.app_context():
-        from . import routes  # importa rutas si existen
+        from . import routes
         db.create_all()
 
     return app

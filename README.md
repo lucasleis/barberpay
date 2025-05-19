@@ -31,10 +31,14 @@ comandos para acceder a la bd por consola.
 4. Hacer un SELECT para ver datos de cualquier tabla
 ```
 SELECT * FROM empleados;
+```
+
+5. Hacer un INSERT
+```
 INSERT INTO peluquerias (id, nombre) VALUES (1, 'Peluquería Central');
 ```
 
-5. Salir de psql
+6. Salir de psql
 ```
 \q
 ```
