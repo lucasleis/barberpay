@@ -138,16 +138,16 @@ def delete_payment_method(id):
 ### Peluqueros ###
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():
-
     salon_id = session.get("salon_id")
 
     if request.method == 'POST':
         barber_id = request.form.get('barber_id')
         service_id = request.form.get('service_id')
-        methods = request.form.getlist('method')
-        amounts = request.form.getlist('amount')
+        method_id = request.form.get('method')
+        amount = request.form.get('amount')
 
-        if not (barber_id and service_id and methods and amounts):
+        # Validación básica
+        if not (barber_id and service_id and method_id and amount):
             flash("Todos los campos son obligatorios.", "danger")
             return redirect(url_for('add_payment'))
 
@@ -161,17 +161,16 @@ def add_payment():
             db.session.add(appointment)
             db.session.commit()
 
-            # Crear los pagos asociados
-            for method_id, amount in zip(methods, amounts):
-                pago = Pago(
-                    appointment_id=appointment.id,
-                    payment_method_id=int(method_id),
-                    amount=float(amount),
-                    peluqueria_id=salon_id
-                )
-                db.session.add(pago)
-
+            # Crear el pago asociado
+            pago = Pago(
+                appointment_id=appointment.id,
+                payment_method_id=int(method_id),
+                amount=float(amount),
+                peluqueria_id=salon_id
+            )
+            db.session.add(pago)
             db.session.commit()
+
             flash("Pago registrado con éxito.", "success")
             return redirect(url_for('index'))
 
@@ -186,5 +185,3 @@ def add_payment():
     methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
 
     return render_template('add_payment.html', barbers=barbers, services=services, methods=methods)
-
-
