@@ -1,0 +1,17 @@
+.payment-method-list {
+  list-style: none;
+  padding: 0;
+}
+
+.payment-method-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.delete-button {
+  color: red;
+  text-decoration: none;
+  font-size: 1.2em;
+}

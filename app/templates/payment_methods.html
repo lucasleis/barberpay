@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='payment_methods.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+  <h2>Métodos de Pago</h2>
+
+  <form method="POST" action="{{ url_for('add_payment_method') }}">
+    <input type="text" name="name" placeholder="Nombre del método de pago" required>
+    <button type="submit">Agregar</button>
+  </form>
+
+  <ul class="payment-method-list">
+    {% for method in methods %}
+      <li class="payment-method-item">
+        <span>{{ method.name }}</span>
+        <a href="{{ url_for('delete_payment_method', id=method.id) }}" class="delete-button" title="Eliminar">
+          <i class="fas fa-trash-alt"></i>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

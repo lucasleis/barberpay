@@ -1,14 +1,13 @@
 from flask import current_app as app, render_template, request, redirect, url_for, session, flash
 from . import db
-from .models import Barber, Service, Appointment, Payment, PaymentMethodEnum
+from .models import Peluqueria, Empleado, Servicio, MetodoPago, Pago, Appointment
 from .auth import login_required
-
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-### Adminstrador ###
+### Administrador ###
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -19,21 +18,22 @@ def login():
         if (username == app.config['ADMIN_USERNAME'] and
             password == app.config['ADMIN_PASSWORD']):
             session.permanent = True
-            session['user'] = username 
+            session['user'] = username
+            session['salon_id'] = 1 
             return redirect(url_for('dashboard'))
         else:
             flash("Usuario o contraseña incorrectos.")
             return redirect(url_for("login"))
 
-    # Si ya está logueado, redirigir directamente
     if "user" in session:
         return redirect(url_for("dashboard"))
-    
+
     return render_template('login.html')
 
 @app.route("/logout")
 def logout():
     session.pop("user", None)
+    session.pop("salon_id", None)
     return redirect(url_for("login"))
 
 @app.route('/dashboard')
@@ -46,17 +46,18 @@ def dashboard():
 @app.route('/admin/barbers')
 def list_barbers():
     if "user" in session:
-        # return f"Bienvenido {session['user']}!"
-        barbers = Barber.query.filter_by(active=True).all()
+        salon_id = session.get('salon_id')
+        barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
         return render_template('barbers.html', barbers=barbers)
     else:
         return redirect(url_for("login"))
-    
+
 @app.route('/admin/barbers/add', methods=['POST'])
 def add_barber():
     if "user" in session:
         name = request.form['name']
-        db.session.add(Barber(name=name))
+        salon_id = session.get('salon_id')
+        db.session.add(Empleado(name=name, peluqueria_id=salon_id))
         db.session.commit()
         return redirect(url_for('list_barbers'))
     else:
@@ -65,7 +66,7 @@ def add_barber():
 @app.route('/admin/barbers/delete/<int:id>')
 def delete_barber(id):
     if "user" in session:
-        barber = Barber.query.get(id)
+        barber = Empleado.query.get(id)
         barber.active = False
         db.session.commit()
         return redirect(url_for('list_barbers'))
@@ -75,7 +76,8 @@ def delete_barber(id):
 @app.route('/admin/services')
 def list_services():
     if "user" in session:
-        services = Service.query.all()
+        salon_id = session.get('salon_id')
+        services = Servicio.query.filter_by(peluqueria_id=salon_id).all()
         return render_template('services.html', services=services)
     else:
         return redirect(url_for("login"))
@@ -85,7 +87,8 @@ def add_service():
     if "user" in session:
         name = request.form['name']
         price = float(request.form['price'])
-        db.session.add(Service(name=name, price=price))
+        salon_id = session.get('salon_id')
+        db.session.add(Servicio(name=name, price=price, peluqueria_id=salon_id))
         db.session.commit()
         return redirect(url_for('list_services'))
     else:
@@ -94,38 +97,92 @@ def add_service():
 @app.route('/admin/services/delete/<int:id>')
 def delete_service(id):
     if "user" in session:
-        service = Service.query.get(id)
+        service = Servicio.query.get(id)
         db.session.delete(service)
         db.session.commit()
         return redirect(url_for('list_services'))
     else:
         return redirect(url_for("login"))
 
+@app.route('/admin/payment_methods')
+def list_payment_methods():
+    if "user" in session:
+        #methods = MetodoPago.query.filter_by(active=True).all()
+        methods = MetodoPago.query.all()
+        return render_template('payment_methods.html', methods=methods)
+    else:
+        return redirect(url_for("login"))
+
+@app.route('/admin/payment_methods/add', methods=['POST'])
+def add_payment_method():
+    if "user" in session:
+        name = request.form['name']
+        db.session.add(MetodoPago(name=name))
+        db.session.commit()
+        return redirect(url_for('list_payment_methods'))
+    else:
+        return redirect(url_for("login"))
+
+@app.route('/admin/payment_methods/delete/<int:id>')
+def delete_payment_method(id):
+    if "user" in session:
+        method = MetodoPago.query.get(id)
+        method.active = False
+        db.session.commit()
+        return redirect(url_for('list_payment_methods'))
+    else:
+        return redirect(url_for("login"))
 
 ### Peluqueros ###
-
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():
+
+    salon_id = session.get("salon_id")
+
     if request.method == 'POST':
-        barber_id = request.form['barber_id']
-        service_id = request.form['service_id']
+        barber_id = request.form.get('barber_id')
+        service_id = request.form.get('service_id')
         methods = request.form.getlist('method')
         amounts = request.form.getlist('amount')
 
-        appointment = Appointment(barber_id=barber_id, service_id=service_id)
-        db.session.add(appointment)
-        db.session.commit()
+        if not (barber_id and service_id and methods and amounts):
+            flash("Todos los campos son obligatorios.", "danger")
+            return redirect(url_for('add_payment'))
 
-        for method, amount in zip(methods, amounts):
-            db.session.add(Payment(
-                appointment_id=appointment.id,
-                method=PaymentMethodEnum[method],
-                amount=float(amount)
-            ))
-        db.session.commit()
+        try:
+            # Crear el turno (Appointment)
+            appointment = Appointment(
+                barber_id=barber_id,
+                service_id=service_id,
+                peluqueria_id=salon_id
+            )
+            db.session.add(appointment)
+            db.session.commit()
 
-        return redirect(url_for('index'))
+            # Crear los pagos asociados
+            for method_id, amount in zip(methods, amounts):
+                pago = Pago(
+                    appointment_id=appointment.id,
+                    payment_method_id=int(method_id),
+                    amount=float(amount),
+                    peluqueria_id=salon_id
+                )
+                db.session.add(pago)
 
-    barbers = Barber.query.filter_by(active=True).all()
-    services = Service.query.all()
-    return render_template('add_payment.html', barbers=barbers, services=services, methods=PaymentMethodEnum)
+            db.session.commit()
+            flash("Pago registrado con éxito.", "success")
+            return redirect(url_for('index'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error al registrar el pago: {str(e)}", "danger")
+            return redirect(url_for('add_payment'))
+
+    # GET: Mostrar formulario
+    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    services = Servicio.query.filter_by(peluqueria_id=salon_id).all()
+    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
+
+    return render_template('add_payment.html', barbers=barbers, services=services, methods=methods)
+
+

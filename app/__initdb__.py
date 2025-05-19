@@ -9,46 +9,52 @@ DB_PORT = "5432"
 
 # Sentencias SQL para crear tablas
 CREATE_TABLES_SQL = """
-CREATE TABLE IF NOT EXISTS peluquerias (
-    id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    direccion TEXT,
-    telefono VARCHAR(20)
-);
+    CREATE TABLE IF NOT EXISTS peluquerias (
+        id SERIAL PRIMARY KEY,
+        nombre VARCHAR(100) NOT NULL,
+        direccion TEXT,
+        telefono VARCHAR(20)
+    );
 
-CREATE TABLE IF NOT EXISTS empleados (
-    id SERIAL PRIMARY KEY,
-    peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
-    nombre VARCHAR(100) NOT NULL,
-    telefono VARCHAR(20),
-    email VARCHAR(100),
-    fecha_ingreso DATE
-);
+    CREATE TABLE IF NOT EXISTS barberos (
+        id SERIAL PRIMARY KEY,
+        peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
+        name VARCHAR(100) NOT NULL,
+        active BOOLEAN DEFAULT TRUE
+    );
 
-CREATE TABLE IF NOT EXISTS metodos_pago (
-    id SERIAL PRIMARY KEY,
-    peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
-    nombre VARCHAR(50) NOT NULL
-);
+    CREATE TABLE IF NOT EXISTS metodos_pago (
+        id SERIAL PRIMARY KEY,
+        peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
+        nombre VARCHAR(50) UNIQUE NOT NULL,
+        active BOOLEAN DEFAULT TRUE
+    );
 
-CREATE TABLE IF NOT EXISTS servicios (
-    id SERIAL PRIMARY KEY,
-    peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT,
-    precio NUMERIC(10,2) NOT NULL
-);
+    CREATE TABLE IF NOT EXISTS servicios (
+        id SERIAL PRIMARY KEY,
+        peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
+        name VARCHAR(100) NOT NULL,
+        precio NUMERIC(10,2) NOT NULL
+    );
 
-CREATE TABLE IF NOT EXISTS pagos (
-    id SERIAL PRIMARY KEY,
-    peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
-    empleado_id INTEGER REFERENCES empleados(id),
-    servicio_id INTEGER REFERENCES servicios(id),
-    metodo_pago_id INTEGER REFERENCES metodos_pago(id),
-    importe NUMERIC(10,2) NOT NULL,
-    fecha TIMESTAMP NOT NULL DEFAULT NOW()
-);
+    CREATE TABLE IF NOT EXISTS turnos (
+        id SERIAL PRIMARY KEY,
+        date TIMESTAMP NOT NULL DEFAULT NOW(),
+        barber_id INTEGER REFERENCES barberos(id),
+        service_id INTEGER REFERENCES servicios(id),
+        peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS pagos (
+        id SERIAL PRIMARY KEY,
+        appointment_id INTEGER REFERENCES turnos(id),
+        amount NUMERIC(10,2) NOT NULL,
+        payment_method_id INTEGER REFERENCES metodos_pago(id),
+        date TIMESTAMP NOT NULL DEFAULT NOW(),
+        peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
+    );
 """
+
 
 def create_database():
     # Conectarse a la base de datos 'postgres' para crear la DB si no existe

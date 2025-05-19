@@ -10,11 +10,11 @@ class Peluqueria(db.Model):
     direccion = db.Column(db.Text)
     telefono = db.Column(db.String(20))
 
-    barberos = db.relationship('Barber', backref='peluqueria', cascade="all, delete")
-    servicios = db.relationship('Service', backref='peluqueria', cascade="all, delete")
+    barber = db.relationship('Empleado', backref='peluqueria', cascade="all, delete")
+    service = db.relationship('Servicio', backref='peluqueria', cascade="all, delete")
     turnos = db.relationship('Appointment', backref='peluqueria', cascade="all, delete")
-    metodos_pago = db.relationship('PaymentMethod', backref='peluqueria', cascade="all, delete")
-    pagos = db.relationship('Payment', backref='peluqueria', cascade="all, delete")
+    metodos_pago = db.relationship('MetodoPago', backref='peluqueria', cascade="all, delete")
+    pagos = db.relationship('Pago', backref='peluqueria', cascade="all, delete")
 
 
 class Empleado(db.Model):
@@ -29,7 +29,7 @@ class Servicio(db.Model):
     __tablename__ = 'servicios'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    price = db.Column(db.Float, nullable=False)
+    precio = db.Column(db.Float, nullable=False)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
 
@@ -41,14 +41,14 @@ class Appointment(db.Model):
     service_id = db.Column(db.Integer, db.ForeignKey('servicios.id'))
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
-    barber = db.relationship('Barber')
-    service = db.relationship('Service')
+    barber = db.relationship('Empleado')
+    service = db.relationship('Servicio')
 
 
 class MetodoPago(db.Model):
     __tablename__ = 'metodos_pago'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
+    nombre = db.Column(db.String(50), unique=True, nullable=False)
     active = db.Column(db.Boolean, default=True)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
@@ -63,4 +63,5 @@ class Pago(db.Model):
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
     appointment = db.relationship('Appointment')
-    method = db.relationship('PaymentMethod')
+    method = db.relationship('MetodoPago')
+

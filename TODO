@@ -1,8 +1,10 @@
 - Administrar:
-    - Agregar funcionalidad de agregar/eliminar peluqueros
-    - Agregar funcionalidad de agregar/eliminar cortes
-    - Agregar funcionalidad de modificar porcentajes de ganancia de peluquero
-
+    - Empleados 
+        - Agregar funcionalidad de agregar/eliminar peluqueros
+        - Agregar input para settear valor de comision
+    - Servicios: 
+        - Agregar funcionalidad de agregar/eliminar cortes
+    
 - Pagos:
     - Arreglar ingresos de plata
     - Mostrar ultimos cortes guardados
