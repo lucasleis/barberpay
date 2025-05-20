@@ -3,7 +3,9 @@
 {% block content %}
 <h2>Registrar un nuevo pago</h2>
 
-<form method="POST" id="paymentForm">
+<form method="POST" id="paymentForm" action="{{ url_for('add_payment') }}">
+    <input type="hidden" name="salon_id" value="{{ salon_id }}">
+
     <label for="barber_id">Peluquero:</label>
     <select name="barber_id" required>
         {% for b in barbers %}
@@ -33,7 +35,7 @@
 
     <!-- Modo simple -->
     <div id="singleMethodGroup" class="payment-method-group">
-        <select name="method">
+        <select id="methodSimple" name="method1">
             {% for method in methods %}
                 <option value="{{ method.id }}">{{ method.nombre }}</option>
             {% endfor %}
@@ -43,21 +45,21 @@
     <!-- Modo múltiple -->
     <div id="multiMethodGroup" style="display: none;">
         <div class="payment-method-group">
-            <select name="method1">
+            <select id="methodMultiple">
                 {% for method in methods %}
                     <option value="{{ method.id }}">{{ method.nombre }}</option>
                 {% endfor %}
             </select>
-            <input type="number" name="amount1" step="0.01" placeholder="Monto $" required>
+            <input type="number" name="amount1" id="amount1" step="1" placeholder="Monto $">
         </div>
 
         <div class="payment-method-group">
-            <select name="method2">
+            <select name="method2" id="method2">
                 {% for method in methods %}
                     <option value="{{ method.id }}">{{ method.nombre }}</option>
                 {% endfor %}
             </select>
-            <input type="number" name="amount2" step="0.01" placeholder="Monto $" required>
+            <input type="number" name="amount2" id="amount2" step="100" placeholder="Monto $">
         </div>
 
         <!-- Mensajes de error -->
@@ -69,15 +71,15 @@
         </p>
     </div>
 
-<!-- Propina y botón -->
-<div class="mb-3">
-  <label for="tip" class="form-label">Propina:</label>
-  <div class="propina-row">
-    <input type="number" name="tip" id="tip" step="0.01" placeholder="$">
-    <button type="submit">Guardar pago</button>
-  </div>
-</div>
 
+    <!-- Propina y botón -->
+    <div class="mb-3">
+      <label for="tip" class="form-label">Propina:</label>
+      <div class="propina-row">
+        <input type="number" name="tip" id="tip" step="100" placeholder="$">
+        <button type="submit">Guardar pago</button>
+      </div>
+    </div>
 
 </form>
 
@@ -90,6 +92,11 @@
     const form = document.getElementById('paymentForm');
     const errorMsg = document.getElementById('multiPaymentError');
     const repeatError = document.getElementById('methodRepeatError');
+
+    const amount1 = document.getElementById('amount1');
+    const amount2 = document.getElementById('amount2');
+    const method1Select = document.getElementById('method1');
+    const method2Select = document.getElementById('method2');
 
     function updatePrice() {
         const selected = serviceSelect.options[serviceSelect.selectedIndex];
@@ -119,6 +126,24 @@
     });
 
     form.addEventListener('submit', function (e) {
+
+        const methodSimple = document.getElementById('methodSimple');
+        const methodMultiple = document.getElementById('methodMultiple');
+
+        if (toggle.checked) {
+            // Modo múltiple
+            methodSimple.disabled = true;
+            methodMultiple.disabled = false;
+            methodSimple.removeAttribute('name');
+            methodMultiple.setAttribute('name', 'method1');
+        } else {
+            // Modo simple
+            methodMultiple.disabled = true;
+            methodSimple.disabled = false;
+            methodMultiple.removeAttribute('name');
+            methodSimple.setAttribute('name', 'method1');
+        }
+
         let valid = true;
 
         if (toggle.checked) {

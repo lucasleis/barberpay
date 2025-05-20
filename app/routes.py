@@ -139,25 +139,54 @@ def delete_payment_method(id):
 ### Peluqueros ###
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():
-    salon_id = request.args.get("salon_id") or session.get("salon_id")
+    print("Form data:", request.form)
+    print("Args data:", request.args)
+
+    session['salon_id'] = 1 
+
+    raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
+
+    if raw_salon_id:
+        try:
+            salon_id = int(str(raw_salon_id).strip("{} ").strip())
+        except ValueError:
+            flash("ID de peluquería inválido.", "danger")
+            return redirect(url_for("index"))
+    else:
+        flash("No se puede determinar la peluquería.", "danger")
+        return redirect(url_for("index"))
 
     if not salon_id:
         flash("No se puede determinar la peluquería.", "danger")
         return redirect(url_for("index"))
 
-    # Cargar siempre los datos visibles
-    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
-    services = Servicio.query.filter_by(peluqueria_id=salon_id).all()
-    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    print(f"salon_id: {salon_id}")
+    peluqueria_id=int(salon_id)
 
+    barbers = Empleado.query.filter_by(active=True, peluqueria_id=peluqueria_id).all()
+    services = Servicio.query.filter_by(peluqueria_id=peluqueria_id).all()
+    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=peluqueria_id).all()
+
+    print(f"")
     if request.method == 'POST':
         barber_id = request.form.get('barber_id')
+        # print(f"barber_id: {barber_id}")
+        
         service_id = request.form.get('service_id')
-        method_id = request.form.get('method')
-        amount = request.form.get('amount')
+        # print(f"service_id: {service_id}")
 
-        if not (barber_id and service_id and method_id and amount):
-            flash("Todos los campos son obligatorios.", "danger")
+        tip = float(request.form.get('tip') or 0.0)
+        # print(f"tip: {tip}")
+        
+        method1 = int(request.form.get('method1'))
+        # print(f"method1: {method1}")
+        
+        # amount1 = float(request.form.get('amount1'))
+        amount1 = request.form.get('amount1')
+        # print(f"amount1: {amount1}")
+
+        if not (barber_id and service_id):
+            flash("Faltan datos del peluquero o servicio.", "danger")
             return render_template(
                 'add_payment.html',
                 barbers=barbers,
@@ -166,27 +195,54 @@ def add_payment():
             )
 
         try:
+            # Crear la cita
             appointment = Appointment(
                 barber_id=barber_id,
                 service_id=service_id,
-                peluqueria_id=salon_id
+                peluqueria_id=peluqueria_id
             )
             db.session.add(appointment)
             db.session.commit()
 
-            pago = Pago(
-                appointment_id=appointment.id,
-                payment_method_id=int(method_id),
-                amount=float(amount),
-                peluqueria_id=salon_id
-            )
-            db.session.add(pago)
-            db.session.commit()
+            # Pago múltiple
+            if request.form.get('amount1') and request.form.get('amount2'):
+                print("Entrando al bloque de múltiples métodos de pago")
 
+                amount2 = float(request.form.get('amount2') or 0)
+                method2 = int(request.form.get('method2'))
+                # print(f"amount1: {amount1}, amount2: {amount2}")
+                # print(f"method1: {method1}, method2: {method2}")
+
+                pago = Pago(
+                    appointment_id=appointment.id,
+                    payment_method1_id=method1,
+                    payment_method2_id=method2,
+                    amount_method1=amount1,
+                    amount_method2=amount2,
+                    amount_tip=tip,
+                    peluqueria_id=peluqueria_id
+                )
+            else:
+                # Pago simple
+                pago = Pago(
+                    appointment_id=appointment.id,
+                    payment_method1_id=method1,
+                    payment_method2_id=None,
+                    amount_method1=amount1,
+                    amount_method2=0,
+                    amount_tip=tip,
+                    peluqueria_id=peluqueria_id
+                )
+            #print(f"Pago creado")
+            db.session.add(pago)
+            print(f"Pago added")
+
+            db.session.commit()
             flash("Pago registrado con éxito.", "success")
             return redirect(url_for('index'))
 
         except Exception as e:
+            print(f"Exception ocurred: {e}")
             db.session.rollback()
             flash(f"Error al registrar el pago: {str(e)}", "danger")
             return render_template(
@@ -202,4 +258,3 @@ def add_payment():
         services=services,
         methods=methods
     )
-

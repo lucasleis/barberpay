@@ -55,13 +55,22 @@ class MetodoPago(db.Model):
 
 class Pago(db.Model):
     __tablename__ = 'pagos'
+    
     id = db.Column(db.Integer, primary_key=True)
-    appointment_id = db.Column(db.Integer, db.ForeignKey('turnos.id'))
-    amount = db.Column(db.Float, nullable=False)
-    payment_method_id = db.Column(db.Integer, db.ForeignKey('metodos_pago.id'))
+    appointment_id = db.Column(db.Integer, db.ForeignKey('turnos.id'), nullable=False)
+    
+    payment_method1_id = db.Column(db.Integer, db.ForeignKey('metodos_pago.id'), nullable=False)
+    payment_method2_id = db.Column(db.Integer, db.ForeignKey('metodos_pago.id'), nullable=True)
+    
+    amount_method1 = db.Column(db.Float, nullable=False)
+    amount_method2 = db.Column(db.Float, nullable=False)
+    amount_tip = db.Column(db.Float, nullable=True)
+    
     date = db.Column(db.DateTime, default=datetime.utcnow)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
+    # Relaciones
     appointment = db.relationship('Appointment')
-    method = db.relationship('MetodoPago')
+    method1 = db.relationship('MetodoPago', foreign_keys=[payment_method1_id])
+    method2 = db.relationship('MetodoPago', foreign_keys=[payment_method2_id])
 

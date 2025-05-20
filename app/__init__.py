@@ -84,9 +84,12 @@ def ensure_database_and_tables():
 
         CREATE TABLE IF NOT EXISTS pagos (
             id SERIAL PRIMARY KEY,
-            appointment_id INTEGER REFERENCES turnos(id),
-            amount NUMERIC(10,2) NOT NULL,
-            payment_method_id INTEGER REFERENCES metodos_pago(id),
+            appointment_id INTEGER NOT NULL REFERENCES turnos(id),
+            payment_method1_id INTEGER NOT NULL REFERENCES metodos_pago(id),
+            payment_method2_id INTEGER REFERENCES metodos_pago(id),
+            amount_method1 NUMERIC(10,2) NOT NULL,
+            amount_method2 NUMERIC(10,2),
+            amount_tip NUMERIC(10,2),
             date TIMESTAMP NOT NULL DEFAULT NOW(),
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
         );
