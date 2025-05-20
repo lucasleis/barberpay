@@ -40,6 +40,7 @@
                 <option value="{{ method.id }}">{{ method.nombre }}</option>
             {% endfor %}
         </select>
+        <input type="hidden" name="amount1" id="amountSimple">
     </div>
 
     <!-- Modo múltiple -->
@@ -71,16 +72,14 @@
         </p>
     </div>
 
-
     <!-- Propina y botón -->
     <div class="mb-3">
-      <label for="tip" class="form-label">Propina:</label>
-      <div class="propina-row">
-        <input type="number" name="tip" id="tip" step="100" placeholder="$">
-        <button type="submit">Guardar pago</button>
-      </div>
+        <label for="tip" class="form-label">Propina:</label>
+        <div class="propina-row">
+            <input type="number" name="tip" id="tip" step="100" placeholder="$">
+            <button type="submit">Guardar pago</button>
+        </div>
     </div>
-
 </form>
 
 <script>
@@ -95,13 +94,16 @@
 
     const amount1 = document.getElementById('amount1');
     const amount2 = document.getElementById('amount2');
+    const amountSimple = document.getElementById('amountSimple');
     const method1Select = document.getElementById('method1');
     const method2Select = document.getElementById('method2');
 
     function updatePrice() {
         const selected = serviceSelect.options[serviceSelect.selectedIndex];
         const precio = selected.getAttribute('data-precio');
-        servicePrice.value = `$${parseFloat(precio).toFixed(2)}`;
+        const precioFloat = parseFloat(precio).toFixed(2);
+        servicePrice.value = `$${precioFloat}`;
+        amountSimple.value = precioFloat;
     }
 
     updatePrice();
@@ -126,7 +128,6 @@
     });
 
     form.addEventListener('submit', function (e) {
-
         const methodSimple = document.getElementById('methodSimple');
         const methodMultiple = document.getElementById('methodMultiple');
 
@@ -142,6 +143,7 @@
             methodSimple.disabled = false;
             methodMultiple.removeAttribute('name');
             methodSimple.setAttribute('name', 'method1');
+            updatePrice();  // asegúrate que amountSimple esté actualizado antes de enviar
         }
 
         let valid = true;
@@ -185,7 +187,6 @@
         }
     });
 
-    // Remueve errores al editar inputs
     document.querySelectorAll('input[name="amount1"], input[name="amount2"]').forEach(input => {
         input.addEventListener('input', () => {
             input.classList.remove('input-error');

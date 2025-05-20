@@ -140,7 +140,7 @@ def delete_payment_method(id):
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():
     print("Form data:", request.form)
-    print("Args data:", request.args)
+    #print("Args data:", request.args)
 
     session['salon_id'] = 1 
 
