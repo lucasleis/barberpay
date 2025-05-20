@@ -139,8 +139,8 @@ def delete_payment_method(id):
 ### Peluqueros ###
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():
-    print("Form data:", request.form)
-    #print("Args data:", request.args)
+    # print("Form data:", request.form)
+    # print("Args data:", request.args)
 
     session['salon_id'] = 1 
 
@@ -160,7 +160,7 @@ def add_payment():
         flash("No se puede determinar la peluquería.", "danger")
         return redirect(url_for("index"))
 
-    print(f"salon_id: {salon_id}")
+    # print(f"salon_id: {salon_id}")
     peluqueria_id=int(salon_id)
 
     barbers = Empleado.query.filter_by(active=True, peluqueria_id=peluqueria_id).all()
@@ -233,13 +233,13 @@ def add_payment():
                     amount_tip=tip,
                     peluqueria_id=peluqueria_id
                 )
-            #print(f"Pago creado")
+            # print(f"Pago creado")
             db.session.add(pago)
-            print(f"Pago added")
+            # print(f"Pago added")
 
             db.session.commit()
             flash("Pago registrado con éxito.", "success")
-            return redirect(url_for('index'))
+            return redirect(url_for('add_payment'))
 
         except Exception as e:
             print(f"Exception ocurred: {e}")

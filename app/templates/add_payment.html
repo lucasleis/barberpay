@@ -1,6 +1,20 @@
 {% extends "layout.html" %}
 
 {% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div id="flash-messages" class="w-100 position-fixed top-0 start-0" style="z-index: 1050;">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show text-center m-0 rounded-0" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
 <h2>Registrar un nuevo pago</h2>
 
 <form method="POST" id="paymentForm" action="{{ url_for('add_payment') }}">
@@ -108,6 +122,15 @@
 
     updatePrice();
     serviceSelect.addEventListener('change', updatePrice);
+
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+          alert.classList.remove('show');
+          alert.classList.add('fade');
+          setTimeout(() => alert.remove(), 1000); 
+        });
+      }, 15000);
 
     toggle.addEventListener('change', function () {
         if (this.checked) {
