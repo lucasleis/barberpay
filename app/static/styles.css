@@ -104,3 +104,21 @@ select {
     border: 1px solid red;
     background-color: #ffe6e6;
 }
+
+.propina-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.propina-row input {
+    flex: 1;
+    margin-bottom: 0; 
+}
+
+.propina-row button {
+    white-space: nowrap; 
+    height: 100%; 
+    padding: 0.5rem 1rem;
+}
