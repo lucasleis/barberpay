@@ -1,15 +1,13 @@
 - Administrar:
     - Empleados 
-        - Agregar funcionalidad de agregar/eliminar peluqueros
         - Agregar input para settear valor de comision
-        - Que se vean los empleados sin estar logueado
+
     - Servicios: 
-        - Agregar funcionalidad de agregar/eliminar cortes
+
+    - Metodos de Pago:
     
 - Pagos:
-    - Agregar input de propina
     - Mostrar ultimos cortes guardados (diferenciar corte de propina)
     - Por algun motivo esta mostrando los errores en el login
 
 - Testear
-    - Validar tiempo de sesion

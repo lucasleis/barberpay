@@ -6,10 +6,10 @@
 {% endblock %}
 
 {% block content %}
-  <h2>Peluqueros</h2>
+  <h2>Empleados</h2>
 
   <form method="POST" action="{{ url_for('add_barber') }}">
-    <input type="text" name="name" placeholder="Nombre del peluquero" required>
+    <input type="text" name="name" placeholder="Nombre del empleado" required>
     <button type="submit">Agregar</button>
   </form>
 
