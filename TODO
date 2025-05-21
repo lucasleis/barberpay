@@ -3,11 +3,30 @@
 
     - Servicios: 
 
+    - Productos:
+        - Agregar tabla productos
+        - Preguntar si deberian estar en la misma compra o separada
+
+    - Descuentos:
+        - Agregar tabla descuentos
+        - Agregar form en pagos
+
+    - Vouchers:
+        - Agregar tabla vouchers
+            - Debe tener id y cantidad (se va a ir restando cada vez) 
+
     - Metodos de Pago:
+
+    - Cierre Semanal:
+        - Agregar que pueda elegir semana. inicia con el primer pago ingresado 
+
+    - Cierre Diario:
+        - intentar reutilizar el cierre semanal
+        - Agregar que pueda elegir dia. 
     
 - Pagos:
     - Mostrar ultimos cortes guardados (diferenciar corte de propina)
-    - Por algun motivo esta mostrando los errores en el login (creo que ya no)
-    - conectar ultimos 10 pagos con db
+    - Mostrar hora del pago
 
 - Testear
+    - Tiempos de carga. Puede ser que este tardando mucho al inicio del login
