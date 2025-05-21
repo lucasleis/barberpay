@@ -98,7 +98,7 @@
 
 <h3>Últimos 10 pagos</h3>
 
-<table class="table table-striped table-bordered" style="margin-top: 1rem;">
+<table class="table table-striped table-bordered text-center" style="margin-top: 1rem;">
   <thead>
     <tr>
       <th>Peluquero</th>
@@ -116,11 +116,11 @@
       <td>{{ pago.appointment.barber.name }}</td>
       <td>{{ pago.appointment.service.name }}</td>
       <td>{{ pago.method1.nombre }}</td>
-      <td>{{ pago.amount_method1 }}</td>
+      <td>{{ pago.amount_method1|int }}</td>
       <td>{{ pago.method2.nombre if pago.method2 else '-' }}</td>
-      <td>{{ pago.amount_method2 }}</td>
-      <td>{{ pago.amount_tip }}</td>
-      <td>{{ pago.amount_method1|float + pago.amount_method2|float + pago.amount_tip|float }}</td>
+      <td>{{ pago.amount_method2|int }}</td>
+      <td>{{ pago.amount_tip|int }}</td>
+      <td>{{ pago.amount_method1|int + pago.amount_method2|int + pago.amount_tip|int }}</td>
   </tr>
   {% endfor %}
 </table>

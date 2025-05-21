@@ -139,3 +139,10 @@ select {
   background-color: #f8d7da;
   color: #721c24;
 }
+
+
+.text-center th,
+.text-center td {
+  text-align: center;
+  vertical-align: middle;
+}
