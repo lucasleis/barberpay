@@ -1,9 +1,12 @@
 
 # Correr container posgres
-
 ```
 docker run --name postgres-peluqueria -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=admin123 -e POSTGRES_DB=peluqueria_db -p 5432:5432 -d postgres
-docker run --name postgres-peluqueria -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=admin123 -e POSTGRES_DB=peluqueria_db -p 5432:5432 -d harbor.extra/dockerhub/library/postgres:latest
+```
+
+# Iniciar ejecucion container stopped
+```
+docker start
 ```
 
 # Acceder por consola a container postgres 

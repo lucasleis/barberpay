@@ -2,6 +2,39 @@ from flask import current_app as app, render_template, request, redirect, url_fo
 from . import db
 from .models import Peluqueria, Empleado, Servicio, MetodoPago, Pago, Appointment
 from .auth import login_required
+from sqlalchemy.orm import aliased
+
+# Funciones auxiliares
+def get_payment_page_data(salon_id):
+    MetodoPago1 = aliased(MetodoPago)
+    MetodoPago2 = aliased(MetodoPago)
+
+    pagos_query = (
+        Pago.query
+        .join(Pago.appointment)
+        .join(Appointment.barber)
+        .join(Appointment.service)
+        .join(MetodoPago1, Pago.payment_method1_id == MetodoPago1.id)
+        .outerjoin(MetodoPago2, Pago.payment_method2_id == MetodoPago2.id)
+        .filter(Pago.peluqueria_id == salon_id)
+        .add_entity(MetodoPago1)
+        .add_entity(MetodoPago2)
+        .order_by(Pago.date.desc())
+        .limit(10)
+        .all()
+    )
+
+    pagos_data = []
+    for pago, method1, method2 in pagos_query:
+        pago.method1 = method1
+        pago.method2 = method2
+        pagos_data.append(pago)
+
+    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    services = Servicio.query.filter_by(peluqueria_id=salon_id).all()
+    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
+
+    return pagos_data, barbers, services, methods
 
 @app.route('/')
 def index():
@@ -139,6 +172,7 @@ def delete_payment_method(id):
         return redirect(url_for("login"))
 
 
+"""
 ### Peluqueros ###
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():
@@ -261,3 +295,72 @@ def add_payment():
         services=services,
         methods=methods
     )
+"""
+
+@app.route('/payments/new', methods=['GET', 'POST'])
+def add_payment():
+    session['salon_id'] = 1
+    raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
+
+    try:
+        salon_id = int(str(raw_salon_id).strip("{} "))
+    except (ValueError, TypeError):
+        flash("ID de peluquería inválido.", "danger")
+        return redirect(url_for("index"))
+
+    pagos_data, barbers, services, methods = get_payment_page_data(salon_id)
+
+    if request.method == 'POST':
+        try:
+            barber_id = request.form.get('barber_id')
+            service_id = request.form.get('service_id')
+            tip = float(request.form.get('tip') or 0.0)
+            method1 = int(request.form.get('method1'))
+            amount1 = float(request.form.get('amount1') or 0)
+
+            if not (barber_id and service_id):
+                raise ValueError("Faltan datos del peluquero o servicio.")
+
+            appointment = Appointment(
+                barber_id=barber_id,
+                service_id=service_id,
+                peluqueria_id=salon_id
+            )
+            db.session.add(appointment)
+            db.session.commit()
+
+            if request.form.get('amount2'):
+                amount2 = float(request.form.get('amount2') or 0)
+                method2 = int(request.form.get('method2'))
+            else:
+                amount2 = 0
+                method2 = None
+
+            pago = Pago(
+                appointment_id=appointment.id,
+                payment_method1_id=method1,
+                payment_method2_id=method2,
+                amount_method1=amount1,
+                amount_method2=amount2,
+                amount_tip=tip,
+                peluqueria_id=salon_id
+            )
+            db.session.add(pago)
+            db.session.commit()
+            flash("Pago registrado con éxito.", "success")
+            return redirect(url_for('add_payment'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error al registrar el pago: {str(e)}", "danger")
+
+    return render_template(
+        'add_payment.html',
+        pagos=pagos_data,
+        salon_id=salon_id,
+        barbers=barbers,
+        services=services,
+        methods=methods
+    )
+
+

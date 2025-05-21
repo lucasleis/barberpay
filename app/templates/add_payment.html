@@ -107,176 +107,167 @@
       <th>Monto</th>
       <th>M. Pago</th>
       <th>Monto</th>
-      <th>Monto Total</th>
       <th>Propina</th>
+      <th>Monto Total</th>
     </tr>
   </thead>
-  <tbody>
-    {% if last_payments %}
-      {% for payment in last_payments %}
-        <tr>
-          <td>{{ payment.appointment.barber.name }}</td>
-          <td>{{ payment.appointment.service.name }}</td>
-          <td>{{ payment.payment_method1.nombre }}</td>
-          <td>${{ "%.2f"|format(payment.amount_method1) }}</td>
-          <td>
-            {% if payment.payment_method2 %}
-              {{ payment.payment_method2.nombre }}
-            {% else %}
-              -
-            {% endif %}
-          </td>
-          <td>
-            {% if payment.amount_method2 %}
-              ${{ "%.2f"|format(payment.amount_method2) }}
-            {% else %}
-              -
-            {% endif %}
-          </td>
-          <td>${{ "%.2f"|format(payment.amount_method1 + (payment.amount_method2 or 0)) }}</td>
-          <td>
-            {% if payment.amount_tip %}
-              ${{ "%.2f"|format(payment.amount_tip) }}
-            {% else %}
-              -
-            {% endif %}
-          </td>
-        </tr>
-      {% endfor %}
-    {% else %}
-      <tr><td colspan="8" class="text-center">No hay pagos recientes.</td></tr>
-    {% endif %}
-  </tbody>
+  {% for pago in pagos %}
+  <tr>
+      <td>{{ pago.appointment.barber.name }}</td>
+      <td>{{ pago.appointment.service.name }}</td>
+      <td>{{ pago.method1.nombre }}</td>
+      <td>{{ pago.amount_method1 }}</td>
+      <td>{{ pago.method2.nombre if pago.method2 else '-' }}</td>
+      <td>{{ pago.amount_method2 }}</td>
+      <td>{{ pago.amount_tip }}</td>
+      <td>{{ pago.amount_method1|float + pago.amount_method2|float + pago.amount_tip|float }}</td>
+  </tr>
+  {% endfor %}
 </table>
 
 
 <script>
-    const serviceSelect = document.getElementById('serviceSelect');
-    const servicePrice = document.getElementById('servicePrice');
-    const toggle = document.getElementById('multiPaymentToggle');
-    const singleGroup = document.getElementById('singleMethodGroup');
-    const multiGroup = document.getElementById('multiMethodGroup');
-    const form = document.getElementById('paymentForm');
-    const errorMsg = document.getElementById('multiPaymentError');
-    const repeatError = document.getElementById('methodRepeatError');
+  const serviceSelect = document.getElementById('serviceSelect');
+  const servicePrice = document.getElementById('servicePrice');
+  const toggle = document.getElementById('multiPaymentToggle');
+  const singleGroup = document.getElementById('singleMethodGroup');
+  const multiGroup = document.getElementById('multiMethodGroup');
+  const form = document.getElementById('paymentForm');
+  const errorMsg = document.getElementById('multiPaymentError');
+  const repeatError = document.getElementById('methodRepeatError');
+  
+  const amount1 = document.getElementById('amount1');
+  const amount2 = document.getElementById('amount2');
+  const amountSimple = document.getElementById('amountSimple');
+  const method1Select = document.getElementById('method1');
+  const method2Select = document.getElementById('method2');
 
-    const amount1 = document.getElementById('amount1');
-    const amount2 = document.getElementById('amount2');
+  console.log("amount1: "+amount1.value);
+
+  function updatePrice() {
+    const selected = serviceSelect.options[serviceSelect.selectedIndex];
+    const precio = selected.getAttribute('data-precio');
+    const precioFloat = parseFloat(precio).toFixed(2);
+    servicePrice.value = `$${precioFloat}`;
+    amountSimple.value = precioFloat;
+
+    console.log("servicePrice.value: "+servicePrice.value);
+  }
+
+  updatePrice();
+  serviceSelect.addEventListener('change', updatePrice);
+
+  setTimeout(() => {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+      alert.classList.remove('show');
+      alert.classList.add('fade');
+      setTimeout(() => alert.remove(), 1000); 
+    });
+  }, 15000);
+
+  toggle.addEventListener('change', function () {
+    if (this.checked) {
+      singleGroup.style.display = 'none';
+      multiGroup.style.display = 'block';
+      multiGroup.querySelectorAll('input').forEach(el => el.required = true);
+    } else {
+      singleGroup.style.display = 'flex';
+      multiGroup.style.display = 'none';
+      multiGroup.querySelectorAll('input').forEach(el => {
+        el.required = false;
+        el.classList.remove('input-error');
+      });
+      multiGroup.querySelectorAll('select').forEach(el => el.classList.remove('input-error'));
+      errorMsg.style.display = 'none';
+      repeatError.style.display = 'none';
+    }
+  });
+
+  form.addEventListener('submit', function (e) {
     const amountSimple = document.getElementById('amountSimple');
-    const method1Select = document.getElementById('method1');
-    const method2Select = document.getElementById('method2');
+    const amountInput = document.getElementById('amount1');
 
-    function updatePrice() {
-        const selected = serviceSelect.options[serviceSelect.selectedIndex];
-        const precio = selected.getAttribute('data-precio');
-        const precioFloat = parseFloat(precio).toFixed(2);
-        servicePrice.value = `$${precioFloat}`;
-        amountSimple.value = precioFloat;
+    if (toggle.checked) {
+      // Modo múltiple
+      methodSimple.disabled = true;
+      methodMultiple.disabled = false;
+      methodSimple.removeAttribute('name');
+      methodMultiple.setAttribute('name', 'method1');
+
+      // 🔧 FIX AQUÍ
+      amountSimple.removeAttribute('name');
+      amountInput.setAttribute('name', 'amount1');
+    } else {
+      // Modo simple
+      methodMultiple.disabled = true;
+      methodSimple.disabled = false;
+      methodMultiple.removeAttribute('name');
+      methodSimple.setAttribute('name', 'method1');
+      updatePrice();
+    
+      // 🔧 FIX AQUÍ
+      amountInput.removeAttribute('name');
+      amountSimple.setAttribute('name', 'amount1');
     }
 
-    updatePrice();
-    serviceSelect.addEventListener('change', updatePrice);
+    let valid = true;
 
-    setTimeout(() => {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
-          alert.classList.remove('show');
-          alert.classList.add('fade');
-          setTimeout(() => alert.remove(), 1000); 
-        });
-      }, 15000);
+    if (toggle.checked) {
 
-    toggle.addEventListener('change', function () {
-        if (this.checked) {
-            singleGroup.style.display = 'none';
-            multiGroup.style.display = 'block';
-            multiGroup.querySelectorAll('input').forEach(el => el.required = true);
-        } else {
-            singleGroup.style.display = 'flex';
-            multiGroup.style.display = 'none';
-            multiGroup.querySelectorAll('input').forEach(el => {
-                el.required = false;
-                el.classList.remove('input-error');
-            });
-            multiGroup.querySelectorAll('select').forEach(el => el.classList.remove('input-error'));
-            errorMsg.style.display = 'none';
-            repeatError.style.display = 'none';
-        }
+      const price = parseFloat(serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-precio'));
+      const amount1 = parseFloat(form.querySelector('input[name="amount1"]').value) || 0;
+      const amount2 = parseFloat(form.querySelector('input[name="amount2"]').value) || 0;
+      const total = amount1 + amount2;
+
+      const method1 = form.querySelector('select[name="method1"]').value;
+      const method2 = form.querySelector('select[name="method2"]').value;
+
+      // console.log("price: " + price);
+
+      // Validación de monto exacto
+      if (total !== price) {
+        [form.querySelector('input[name="amount1"]'), form.querySelector('input[name="amount2"]')]
+          .forEach(input => input.classList.add('input-error'));
+        errorMsg.style.display = 'block';
+        valid = false;
+      } else {
+        [form.querySelector('input[name="amount1"]'), form.querySelector('input[name="amount2"]')]
+          .forEach(input => input.classList.remove('input-error'));
+        errorMsg.style.display = 'none';
+      }
+
+      // Validación de métodos distintos
+      if (method1 === method2) {
+        [form.querySelector('select[name="method1"]'), form.querySelector('select[name="method2"]')]
+          .forEach(select => select.classList.add('input-error'));
+        repeatError.style.display = 'block';
+        valid = false;
+      } else {
+        [form.querySelector('select[name="method1"]'), form.querySelector('select[name="method2"]')]
+          .forEach(select => select.classList.remove('input-error'));
+        repeatError.style.display = 'none';
+      }
+
+      if (!valid) {
+        e.preventDefault();
+      }
+    }
+  });
+
+  document.querySelectorAll('input[name="amount1"], input[name="amount2"]').forEach(input => {
+    input.addEventListener('input', () => {
+      input.classList.remove('input-error');
+      errorMsg.style.display = 'none';
     });
+  });
 
-    form.addEventListener('submit', function (e) {
-        const methodSimple = document.getElementById('methodSimple');
-        const methodMultiple = document.getElementById('methodMultiple');
-
-        if (toggle.checked) {
-            // Modo múltiple
-            methodSimple.disabled = true;
-            methodMultiple.disabled = false;
-            methodSimple.removeAttribute('name');
-            methodMultiple.setAttribute('name', 'method1');
-        } else {
-            // Modo simple
-            methodMultiple.disabled = true;
-            methodSimple.disabled = false;
-            methodMultiple.removeAttribute('name');
-            methodSimple.setAttribute('name', 'method1');
-            updatePrice();  // asegúrate que amountSimple esté actualizado antes de enviar
-        }
-
-        let valid = true;
-
-        if (toggle.checked) {
-            const price = parseFloat(serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-precio'));
-            const amount1 = parseFloat(form.querySelector('input[name="amount1"]').value) || 0;
-            const amount2 = parseFloat(form.querySelector('input[name="amount2"]').value) || 0;
-            const total = amount1 + amount2;
-
-            const method1 = form.querySelector('select[name="method1"]').value;
-            const method2 = form.querySelector('select[name="method2"]').value;
-
-            // Validación de monto exacto
-            if (total !== price) {
-                [form.querySelector('input[name="amount1"]'), form.querySelector('input[name="amount2"]')]
-                    .forEach(input => input.classList.add('input-error'));
-                errorMsg.style.display = 'block';
-                valid = false;
-            } else {
-                [form.querySelector('input[name="amount1"]'), form.querySelector('input[name="amount2"]')]
-                    .forEach(input => input.classList.remove('input-error'));
-                errorMsg.style.display = 'none';
-            }
-
-            // Validación de métodos distintos
-            if (method1 === method2) {
-                [form.querySelector('select[name="method1"]'), form.querySelector('select[name="method2"]')]
-                    .forEach(select => select.classList.add('input-error'));
-                repeatError.style.display = 'block';
-                valid = false;
-            } else {
-                [form.querySelector('select[name="method1"]'), form.querySelector('select[name="method2"]')]
-                    .forEach(select => select.classList.remove('input-error'));
-                repeatError.style.display = 'none';
-            }
-
-            if (!valid) {
-                e.preventDefault();
-            }
-        }
+  document.querySelectorAll('select[name="method1"], select[name="method2"]').forEach(select => {
+    select.addEventListener('change', () => {
+      select.classList.remove('input-error');
+      repeatError.style.display = 'none';
     });
-
-    document.querySelectorAll('input[name="amount1"], input[name="amount2"]').forEach(input => {
-        input.addEventListener('input', () => {
-            input.classList.remove('input-error');
-            errorMsg.style.display = 'none';
-        });
-    });
-
-    document.querySelectorAll('select[name="method1"], select[name="method2"]').forEach(select => {
-        select.addEventListener('change', () => {
-            select.classList.remove('input-error');
-            repeatError.style.display = 'none';
-        });
-    });
+  });
 </script>
 
 {% endblock %}
