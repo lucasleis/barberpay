@@ -1,6 +1,7 @@
 - Administrar:
     - Empleados 
-        - Agregar input para settear valor de comision
+        - Agregar input para settear valor de comision 
+        - Agregar campo comision a la tabla de empleado
 
     - Servicios: 
 
@@ -8,6 +9,7 @@
     
 - Pagos:
     - Mostrar ultimos cortes guardados (diferenciar corte de propina)
-    - Por algun motivo esta mostrando los errores en el login
+    - Por algun motivo esta mostrando los errores en el login (creo que ya no)
+    - conectar ultimos 10 pagos con db
 
 - Testear
