@@ -142,7 +142,7 @@
   const method1Select = document.getElementById('method1');
   const method2Select = document.getElementById('method2');
 
-  console.log("amount1: "+amount1.value);
+  // console.log("amount1: "+amount1.value);
 
   function updatePrice() {
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
@@ -151,7 +151,7 @@
     servicePrice.value = `$${precioFloat}`;
     amountSimple.value = precioFloat;
 
-    console.log("servicePrice.value: "+servicePrice.value);
+    // console.log("servicePrice.value: "+servicePrice.value);
   }
 
   updatePrice();

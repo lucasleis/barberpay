@@ -1,0 +1,49 @@
+/* Estilos generales para la sección de cierre semanal */
+.semana-cierre {
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+/* Títulos */
+.semana-cierre h5 {
+  margin-bottom: 1rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.semana-cierre h6 {
+  margin-top: 1.5rem;
+  font-weight: 600;
+  color: #444;
+}
+
+/* Totales generales */
+.totales-generales {
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+
+.totales-generales strong {
+  color: #000;
+}
+
+/* Listas de totales */
+.lista-totales {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.5rem;
+}
+
+.lista-totales li {
+  margin-bottom: 0.25rem;
+}
+
+/* Separador */
+.separador {
+  margin-top: 2rem;
+  border-top: 1px solid #ccc;
+}
+  

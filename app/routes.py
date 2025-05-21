@@ -3,6 +3,8 @@ from . import db
 from .models import Peluqueria, Empleado, Servicio, MetodoPago, Pago, Appointment
 from .auth import login_required
 from sqlalchemy.orm import aliased
+from datetime import timedelta
+from collections import defaultdict
 
 # Funciones auxiliares
 def get_payment_page_data(salon_id):
@@ -35,6 +37,93 @@ def get_payment_page_data(salon_id):
     methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
 
     return pagos_data, barbers, services, methods
+
+def get_cierre_semanal_data(salon_id):
+    MetodoPago1 = aliased(MetodoPago)
+    MetodoPago2 = aliased(MetodoPago)
+
+    pagos_query = (
+        Pago.query
+        .join(Pago.appointment)
+        .join(Appointment.barber)
+        .join(Appointment.service)
+        .join(MetodoPago1, Pago.payment_method1_id == MetodoPago1.id)
+        .outerjoin(MetodoPago2, Pago.payment_method2_id == MetodoPago2.id)
+        .filter(Pago.peluqueria_id == salon_id)
+        .order_by(Pago.date.desc())
+        .add_entity(MetodoPago1)
+        .add_entity(MetodoPago2)
+        .all()
+    )
+
+    pagos_por_semana = defaultdict(list)
+
+    for pago, method1, method2 in pagos_query:
+        appointment = pago.appointment
+        barber = appointment.barber
+        service = appointment.service
+
+        valor_servicio = float(service.precio)
+        porcentaje_empleado = barber.porcentaje
+        pago_empleado = valor_servicio * (porcentaje_empleado / 100)
+        propina = float(pago.amount_tip or 0)
+        pago_empleado_con_propina = pago_empleado + propina
+        pago_propietario = valor_servicio - pago_empleado
+
+        fecha_pago = pago.date.date()
+        cierre_semana = fecha_pago + timedelta(days=(6 - fecha_pago.weekday()))
+
+        pagos_por_semana[cierre_semana].append({
+            "fecha": fecha_pago,
+            "empleado": barber.name,
+            "servicio": service.name,
+            "valor_servicio": valor_servicio,
+            "porcentaje_empleado": porcentaje_empleado,
+            "pago_empleado": pago_empleado_con_propina,
+            "pago_propietario": pago_propietario,
+            "metodo_pago1": method1.nombre if method1 else None,
+            "monto1": float(pago.amount_method1),
+            "metodo_pago2": method2.nombre if method2 else None,
+            "monto2": float(pago.amount_method2 or 0),
+            "propina": propina,
+        })
+
+    cierre_ordenado = []
+
+    for fecha_cierre, pagos in sorted(pagos_por_semana.items(), reverse=True):
+        total_general = 0
+        total_propietario = 0
+        total_empleados = defaultdict(lambda: {"monto": 0, "cortes": 0})
+        total_metodos_pago = defaultdict(float)
+
+        for p in pagos:
+            total_general += p["valor_servicio"] + p["propina"]
+            total_propietario += p["pago_propietario"]
+
+            total_empleados[p["empleado"]]["monto"] += p["pago_empleado"]
+            total_empleados[p["empleado"]]["cortes"] += 1
+
+            if p["metodo_pago1"]:
+                total_metodos_pago[p["metodo_pago1"]] += p["monto1"]
+            if p["metodo_pago2"]:
+                total_metodos_pago[p["metodo_pago2"]] += p["monto2"]
+
+        fecha_inicio = fecha_cierre - timedelta(days=6)
+        
+        cierre_ordenado.append({
+            "fecha_inicio": fecha_inicio,
+            "fecha_cierre": fecha_cierre,
+            "pagos": pagos,
+            "totales": {
+                "monto_total": total_general,
+                "propietario_total": total_propietario,
+                "empleados": dict(total_empleados),
+                "metodos_pago": dict(total_metodos_pago),
+            }
+        })
+
+    return cierre_ordenado
+
 
 @app.route('/')
 def index():
@@ -172,130 +261,7 @@ def delete_payment_method(id):
         return redirect(url_for("login"))
 
 
-"""
 ### Peluqueros ###
-@app.route('/payments/new', methods=['GET', 'POST'])
-def add_payment():
-    # print("Form data:", request.form)
-    # print("Args data:", request.args)
-
-    session['salon_id'] = 1 
-
-    raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
-
-    if raw_salon_id:
-        try:
-            salon_id = int(str(raw_salon_id).strip("{} ").strip())
-        except ValueError:
-            flash("ID de peluquería inválido.", "danger")
-            return redirect(url_for("index"))
-    else:
-        flash("No se puede determinar la peluquería.", "danger")
-        return redirect(url_for("index"))
-
-    if not salon_id:
-        flash("No se puede determinar la peluquería.", "danger")
-        return redirect(url_for("index"))
-
-    # print(f"salon_id: {salon_id}")
-    peluqueria_id=int(salon_id)
-
-    barbers = Empleado.query.filter_by(active=True, peluqueria_id=peluqueria_id).all()
-    services = Servicio.query.filter_by(peluqueria_id=peluqueria_id).all()
-    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=peluqueria_id).all()
-
-    print(f"")
-    if request.method == 'POST':
-        barber_id = request.form.get('barber_id')
-        # print(f"barber_id: {barber_id}")
-        
-        service_id = request.form.get('service_id')
-        # print(f"service_id: {service_id}")
-
-        tip = float(request.form.get('tip') or 0.0)
-        # print(f"tip: {tip}")
-        
-        method1 = int(request.form.get('method1'))
-        # print(f"method1: {method1}")
-        
-        # amount1 = float(request.form.get('amount1'))
-        amount1 = request.form.get('amount1')
-        # print(f"amount1: {amount1}")
-
-        if not (barber_id and service_id):
-            flash("Faltan datos del peluquero o servicio.", "danger")
-            return render_template(
-                'add_payment.html',
-                barbers=barbers,
-                services=services,
-                methods=methods
-            )
-
-        try:
-            # Crear la cita
-            appointment = Appointment(
-                barber_id=barber_id,
-                service_id=service_id,
-                peluqueria_id=peluqueria_id
-            )
-            db.session.add(appointment)
-            db.session.commit()
-
-            # Pago múltiple
-            if request.form.get('amount1') and request.form.get('amount2'):
-                print("Entrando al bloque de múltiples métodos de pago")
-
-                amount2 = float(request.form.get('amount2') or 0)
-                method2 = int(request.form.get('method2'))
-                # print(f"amount1: {amount1}, amount2: {amount2}")
-                # print(f"method1: {method1}, method2: {method2}")
-
-                pago = Pago(
-                    appointment_id=appointment.id,
-                    payment_method1_id=method1,
-                    payment_method2_id=method2,
-                    amount_method1=amount1,
-                    amount_method2=amount2,
-                    amount_tip=tip,
-                    peluqueria_id=peluqueria_id
-                )
-            else:
-                # Pago simple
-                pago = Pago(
-                    appointment_id=appointment.id,
-                    payment_method1_id=method1,
-                    payment_method2_id=None,
-                    amount_method1=amount1,
-                    amount_method2=0,
-                    amount_tip=tip,
-                    peluqueria_id=peluqueria_id
-                )
-            # print(f"Pago creado")
-            db.session.add(pago)
-            # print(f"Pago added")
-
-            db.session.commit()
-            flash("Pago registrado con éxito.", "success")
-            return redirect(url_for('add_payment'))
-
-        except Exception as e:
-            print(f"Exception ocurred: {e}")
-            db.session.rollback()
-            flash(f"Error al registrar el pago: {str(e)}", "danger")
-            return render_template(
-                'add_payment.html',
-                barbers=barbers,
-                services=services,
-                methods=methods
-            )
-
-    return render_template(
-        'add_payment.html',
-        barbers=barbers,
-        services=services,
-        methods=methods
-    )
-"""
 
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():
@@ -362,5 +328,26 @@ def add_payment():
         services=services,
         methods=methods
     )
+
+
+### Cierres ###
+
+@app.route('/cierre/semanal')
+def show_cierre_semanal():
+    return render_template('cierre_semanal.html')
+
+@app.route("/cierre_semanal")
+def cierre_semanal():
+    session['salon_id'] = 1
+    raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
+
+    try:
+        salon_id = int(str(raw_salon_id).strip("{} "))
+    except (ValueError, TypeError):
+        flash("ID de peluquería inválido.", "danger")
+        return redirect(url_for("index"))
+
+    semanas_cierre = get_cierre_semanal_data(salon_id)
+    return render_template("cierre_semanal.html", semanas=semanas_cierre)
 
 
