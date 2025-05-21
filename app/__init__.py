@@ -57,6 +57,7 @@ def ensure_database_and_tables():
             id SERIAL PRIMARY KEY,
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
             name VARCHAR(100) NOT NULL,
+            porcentaje INTEGER NOT NULL,
             active BOOLEAN DEFAULT TRUE
         );
 

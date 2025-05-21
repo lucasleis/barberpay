@@ -9,14 +9,25 @@
   <h2>Empleados</h2>
 
   <form method="POST" action="{{ url_for('add_barber') }}">
-    <input type="text" name="name" placeholder="Nombre del empleado" required>
+    <!--
+      <label for="barber_id">Nombre:</label>
+      <input type="text" name="name" placeholder="Nombre del empleado" required>
+    -->
+    <label for="barber_id">Empleado:</label>
+    <div class="payment-method-group">
+      <input type="text" name="name" placeholder="Nombre" required>
+      <input type="number" name="porcentaje" id="porcentaje" step="1" placeholder="Porcentaje %" required>
+    </div>
+
     <button type="submit">Agregar</button>
+
+    
   </form>
 
   <ul class="barber-list">
     {% for barber in barbers %}
       <li class="barber-item">
-        <span>{{ barber.name }}</span>
+        <span>Nombre: {{ barber.name }} | Porcentaje: {{ barber.porcentaje }} </span>
         <a href="{{ url_for('delete_barber', id=barber.id) }}" class="delete-button" title="Eliminar">
           <i class="fas fa-trash-alt"></i>
         </a>

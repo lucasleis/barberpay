@@ -56,8 +56,11 @@ def list_barbers():
 def add_barber():
     if "user" in session:
         name = request.form['name']
+        porcentaje = request.form.get('porcentaje')
+        if not porcentaje:
+            return "Porcentaje es requerido", 400
         salon_id = session.get('salon_id')
-        db.session.add(Empleado(name=name, peluqueria_id=salon_id))
+        db.session.add(Empleado(name=name, peluqueria_id=salon_id, porcentaje=porcentaje))
         db.session.commit()
         return redirect(url_for('list_barbers'))
     else:
