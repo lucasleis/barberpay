@@ -27,32 +27,48 @@
     {% endfor %}
   </select>
 
-  <label for="service_id">Servicio y precio:</label>
-
-  <!-- Selector de servicio -->
-  <div style="display: flex; gap: 1rem;">
-    <select name="service_id" id="serviceSelect" required>
-      {% for s in services %}
-        <option value="{{ s.id }}" data-precio="{{ s.precio }}">
-          {{ s.name }}
-        </option>
-      {% endfor %}
-    </select>
-    <input type="text" id="servicePrice" disabled placeholder="$" style="width: 100px;">
+  <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+    <div style="flex: 1;">
+      <input type="checkbox" class="btn-check" id="toggleServicio" autocomplete="off" checked>
+      <label class="btn full-width" for="toggleServicio">Servicio</label>
+    </div>
+    <div style="flex: 1;">
+      <input type="checkbox" class="btn-check" id="toggleProducto" autocomplete="off">
+      <label class="btn full-width" for="toggleProducto">Producto</label>
+    </div>
   </div>
 
-  <!-- Selector de productos -->
-  <div id="productSection" style="" > <!-- "display: none;" -->
-    <label for="product_id">Producto:</label>
+
+  <!-- Selector de servicio -->
+  <div id="servicioSection">
+    <label for="service_id">Servicio y precio:</label>
     <div style="display: flex; gap: 1rem;">
-      <select name="product_id" id="productSelect">
-        {% for product in products %}
-          <option value="{{ product.id }}" data-precio="{{ product.precio }}">
-            {{ product.name }}
+      <select name="service_id" id="serviceSelect" required>
+        {% for s in services %}
+          <option value="{{ s.id }}" data-precio="{{ s.precio }}">
+            {{ s.name }}
           </option>
         {% endfor %}
-      </select>  
-      <input type="text" id="productPrice" disabled placeholder="$" style="width: 100px;">
+      </select>
+      <input type="text" id="servicePrice" disabled placeholder="$" style="width: 100px;">
+    </div>
+  </div>
+
+
+  <!-- Selector de productos -->
+  <div id="productSection">
+    <div id="productSection" >
+      <label for="product_id">Producto:</label>
+      <div style="display: flex; gap: 1rem;">
+        <select name="product_id" id="productSelect">
+          {% for product in products %}
+            <option value="{{ product.id }}" data-precio="{{ product.precio }}">
+              {{ product.name }}
+            </option>
+          {% endfor %}
+        </select>  
+        <input type="text" id="productPrice" disabled placeholder="$" style="width: 100px;">
+      </div>
     </div>
   </div>
 
@@ -132,11 +148,11 @@
       <td>{{ pago.appointment.barber.name }}</td>
       <td>{{ pago.appointment.service.name }}</td>
       <td>{{ pago.method1.nombre }}</td>
-      <td>{{ pago.amount_method1|int }}</td>
+      <td>${{ pago.amount_method1|int }}</td>
       <td>{{ pago.method2.nombre if pago.method2 else '-' }}</td>
-      <td>{{ pago.amount_method2|int }}</td>
-      <td>{{ pago.amount_tip|int }}</td>
-      <td>{{ pago.amount_method1|int + pago.amount_method2|int + pago.amount_tip|int }}</td>
+      <td>${{ pago.amount_method2|int }}</td>
+      <td>${{ pago.amount_tip|int }}</td>
+      <td>${{ pago.amount_method1|int + pago.amount_method2|int + pago.amount_tip|int }}</td>
     </tr>
   {% endfor %}
 </table>
@@ -160,8 +176,34 @@
   const method1Select = document.getElementById('method1');
   const method2Select = document.getElementById('method2');
 
-  // console.log("amount1: "+amount1.value);
+  const tipoPagoRadios = document.querySelectorAll('input[name="tipo_pago"]');
 
+  /*
+
+  function updateTipoPagoView() {
+    const selected = document.querySelector('input[name="tipo_pago"]:checked').value;
+    if (selected === 'servicio') {
+      servicioSection.style.display = 'block';
+      productSection.style.display = 'none';
+    } else if (selected === 'producto') {
+      servicioSection.style.display = 'none';
+      productSection.style.display = 'block';
+    } else {
+      servicioSection.style.display = 'block';
+      productSection.style.display = 'block';
+    }
+  }
+
+  // Inicializar
+  updateTipoPagoView();
+
+  // Escuchar cambios
+  tipoPagoRadios.forEach(radio => {
+    radio.addEventListener('change', updateTipoPagoView);
+  });
+
+  */
+  
   function updatePrice() {
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
     const precio = selected.getAttribute('data-precio');
@@ -298,6 +340,26 @@
       repeatError.style.display = 'none';
     });
   });
+
+
+  const servicioToggle = document.getElementById('toggleServicio');
+  const productoToggle = document.getElementById('toggleProducto');
+  const servicioSection = document.getElementById('servicioSection');
+  const productSection = document.getElementById('productSection');
+
+  function updateToggleSections() {
+    servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
+    productSection.style.display = productoToggle.checked ? 'block' : 'none';
+  }
+
+  // Inicial
+  updateToggleSections();
+
+  // Listeners
+  servicioToggle.addEventListener('change', updateToggleSections);
+  productoToggle.addEventListener('change', updateToggleSections);
+
+
 </script>
 
 {% endblock %}

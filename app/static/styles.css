@@ -154,3 +154,28 @@ select {
   gap: 0.4rem; /* espacio entre el checkbox y el texto */
   float: right;
 }
+
+
+.btn-check {
+    display: none;
+  }
+
+  .btn {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    color: black;
+    background-color: white;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+    display: block;
+  }
+
+  .btn.full-width {
+    width: 100%;
+  }
+
+  .btn-check:checked + .btn {
+    background-color: black;
+    color: white;
+  }

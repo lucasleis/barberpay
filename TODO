@@ -4,8 +4,7 @@
     - Servicios: 
 
     - Productos:
-        - Agregar tabla productos
-        - Preguntar si deberian estar en la misma compra o separada
+        - Agregar a la tabla de pagos
 
     - Descuentos:
         - Agregar tabla descuentos
