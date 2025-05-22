@@ -1,6 +1,6 @@
 from flask import current_app as app, render_template, request, redirect, url_for, session, flash
 from . import db
-from .models import Peluqueria, Empleado, Servicio, MetodoPago, Pago, Appointment
+from .models import Peluqueria, Empleado, Servicio, MetodoPago, Pago, Appointment, Producto
 from .auth import login_required
 from sqlalchemy.orm import aliased
 from datetime import timedelta
@@ -229,6 +229,38 @@ def delete_service(id):
     else:
         return redirect(url_for("login"))
 
+@app.route('/admin/products')
+def list_products():
+    if "user" in session:
+        salon_id = session.get('salon_id')
+        products = Producto.query.filter_by(peluqueria_id=salon_id).all()
+        return render_template('products.html', products=products)
+    else:
+        return redirect(url_for("login"))
+
+@app.route('/admin/products/add', methods=['POST'])
+def add_product():
+    if "user" in session:
+        name = request.form['name']
+        precio = float(request.form['precio'])
+        salon_id = session.get('salon_id')
+        db.session.add(Producto(name=name, precio=precio, peluqueria_id=salon_id))
+        db.session.commit()
+        return redirect(url_for('list_products'))
+    else:
+        return redirect(url_for("login"))
+
+@app.route('/admin/products/delete/<int:id>')
+def delete_product(id):
+    if "user" in session:
+        product = Producto.query.get(id)
+        db.session.delete(product)
+        db.session.commit()
+        return redirect(url_for('list_products'))
+    else:
+        return redirect(url_for("login"))
+
+
 @app.route('/admin/payment_methods')
 def list_payment_methods():
     if "user" in session:
@@ -275,6 +307,7 @@ def add_payment():
         return redirect(url_for("index"))
 
     pagos_data, barbers, services, methods = get_payment_page_data(salon_id)
+    products = Producto.query.filter_by(peluqueria_id=salon_id).all()
 
     if request.method == 'POST':
         try:
@@ -326,7 +359,8 @@ def add_payment():
         salon_id=salon_id,
         barbers=barbers,
         services=services,
-        methods=methods
+        methods=methods,
+        products=products 
     )
 
 

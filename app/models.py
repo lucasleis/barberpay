@@ -34,6 +34,14 @@ class Servicio(db.Model):
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
 
+class Producto(db.Model):
+    __tablename__ = 'productos'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    precio = db.Column(db.Float, nullable=False)
+    peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
+
+
 class Appointment(db.Model):
     __tablename__ = 'turnos'
     id = db.Column(db.Integer, primary_key=True)

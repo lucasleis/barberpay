@@ -18,82 +18,98 @@
 <h2>Registrar un nuevo pago</h2>
 
 <form method="POST" id="paymentForm" action="{{ url_for('add_payment') }}">
-    <input type="hidden" name="salon_id" value="{{ salon_id }}">
+  <input type="hidden" name="salon_id" value="{{ salon_id }}">
 
-    <label for="barber_id">Peluquero:</label>
-    <select name="barber_id" required>
-        {% for b in barbers %}
-            <option value="{{ b.id }}">{{ b.name }}</option>
-        {% endfor %}
+  <label for="barber_id">Peluquero:</label>
+  <select name="barber_id" required>
+    {% for b in barbers %}
+      <option value="{{ b.id }}">{{ b.name }}</option>
+    {% endfor %}
+  </select>
+
+  <label for="service_id">Servicio y precio:</label>
+
+  <!-- Selector de servicio -->
+  <div style="display: flex; gap: 1rem;">
+    <select name="service_id" id="serviceSelect" required>
+      {% for s in services %}
+        <option value="{{ s.id }}" data-precio="{{ s.precio }}">
+          {{ s.name }}
+        </option>
+      {% endfor %}
     </select>
+    <input type="text" id="servicePrice" disabled placeholder="$" style="width: 100px;">
+  </div>
 
-    <label for="service_id">Servicio y precio:</label>
+  <!-- Selector de productos -->
+  <div id="productSection" style="" > <!-- "display: none;" -->
+    <label for="product_id">Producto:</label>
     <div style="display: flex; gap: 1rem;">
-        <select name="service_id" id="serviceSelect" required>
-            {% for s in services %}
-                <option value="{{ s.id }}" data-precio="{{ s.precio }}">
-                    {{ s.name }}
-                </option>
-            {% endfor %}
-        </select>
+      <select name="product_id" id="productSelect">
+        {% for product in products %}
+          <option value="{{ product.id }}" data-precio="{{ product.precio }}">
+            {{ product.name }}
+          </option>
+        {% endfor %}
+      </select>  
+      <input type="text" id="productPrice" disabled placeholder="$" style="width: 100px;">
+    </div>
+  </div>
 
-        <input type="text" id="servicePrice" disabled placeholder="$" style="width: 100px;">
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+      <label for="method">Método de pago:</label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="multiPaymentToggle"> ¿Usar múltiples métodos?
+      </label>
+  </div>
+
+  <!-- Modo simple -->
+  <div id="singleMethodGroup" class="payment-method-group">
+    <select id="methodSimple" name="method1">
+      {% for method in methods %}
+        <option value="{{ method.id }}">{{ method.nombre }}</option>
+      {% endfor %}
+    </select>
+    <input type="hidden" name="amount1" id="amountSimple">
+  </div>
+
+  <!-- Modo múltiple -->
+  <div id="multiMethodGroup" style="display: none;">
+    <div class="payment-method-group">
+      <select id="methodMultiple">
+        {% for method in methods %}
+          <option value="{{ method.id }}">{{ method.nombre }}</option>
+        {% endfor %}
+      </select>
+      <input type="number" name="amount1" id="amount1" step="1" placeholder="Monto $">
     </div>
 
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-        <label for="method">Método de pago:</label>
-        <label style="font-size: 0.9rem;">
-            <input type="checkbox" id="multiPaymentToggle"> ¿Usar múltiples métodos?
-        </label>
+    <div class="payment-method-group">
+      <select name="method2" id="method2">
+        {% for method in methods %}
+          <option value="{{ method.id }}">{{ method.nombre }}</option>
+        {% endfor %}
+      </select>
+      <input type="number" name="amount2" id="amount2" step="100" placeholder="Monto $">
     </div>
 
-    <!-- Modo simple -->
-    <div id="singleMethodGroup" class="payment-method-group">
-        <select id="methodSimple" name="method1">
-            {% for method in methods %}
-                <option value="{{ method.id }}">{{ method.nombre }}</option>
-            {% endfor %}
-        </select>
-        <input type="hidden" name="amount1" id="amountSimple">
+    <!-- Mensajes de error -->
+    <p id="multiPaymentError" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
+      La suma de los montos debe ser igual al precio del servicio.
+    </p>
+    <p id="methodRepeatError" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
+      Los métodos de pago deben ser diferentes.
+    </p>
+  </div>
+
+  <!-- Propina y botón -->
+  <div class="mb-3">
+    <label for="tip" class="form-label">Propina:</label>
+    <div class="propina-row">
+      <input type="number" name="tip" id="tip" step="100" placeholder="$">
+      <button type="submit">Guardar pago</button>
     </div>
-
-    <!-- Modo múltiple -->
-    <div id="multiMethodGroup" style="display: none;">
-        <div class="payment-method-group">
-            <select id="methodMultiple">
-                {% for method in methods %}
-                    <option value="{{ method.id }}">{{ method.nombre }}</option>
-                {% endfor %}
-            </select>
-            <input type="number" name="amount1" id="amount1" step="1" placeholder="Monto $">
-        </div>
-
-        <div class="payment-method-group">
-            <select name="method2" id="method2">
-                {% for method in methods %}
-                    <option value="{{ method.id }}">{{ method.nombre }}</option>
-                {% endfor %}
-            </select>
-            <input type="number" name="amount2" id="amount2" step="100" placeholder="Monto $">
-        </div>
-
-        <!-- Mensajes de error -->
-        <p id="multiPaymentError" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
-            La suma de los montos debe ser igual al precio del servicio.
-        </p>
-        <p id="methodRepeatError" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
-            Los métodos de pago deben ser diferentes.
-        </p>
-    </div>
-
-    <!-- Propina y botón -->
-    <div class="mb-3">
-        <label for="tip" class="form-label">Propina:</label>
-        <div class="propina-row">
-            <input type="number" name="tip" id="tip" step="100" placeholder="$">
-            <button type="submit">Guardar pago</button>
-        </div>
-    </div>
+  </div>
 </form>
 
 <h3>Últimos 10 pagos</h3>
@@ -112,7 +128,7 @@
     </tr>
   </thead>
   {% for pago in pagos %}
-  <tr>
+    <tr>
       <td>{{ pago.appointment.barber.name }}</td>
       <td>{{ pago.appointment.service.name }}</td>
       <td>{{ pago.method1.nombre }}</td>
@@ -121,7 +137,7 @@
       <td>{{ pago.amount_method2|int }}</td>
       <td>{{ pago.amount_tip|int }}</td>
       <td>{{ pago.amount_method1|int + pago.amount_method2|int + pago.amount_tip|int }}</td>
-  </tr>
+    </tr>
   {% endfor %}
 </table>
 
@@ -129,7 +145,9 @@
 <script>
   const serviceSelect = document.getElementById('serviceSelect');
   const servicePrice = document.getElementById('servicePrice');
+  const productPrice = document.getElementById('productPrice');
   const toggle = document.getElementById('multiPaymentToggle');
+  const productToggle = document.getElementById('productToggle');
   const singleGroup = document.getElementById('singleMethodGroup');
   const multiGroup = document.getElementById('multiMethodGroup');
   const form = document.getElementById('paymentForm');
@@ -147,7 +165,7 @@
   function updatePrice() {
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
     const precio = selected.getAttribute('data-precio');
-    const precioFloat = parseFloat(precio).toFixed(2);
+    const precioFloat = Math.round(parseFloat(precio).toFixed(2));
     servicePrice.value = `$${precioFloat}`;
     amountSimple.value = precioFloat;
 
@@ -156,6 +174,20 @@
 
   updatePrice();
   serviceSelect.addEventListener('change', updatePrice);
+
+  function updateProductPrice() {
+    const selected = productSelect.options[productSelect.selectedIndex];
+    const precio = selected.getAttribute('data-precio');
+    if (precio !== null) {
+      const precioInt = Math.round(parseFloat(precio));
+      productPrice.value = `$${precioInt}`;
+    } else {
+      productPrice.value = '';
+    }
+  }
+
+  updateProductPrice(); 
+  productSelect.addEventListener('change', updateProductPrice);
 
   setTimeout(() => {
     const alerts = document.querySelectorAll('.alert');
@@ -195,7 +227,6 @@
       methodSimple.removeAttribute('name');
       methodMultiple.setAttribute('name', 'method1');
 
-      // 🔧 FIX AQUÍ
       amountSimple.removeAttribute('name');
       amountInput.setAttribute('name', 'amount1');
     } else {
@@ -206,7 +237,6 @@
       methodSimple.setAttribute('name', 'method1');
       updatePrice();
     
-      // 🔧 FIX AQUÍ
       amountInput.removeAttribute('name');
       amountSimple.setAttribute('name', 'amount1');
     }

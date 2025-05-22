@@ -31,15 +31,15 @@
       <td>{{ pago.fecha.strftime('%d/%m/%Y') }}</td>
       <td>{{ pago.empleado }}</td>
       <td>{{ pago.servicio }}</td>
-      <td>{{ pago.valor_servicio|int }}</td>
+      <td>${{ pago.valor_servicio|int }}</td>
       <td>{{ pago.porcentaje_empleado }}%</td>
-      <td>{{ pago.pago_empleado|int }}</td>
-      <td>{{ pago.pago_propietario|int }}</td>
+      <td>${{ pago.pago_empleado|int-pago.propina|int }}</td>
+      <td>${{ pago.pago_propietario|int }}</td>
       <td>{{ pago.metodo_pago1 }}</td>
-      <td>{{ pago.monto1|int }}</td>
+      <td>${{ pago.monto1|int }}</td>
       <td>{{ pago.metodo_pago2 or '' }}</td>
-      <td>{{ pago.monto2|int or '' }}</td>
-      <td>{{ pago.propina|int }}</td>
+      <td>${{ pago.monto2|int or '' }}</td>
+      <td>${{ pago.propina|int }}</td>
     </tr>
   {% endfor %}
   </tbody>

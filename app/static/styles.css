@@ -146,3 +146,11 @@ select {
   text-align: center;
   vertical-align: middle;
 }
+
+.checkbox-label {
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem; /* espacio entre el checkbox y el texto */
+  float: right;
+}

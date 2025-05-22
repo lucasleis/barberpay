@@ -74,6 +74,13 @@ def ensure_database_and_tables():
             name VARCHAR(100) NOT NULL,
             precio NUMERIC(10,2) NOT NULL
         );
+                
+        CREATE TABLE IF NOT EXISTS productos (
+            id SERIAL PRIMARY KEY,
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
+            name VARCHAR(100) NOT NULL,
+            precio NUMERIC(10,2) NOT NULL
+        );
 
         CREATE TABLE IF NOT EXISTS turnos (
             id SERIAL PRIMARY KEY,
