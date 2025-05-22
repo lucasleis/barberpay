@@ -27,6 +27,7 @@
     {% endfor %}
   </select>
 
+  <!-- Toggle Servicio o Producto -->
   <div id="toggleContainer" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
     <div style="flex: 1;">
       <input type="checkbox" class="btn-check" id="toggleServicio" autocomplete="off" checked>
@@ -57,7 +58,6 @@
     </div>
   </div>
 
-
   <!-- Selector de productos -->
   <div id="productSection">
     <div id="productSection" >
@@ -69,7 +69,19 @@
               {{ product.name }}
             </option>
           {% endfor %}
-        </select>  
+        </select>
+        <select id="productCant" style="width: 100px;">
+          <option value="1" selected>1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>        
         <input type="text" id="productPrice" disabled placeholder="$" style="width: 100px;">
       </div>
     </div>

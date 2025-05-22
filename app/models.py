@@ -48,6 +48,7 @@ class Appointment(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow)
     barber_id = db.Column(db.Integer, db.ForeignKey('barberos.id'))
     service_id = db.Column(db.Integer, db.ForeignKey('servicios.id'))
+    producto_id = db.Column(db.Integer, db.ForeignKey('productos.id'))
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
     barber = db.relationship('Empleado')
@@ -66,7 +67,7 @@ class Pago(db.Model):
     __tablename__ = 'pagos'
     
     id = db.Column(db.Integer, primary_key=True)
-    appointment_id = db.Column(db.Integer, db.ForeignKey('turnos.id'), nullable=False)
+    appointment_id = db.Column(db.Integer, db.ForeignKey('turnos.id'), nullable=False)      # en esta var guarda id de servicios y productos  
     
     payment_method1_id = db.Column(db.Integer, db.ForeignKey('metodos_pago.id'), nullable=False)
     payment_method2_id = db.Column(db.Integer, db.ForeignKey('metodos_pago.id'), nullable=True)

@@ -5,16 +5,18 @@
 
     - Productos:
         - Agregar a la tabla de pagos
+        - Agregar cantidad de stock que se agrega
 
     - Descuentos:
         - Agregar tabla descuentos
         - Agregar form en pagos
 
+    - Metodos de Pago:
+        - Agregar checkbox para vouchers (similar a multiples pagos)
+
     - Vouchers:
         - Agregar tabla vouchers
             - Debe tener id y cantidad (se va a ir restando cada vez) 
-
-    - Metodos de Pago:
 
     - Cierre Semanal:
         - Agregar que pueda elegir semana. inicia con el primer pago ingresado 
