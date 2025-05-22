@@ -27,7 +27,7 @@
     {% endfor %}
   </select>
 
-  <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+  <div id="toggleContainer" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
     <div style="flex: 1;">
       <input type="checkbox" class="btn-check" id="toggleServicio" autocomplete="off" checked>
       <label class="btn full-width" for="toggleServicio">Servicio</label>
@@ -37,6 +37,9 @@
       <label class="btn full-width" for="toggleProducto">Producto</label>
     </div>
   </div>
+  <p id="toggleError" class="text-danger mt-1" style="display: none;">
+    Debe seleccionar al menos "Servicio" o "Producto".
+  </p>                                                    
 
 
   <!-- Selector de servicio -->
@@ -178,31 +181,11 @@
 
   const tipoPagoRadios = document.querySelectorAll('input[name="tipo_pago"]');
 
-  /*
+  const servicioToggle = document.getElementById('toggleServicio');
+  const productoToggle = document.getElementById('toggleProducto');
+  const servicioSection = document.getElementById('servicioSection');
+  const productSection = document.getElementById('productSection');
 
-  function updateTipoPagoView() {
-    const selected = document.querySelector('input[name="tipo_pago"]:checked').value;
-    if (selected === 'servicio') {
-      servicioSection.style.display = 'block';
-      productSection.style.display = 'none';
-    } else if (selected === 'producto') {
-      servicioSection.style.display = 'none';
-      productSection.style.display = 'block';
-    } else {
-      servicioSection.style.display = 'block';
-      productSection.style.display = 'block';
-    }
-  }
-
-  // Inicializar
-  updateTipoPagoView();
-
-  // Escuchar cambios
-  tipoPagoRadios.forEach(radio => {
-    radio.addEventListener('change', updateTipoPagoView);
-  });
-
-  */
   
   function updatePrice() {
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
@@ -259,6 +242,21 @@
   });
 
   form.addEventListener('submit', function (e) {
+
+    const toggleError = document.getElementById('toggleError');
+    const toggleContainer = document.getElementById('toggleContainer');
+
+    // Validar que un button de Producto o Servicio esté seleccionado
+    if (!servicioToggle.checked && !productoToggle.checked) {
+      toggleError.style.display = 'block';
+      toggleContainer.classList.add('border', 'border-danger', 'rounded', 'p-2');
+      e.preventDefault();
+      return;
+    } else {
+      toggleError.style.display = 'none';
+      toggleContainer.classList.remove('border', 'border-danger', 'rounded', 'p-2');
+    }
+
     const amountSimple = document.getElementById('amountSimple');
     const amountInput = document.getElementById('amount1');
 
@@ -340,12 +338,6 @@
       repeatError.style.display = 'none';
     });
   });
-
-
-  const servicioToggle = document.getElementById('toggleServicio');
-  const productoToggle = document.getElementById('toggleProducto');
-  const servicioSection = document.getElementById('servicioSection');
-  const productSection = document.getElementById('productSection');
 
   function updateToggleSections() {
     servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
