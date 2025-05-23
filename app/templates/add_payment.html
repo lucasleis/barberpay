@@ -30,11 +30,11 @@
   <!-- Toggle Servicio o Producto -->
   <div id="toggleContainer" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
     <div style="flex: 1;">
-      <input type="checkbox" class="btn-check" id="toggleServicio" autocomplete="off" checked>
+      <input type="checkbox" class="btn-check" id="toggleServicio" name="toggleServicio" autocomplete="off" checked>
       <label class="btn full-width" for="toggleServicio">Servicio</label>
     </div>
     <div style="flex: 1;">
-      <input type="checkbox" class="btn-check" id="toggleProducto" autocomplete="off">
+      <input type="checkbox" class="btn-check" id="toggleProducto" name="toggleProducto" autocomplete="off">
       <label class="btn full-width" for="toggleProducto">Producto</label>
     </div>
   </div>
@@ -89,6 +89,9 @@
 
   <div style="display: flex; align-items: center; justify-content: space-between;">
       <label for="method">Método de pago:</label>
+      <label class="checkbox-label">
+        <input type="checkbox" id=""> ¿Usa cúpon de descuento?
+      </label>
       <label class="checkbox-label">
         <input type="checkbox" id="multiPaymentToggle"> ¿Usar múltiples métodos?
       </label>
@@ -150,6 +153,8 @@
     <tr>
       <th>Peluquero</th>
       <th>Servicio</th>
+      <th>Producto</th>
+      <th>Cantidad</th>
       <th>M. Pago </th>
       <th>Monto</th>
       <th>M. Pago</th>
@@ -162,6 +167,8 @@
     <tr>
       <td>{{ pago.appointment.barber.name }}</td>
       <td>{{ pago.appointment.service.name }}</td>
+      <td> Prueba</td>
+      <td> 0 </td>
       <td>{{ pago.method1.nombre }}</td>
       <td>${{ pago.amount_method1|int }}</td>
       <td>{{ pago.method2.nombre if pago.method2 else '-' }}</td>
@@ -177,6 +184,8 @@
   const serviceSelect = document.getElementById('serviceSelect');
   const servicePrice = document.getElementById('servicePrice');
   const productPrice = document.getElementById('productPrice');
+  const productCant = document.getElementById('productCant');
+  const productSelect = document.getElementById('productSelect');
   const toggle = document.getElementById('multiPaymentToggle');
   const productToggle = document.getElementById('productToggle');
   const singleGroup = document.getElementById('singleMethodGroup');
@@ -198,7 +207,9 @@
   const servicioSection = document.getElementById('servicioSection');
   const productSection = document.getElementById('productSection');
 
-  
+  console.log("productPrice: "+ productPrice.value)
+  console.log("productCant: "+ productCant.value)
+
   function updatePrice() {
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
     const precio = selected.getAttribute('data-precio');

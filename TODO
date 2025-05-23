@@ -1,11 +1,11 @@
 - Administrar:
-    - Empleados 
+    - Empleados:
 
     - Servicios: 
 
     - Productos:
         - Agregar a la tabla de pagos
-        - Agregar cantidad de stock que se agrega
+        - Manejar cantidad de stock 
 
     - Descuentos:
         - Agregar tabla descuentos
@@ -26,8 +26,7 @@
         - Agregar que pueda elegir dia. 
     
 - Pagos:
-    - Mostrar ultimos cortes guardados (diferenciar corte de propina)
     - Mostrar hora del pago
 
-- Testear
-    - Tiempos de carga. Puede ser que este tardando mucho al inicio del login
+- Testear:
+    - Tiempos de carga

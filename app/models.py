@@ -48,7 +48,7 @@ class Appointment(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow)
     barber_id = db.Column(db.Integer, db.ForeignKey('barberos.id'))
     service_id = db.Column(db.Integer, db.ForeignKey('servicios.id'))
-    producto_id = db.Column(db.Integer, db.ForeignKey('productos.id'))
+    productos_id = db.Column(db.Integer, db.ForeignKey('productos.id'))
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
     barber = db.relationship('Empleado')

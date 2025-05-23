@@ -89,6 +89,7 @@ def ensure_database_and_tables():
             barber_id INTEGER REFERENCES barberos(id),
             service_id INTEGER REFERENCES servicios(id),
             productos_id INTEGER REFERENCES productos(id),
+            cantidad INTEGER,
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
         );
 

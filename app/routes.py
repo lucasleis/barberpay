@@ -312,28 +312,34 @@ def add_payment():
     if request.method == 'POST':
         try:
             barber_id = request.form.get('barber_id')
+            if not (barber_id ):
+                raise ValueError("Faltan datos del peluquero o servicio.")
+            
             tip = float(request.form.get('tip') or 0.0)
-
-            # Deberia hacer 2 if. uno por cada uno que este seleccionado
             service_id = request.form.get('service_id')
             product_id = request.form.get('product_id')
             method1 = int(request.form.get('method1'))
             amount1 = float(request.form.get('amount1') or 0)
 
-            #if not (barber_id and service_id):
-            #    raise ValueError("Faltan datos del peluquero o servicio.")
-
-            if (service_id):
-                print("COMPRA SERVICIO")
-
-            if (product_id):
-                print("COMPRA PRODUCTO")
+            toggle_servicio = 'toggleServicio' in request.form
+            toggle_producto = 'toggleProducto' in request.form
             
-            appointment = Appointment(
-                barber_id=barber_id,
-                service_id=service_id,
-                peluqueria_id=salon_id
-            )
+            if toggle_producto:
+                # print("Toggle de Producto activado")
+                appointment = Appointment(
+                    barber_id=barber_id,
+                    productos_id=product_id,
+                    peluqueria_id=salon_id
+                )
+
+            if toggle_servicio:
+                # print("Toggle de Servicio activado")
+                appointment = Appointment(
+                    barber_id=barber_id,
+                    service_id=service_id,
+                    peluqueria_id=salon_id
+                )
+
             db.session.add(appointment)
             db.session.commit()
 
