@@ -27,6 +27,12 @@
     
 - Pagos:
     - Mostrar hora del pago
+    - Pueden comprar multiples productos en una compra. ej gel y shampu
+    - Agregar cupon de descuentos
+    - Agregar algo para que puedan poner un precio de corte diferente (para amigos)
+    - En venta de producto, los empleados se quedan con el 15%
+    - En color y mechas, los empleados se quedan con el 50%
 
 - Testear:
     - Tiempos de carga
+    - Vision mobile
