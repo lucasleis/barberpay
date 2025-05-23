@@ -3,7 +3,7 @@ from . import db
 from .models import Peluqueria, Empleado, Servicio, MetodoPago, Pago, Appointment, Producto
 from .auth import login_required
 from sqlalchemy.orm import aliased
-from datetime import timedelta
+from datetime import datetime, timedelta, time
 from collections import defaultdict
 
 # Funciones auxiliares
@@ -113,6 +113,98 @@ def get_cierre_semanal_data(salon_id):
         cierre_ordenado.append({
             "fecha_inicio": fecha_inicio,
             "fecha_cierre": fecha_cierre,
+            "pagos": pagos,
+            "totales": {
+                "monto_total": total_general,
+                "propietario_total": total_propietario,
+                "empleados": dict(total_empleados),
+                "metodos_pago": dict(total_metodos_pago),
+            }
+        })
+
+    return cierre_ordenado
+
+def get_cierre_entre_fechas_data(salon_id, fecha_inicio_str, fecha_final_str):
+    MetodoPago1 = aliased(MetodoPago)
+    MetodoPago2 = aliased(MetodoPago)
+
+    # Convertir strings a objetos datetime.date
+    fecha_inicio = datetime.combine(datetime.strptime(fecha_inicio_str, "%Y-%m-%d"), time.min)  # 00:00:00
+    fecha_final = datetime.combine(datetime.strptime(fecha_final_str, "%Y-%m-%d"), time.max)    # 23:59:59.999999
+
+    pagos_query = (
+        Pago.query
+        .join(Pago.appointment)
+        .join(Appointment.barber)
+        .join(Appointment.service)
+        .join(MetodoPago1, Pago.payment_method1_id == MetodoPago1.id)
+        .outerjoin(MetodoPago2, Pago.payment_method2_id == MetodoPago2.id)
+        .filter(
+            Pago.peluqueria_id == salon_id,
+            Pago.date >= fecha_inicio,
+            Pago.date <= fecha_final
+        )
+        .order_by(Pago.date.desc())
+        .add_entity(MetodoPago1)
+        .add_entity(MetodoPago2)
+        .all()
+    )
+
+    pagos_por_semana = defaultdict(list)
+
+    for pago, method1, method2 in pagos_query:
+        appointment = pago.appointment
+        barber = appointment.barber
+        service = appointment.service
+
+        valor_servicio = float(service.precio)
+        porcentaje_empleado = barber.porcentaje
+        pago_empleado = valor_servicio * (porcentaje_empleado / 100)
+        propina = float(pago.amount_tip or 0)
+        pago_empleado_con_propina = pago_empleado + propina
+        pago_propietario = valor_servicio - pago_empleado
+
+        fecha_pago = pago.date.date()
+        cierre_semana = fecha_pago + timedelta(days=(6 - fecha_pago.weekday()))
+
+        pagos_por_semana[cierre_semana].append({
+            "fecha": fecha_pago,
+            "empleado": barber.name,
+            "servicio": service.name,
+            "valor_servicio": valor_servicio,
+            "porcentaje_empleado": porcentaje_empleado,
+            "pago_empleado": pago_empleado_con_propina,
+            "pago_propietario": pago_propietario,
+            "metodo_pago1": method1.nombre if method1 else None,
+            "monto1": float(pago.amount_method1),
+            "metodo_pago2": method2.nombre if method2 else None,
+            "monto2": float(pago.amount_method2 or 0),
+            "propina": propina,
+        })
+
+    cierre_ordenado = []
+
+    for fecha_cierre, pagos in sorted(pagos_por_semana.items(), reverse=True):
+        total_general = 0
+        total_propietario = 0
+        total_empleados = defaultdict(lambda: {"monto": 0, "cortes": 0})
+        total_metodos_pago = defaultdict(float)
+
+        for p in pagos:
+            total_general += p["valor_servicio"] + p["propina"]
+            total_propietario += p["pago_propietario"]
+
+            total_empleados[p["empleado"]]["monto"] += p["pago_empleado"]
+            total_empleados[p["empleado"]]["cortes"] += 1
+
+            if p["metodo_pago1"]:
+                total_metodos_pago[p["metodo_pago1"]] += p["monto1"]
+            if p["metodo_pago2"]:
+                total_metodos_pago[p["metodo_pago2"]] += p["monto2"]
+
+        cierre_ordenado.append({
+            "fecha_inicio": fecha_inicio,
+            "fecha_cierre": fecha_final,
             "pagos": pagos,
             "totales": {
                 "monto_total": total_general,
@@ -380,10 +472,11 @@ def add_payment():
 
 
 ### Cierres ###
-
+"""
 @app.route('/cierre/semanal')
 def show_cierre_semanal():
     return render_template('cierre_semanal.html')
+"""
 
 @app.route("/cierre_semanal")
 def cierre_semanal():
@@ -399,4 +492,24 @@ def cierre_semanal():
     semanas_cierre = get_cierre_semanal_data(salon_id)
     return render_template("cierre_semanal.html", semanas=semanas_cierre)
 
+@app.route("/cierres")
+def cierre_entre_dias():
+    session['salon_id'] = 1
+    raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
+
+    try:
+        salon_id = int(str(raw_salon_id).strip("{} "))
+    except (ValueError, TypeError):
+        flash("ID de peluquería inválido.", "danger")
+        return redirect(url_for("index"))
+
+    fecha_inicio = request.args.get("fechaInicio")
+    fecha_final = request.args.get("fechaFinal")
+
+    if fecha_inicio and fecha_final:
+        semanas = get_cierre_entre_fechas_data(salon_id, fecha_inicio, fecha_final)
+    else:
+        semanas = get_cierre_semanal_data(salon_id)
+
+    return render_template("cierre_entre_dias.html", semanas=semanas)  
 

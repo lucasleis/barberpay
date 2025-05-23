@@ -1,0 +1,90 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='cierre_entre_dias.css') }}">
+
+<h3>Cierre Semanal</h3>
+
+<form method="get" action="{{ url_for('cierre_entre_dias') }}" class="form-fechas">
+  <label for="fechaInicio">Seleccionar fecha:</label>
+  <span class="rango-fechas">
+    Desde
+    <input type="date" name="fechaInicio" id="fechaInicio"
+           value="{{ request.args.get('fechaInicio', '') }}">
+    hasta
+    <input type="date" name="fechaFinal" id="fechaFinal"
+           value="{{ request.args.get('fechaFinal', '') }}">
+  </span>
+
+  <button type="submit" class="boton-cierre">Ver cierre</button>
+</form>
+
+
+{% for semana in semanas %}
+  <h5>Cierre: {{ semana.fecha_inicio.strftime('%d/%m/%Y') }} - {{ semana.fecha_cierre.strftime('%d/%m/%Y') }}</h5>
+
+  <table class="table table-striped table-bordered text-center" style="margin-top: 1rem;">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Empleado</th>
+        <th>Servicio</th>
+        <th>Valor Servicio</th>
+        <th>% Empleado</th>
+        <th>$ Empleado</th>
+        <th>$ Propietario</th>
+        <th>M. de Pago 1</th>
+        <th>Monto</th>
+        <th>M. de Pago 2</th>
+        <th>Monto</th>
+        <th>Propina</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for pago in semana.pagos %}
+      <tr>
+        <td>{{ pago.fecha.strftime('%d/%m/%Y') }}</td>
+        <td>{{ pago.empleado }}</td>
+        <td>{{ pago.servicio }}</td>
+        <td>${{ pago.valor_servicio|int }}</td>
+        <td>{{ pago.porcentaje_empleado }}%</td>
+        <td>${{ pago.pago_empleado|int-pago.propina|int }}</td>
+        <td>${{ pago.pago_propietario|int }}</td>
+        <td>{{ pago.metodo_pago1 }}</td>
+        <td>${{ pago.monto1|int }}</td>
+        <td>{{ pago.metodo_pago2 or '' }}</td>
+        <td>${{ pago.monto2|int or '' }}</td>
+        <td>${{ pago.propina|int }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+
+  <!-- Totales por semana -->
+  <div class="semana-cierre">
+    <div class="totales-generales">
+      <div><strong>Total general:</strong> ${{ semana.totales.monto_total|int }}</div>
+      <div><strong>Total propietario:</strong> ${{ semana.totales.propietario_total|int }}</div>
+    </div>
+    
+    <h6>Totales por empleado:</h6>
+    <ul class="lista-totales">
+      {% for nombre, datos in semana.totales.empleados.items() %}
+        <li><strong>{{ nombre }}</strong>: ${{ datos.monto|int }} ({{ datos.cortes }} cortes)</li>
+      {% endfor %}
+    </ul>
+    
+    <h6>Totales por método de pago:</h6>
+    <ul class="lista-totales">
+      {% for metodo, monto in semana.totales.metodos_pago.items() %}
+        <li>{{ metodo }}: ${{ monto|int }}</li>
+      {% endfor %}
+    </ul>
+    
+    <div class="separador"></div>
+  </div>
+  <hr>
+{% endfor %}
+
+{% endblock %}

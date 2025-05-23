@@ -50,35 +50,33 @@
 
   .form-fechas {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 12px;
     padding: 16px;
-    background-color: #ffffff;
+    background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     flex-wrap: wrap;
+    gap: 12px;
   }
 
-  .form-fechas label {
+  .rango-fechas {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
     font-weight: 500;
-    margin-right: 8px;
-    white-space: nowrap;
   }
 
-  .form-fechas input[type="date"] {
+  .rango-fechas input[type="date"] {
     padding: 6px 10px;
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 14px;
-    transition: border-color 0.3s;
   }
 
-  .form-fechas input[type="date"]:focus {
-    border-color: #66afe9;
-    outline: none;
-  }
-
-  .form-fechas button {
+  .boton-cierre {
+    margin-left: auto;
     padding: 6px 16px;
     border: none;
     background-color: #28a745;
@@ -89,7 +87,6 @@
     transition: background-color 0.3s;
   }
 
-  .form-fechas button:hover {
+  .boton-cierre:hover {
     background-color: #218838;
   }
-
