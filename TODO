@@ -4,7 +4,7 @@
     - Servicios: 
 
     - Productos:
-        - Manejar cantidad de stock 
+        - Almacenar cantidad de stock
 
     - Descuentos:
         - Agregar tabla descuentos
@@ -18,13 +18,14 @@
             - Debe tener id y cantidad (se va a ir restando cada vez) 
         - Hacer que no se cobre cuando se usa
 
-    - Cierre Semanal:
-        - Agregar que pueda elegir semana. inicia con el primer pago ingresado 
+    - Cierre:
+        - arreglar cuentas (Totales por método de pago)
+        - Desglosar total por empleado
 
-    - Cierre Diario:
-        - intentar reutilizar el cierre semanal
-        - Agregar que pueda elegir dia. 
-    
+- Errores:
+    - si quiero borrar algun servicio/empleado/producto y fue usado genera error
+
+
 - Pagos:
     - Mostrar hora del pago
     - Pueden comprar multiples productos en una compra. ej gel y shampu
@@ -32,6 +33,8 @@
     - Agregar algo para que puedan poner un precio de corte diferente (para amigos)
     - En venta de producto, los empleados se quedan con el 15%
     - En color y mechas, los empleados se quedan con el 50%
+    - Permitir borrar pagos
+    - Descontar cantidad en stock
 
 - Testear:
     - Tiempos de carga

@@ -1,16 +1,24 @@
 {% extends "layout.html" %}
 
 {% block head %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='services.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='products.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-  <h2>Servicios</h2>
+  <h2>Productos</h2>
 
   <form method="POST" action="{{ url_for('add_product') }}" class="service-form">
-    <input type="text" name="name" placeholder="Nombre del producto" required>
-    <input type="number" name="precio" step="0.01" placeholder="Precio ($)" required>
+    <div class="nombre-cantidad">
+      <input type="text" name="name" placeholder="Nombre del producto" required>
+      <select id="productCant" name="cantidad">
+        {% for i in range(1, 11) %}
+          <option value="{{ i }}">{{ i }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  
+    <input type="number" name="precio" step="1" placeholder="Precio ($)" required>
     <button type="submit">Agregar producto</button>
   </form>
 
