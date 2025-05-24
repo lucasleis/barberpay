@@ -157,25 +157,121 @@ select {
 
 
 .btn-check {
-    display: none;
-  }
+  display: none;
+}
 
-  .btn {
+.btn {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  color: black;
+  background-color: white;
+  text-align: center;
+  border-radius: 4px;
+  cursor: pointer;
+  display: block;
+}
+
+.btn.full-width {
+  width: 100%;
+}
+
+.btn-check:checked + .btn {
+  background-color: black;
+  color: white;
+}
+
+.table .btn-danger {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.table .btn-danger:hover {
+    background-color: #c82333;
+}
+
+.table td form {
+    margin: 0;
+}
+
+.table td {
     padding: 0.5rem;
-    border: 1px solid #ccc;
-    color: black;
-    background-color: white;
+}
+
+.table th, .table td {
+    vertical-align: middle;
+}
+
+.btn-sm {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.5rem;
+    line-height: 1;
+}
+
+/* Centrar botón dentro de la celda */
+td.borrar-pago {
     text-align: center;
-    border-radius: 4px;
-    cursor: pointer;
-    display: block;
-  }
+    padding: 0.5rem;
+    background-color: transparent;
+}
 
-  .btn.full-width {
-    width: 100%;
-  }
+/* Formulario sin márgenes ni relleno extra */
+td.borrar-pago form {
+    margin: 0;
+    display: inline-block;
+}
 
-  .btn-check:checked + .btn {
-    background-color: black;
+/* Botón ícono más prolijo */
+.btn-danger {
+    background-color: #dc3545;
     color: white;
-  }
+    border: none;
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+th.borrar-pago,
+td.borrar-pago {
+    width: 80px;
+}
+
+/* Celda: sin fondo ni borde */
+td.borrar-pago {
+    text-align: center;
+    padding: 0.5rem;
+    background-color: transparent !important;
+}
+
+/* Formulario inline sin fondo ni borde */
+td.borrar-pago form {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* Botón: sin borde ni sombra */
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}

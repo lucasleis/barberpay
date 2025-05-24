@@ -139,7 +139,7 @@
   </div>
 </form>
 
-<h3>Últimos 10 pagos</h3>
+<h3>Pagos Hoy</h3>
 
 <table class="table table-striped table-bordered text-center" style="margin-top: 1rem;">
   <thead>
@@ -155,6 +155,7 @@
       <th>Monto</th>
       <th>Propina</th>
       <th>Monto Total</th>
+      <th>Borrar Pago</th>
     </tr>
   </thead>
   {% for pago in pagos %}
@@ -170,6 +171,11 @@
       <td>${{ pago.amount_method2|int }}</td>
       <td>${{ pago.amount_tip|int }}</td>
       <td>${{ pago.amount_method1|int + pago.amount_method2|int + pago.amount_tip|int }}</td>
+      <td class="borrar-pago">
+        <form method="POST" action="/ruta">
+          <button type="submit" class="btn btn-danger" title="Eliminar">🗑️</button>
+        </form>
+      </td>
     </tr>
   {% endfor %}
 </table>
