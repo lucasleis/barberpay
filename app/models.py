@@ -32,6 +32,7 @@ class Servicio(db.Model):
     name = db.Column(db.String(100), nullable=False)
     precio = db.Column(db.Float, nullable=False)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
+    active = db.Column(db.Boolean, default=True)
 
 
 class Producto(db.Model):
@@ -39,7 +40,9 @@ class Producto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     precio = db.Column(db.Float, nullable=False)
+    cantidad = db.Column(db.Integer, nullable=False)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
+    active = db.Column(db.Boolean, default=True)
 
 
 class Appointment(db.Model):
@@ -61,6 +64,7 @@ class MetodoPago(db.Model):
     nombre = db.Column(db.String(50), unique=True, nullable=False)
     active = db.Column(db.Boolean, default=True)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
+    active = db.Column(db.Boolean, default=True)
 
 
 class Pago(db.Model):

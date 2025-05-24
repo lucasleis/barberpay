@@ -4,7 +4,7 @@
     - Servicios: 
 
     - Productos:
-        - Almacenar cantidad de stock
+        - Al momento de comprar que valide cantidad
 
     - Descuentos:
         - Agregar tabla descuentos
@@ -19,7 +19,7 @@
         - Hacer que no se cobre cuando se usa
 
     - Cierre:
-        - arreglar cuentas (Totales por método de pago)
+        - Arreglar cuentas (Totales por método de pago)
         - Desglosar total por empleado
 
 - Errores:
@@ -27,7 +27,6 @@
 
 
 - Pagos:
-    - Mostrar hora del pago
     - Pueden comprar multiples productos en una compra. ej gel y shampu
     - Agregar cupon de descuentos
     - Agregar algo para que puedan poner un precio de corte diferente (para amigos)

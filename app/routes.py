@@ -257,6 +257,9 @@ def dashboard():
     else:
         return redirect(url_for("login"))
 
+
+### Empleados ###
+
 @app.route('/admin/barbers')
 def list_barbers():
     if "user" in session:
@@ -290,6 +293,9 @@ def delete_barber(id):
     else:
         return redirect(url_for("login"))
 
+
+### Servicios ###
+
 @app.route('/admin/services')
 def list_services():
     if "user" in session:
@@ -321,6 +327,9 @@ def delete_service(id):
     else:
         return redirect(url_for("login"))
 
+
+### Productos ###
+
 @app.route('/admin/products')
 def list_products():
     if "user" in session:
@@ -336,7 +345,8 @@ def add_product():
         name = request.form['name']
         precio = float(request.form['precio'])
         salon_id = session.get('salon_id')
-        db.session.add(Producto(name=name, precio=precio, peluqueria_id=salon_id))
+        cantidad = int(request.form['cantidad'])
+        db.session.add(Producto(name=name, precio=precio, peluqueria_id=salon_id,cantidad=cantidad))
         db.session.commit()
         return redirect(url_for('list_products'))
     else:
@@ -352,6 +362,8 @@ def delete_product(id):
     else:
         return redirect(url_for("login"))
 
+
+### Metodos de Pago ###
 
 @app.route('/admin/payment_methods')
 def list_payment_methods():
@@ -385,7 +397,7 @@ def delete_payment_method(id):
         return redirect(url_for("login"))
 
 
-### Peluqueros ###
+### Pagos ###
 
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():

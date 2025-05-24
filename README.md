@@ -41,6 +41,11 @@ SELECT * FROM empleados;
 INSERT INTO peluquerias (id, nombre) VALUES (1, 'Peluquería Central');
 ```
 
+6. Borrar database
+```
+DROP DATABASE peluqueria_db ;
+```
+
 6. Salir de psql
 ```
 \q

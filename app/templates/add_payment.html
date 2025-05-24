@@ -144,6 +144,7 @@
 <table class="table table-striped table-bordered text-center" style="margin-top: 1rem;">
   <thead>
     <tr>
+      <th>Hora</th>
       <th>Peluquero</th>
       <th>Servicio</th>
       <th>Producto</th>
@@ -158,6 +159,7 @@
   </thead>
   {% for pago in pagos %}
     <tr>
+      <td>{{ pago.date.strftime('%H:%M') }}</td>
       <td>{{ pago.appointment.barber.name }}</td>
       <td>{{ pago.appointment.service.name }}</td>
       <td> Prueba</td>
