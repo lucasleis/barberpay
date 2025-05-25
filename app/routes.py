@@ -74,7 +74,7 @@ def get_payment_page_data(salon_id):
         pagos_data.append(pago)
 
     barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
-    services = Servicio.query.filter_by(peluqueria_id=salon_id).all()
+    services = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
     methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
 
     return pagos_data, barbers, services, methods
@@ -341,7 +341,7 @@ def delete_barber(id):
 def list_services():
     if "user" in session:
         salon_id = session.get('salon_id')
-        services = Servicio.query.filter_by(peluqueria_id=salon_id).all()
+        services = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
         return render_template('services.html', services=services)
     else:
         return redirect(url_for("login"))
@@ -362,7 +362,8 @@ def add_service():
 def delete_service(id):
     if "user" in session:
         service = Servicio.query.get(id)
-        db.session.delete(service)
+        service.active = False
+        # db.session.delete(service)
         db.session.commit()
         return redirect(url_for('list_services'))
     else:
@@ -375,7 +376,7 @@ def delete_service(id):
 def list_products():
     if "user" in session:
         salon_id = session.get('salon_id')
-        products = Producto.query.filter_by(peluqueria_id=salon_id).all()
+        products = Producto.query.filter_by(active=True, peluqueria_id=salon_id).all()
         return render_template('products.html', products=products)
     else:
         return redirect(url_for("login"))
@@ -397,7 +398,8 @@ def add_product():
 def delete_product(id):
     if "user" in session:
         product = Producto.query.get(id)
-        db.session.delete(product)
+        product.active = False
+        # db.session.delete(product)
         db.session.commit()
         return redirect(url_for('list_products'))
     else:
@@ -418,7 +420,6 @@ def list_payment_methods():
 @app.route('/admin/payment_methods/add', methods=['POST'])
 def add_payment_method():
     if "user" in session:
-        print(request.form) 
         nombre = request.form['nombre']
         salon_id = session.get('salon_id')
         db.session.add(MetodoPago(nombre=nombre, peluqueria_id=salon_id))
@@ -431,7 +432,8 @@ def add_payment_method():
 def delete_payment_method(id):
     if "user" in session:
         method = MetodoPago.query.get(id)
-        db.session.delete(method)
+        method.active = False
+        # db.session.delete(method)
         db.session.commit()
         return redirect(url_for('list_payment_methods'))
     else:
@@ -452,7 +454,7 @@ def add_payment():
         return redirect(url_for("index"))
 
     pagos_data, barbers, services, methods = get_payment_page_data(salon_id)
-    products = Producto.query.filter_by(peluqueria_id=salon_id).all()
+    products = Producto.query.filter_by(active=True, peluqueria_id=salon_id).all()
 
     if request.method == 'POST':
         try:

@@ -64,7 +64,7 @@ def ensure_database_and_tables():
         CREATE TABLE IF NOT EXISTS metodos_pago (
             id SERIAL PRIMARY KEY,
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
-            nombre VARCHAR(50) UNIQUE NOT NULL,
+            nombre VARCHAR(50) NOT NULL,
             active BOOLEAN DEFAULT TRUE
         );
 
