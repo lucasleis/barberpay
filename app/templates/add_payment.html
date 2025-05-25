@@ -58,36 +58,41 @@
     </div>
   </div>
 
+
   <!-- Selector de productos -->
   <div id="productSection">
-    <div id="productSection" >
+    <div class="productRow">
       <label for="product_id">Producto:</label>
       <div style="display: flex; gap: 1rem;">
-        <select name="product_id" id="productSelect">
+        <select name="product_id" class="productSelect">
           {% for product in products %}
             <option value="{{ product.id }}" data-precio="{{ product.precio }}">
               {{ product.name }}
             </option>
           {% endfor %}
         </select>
-        <select id="productCant" name="cantidad" style="width: 100px;">
+        <select class="productCant" name="cantidad" style="width: 100px;">
           {% for i in range(1, 11) %}
             <option value="{{ i }}">{{ i }}</option>
           {% endfor %}
         </select>       
-        <input type="text" id="productPrice" disabled placeholder="$" style="width: 100px;">
+        <input type="text" class="productPrice" disabled placeholder="$" style="width: 100px;">
+        <button type="button" class="addProductBtn">+</button>
+        <button type="button" class="removeProductBtn">−</button>
       </div>
     </div>
   </div>
+  <p id="messageContainer" class="error-msg" style="display: none; color: red; font-size: 0.9rem;"></p>
 
+  <!-- Metodo de Pago -->
   <div style="display: flex; align-items: center; justify-content: space-between;">
-      <label for="method">Método de pago:</label>
-      <label class="checkbox-label">
-        <input type="checkbox" id=""> ¿Usa cúpon de descuento?
-      </label>
-      <label class="checkbox-label">
-        <input type="checkbox" id="multiPaymentToggle"> ¿Usar múltiples métodos?
-      </label>
+    <label for="method">Método de pago:</label>
+    <label class="checkbox-label">
+      <input type="checkbox" id=""> ¿Usa voucher?
+    </label>
+    <label class="checkbox-label">
+      <input type="checkbox" id="multiPaymentToggle"> ¿Usar múltiples métodos?
+    </label>
   </div>
 
   <!-- Modo simple -->
@@ -117,7 +122,7 @@
           <option value="{{ method.id }}">{{ method.nombre }}</option>
         {% endfor %}
       </select>
-      <input type="number" name="amount2" id="amount2" step="100" placeholder="Monto $">
+      <input type="number" name="amount2" id="amount2" step="1" placeholder="Monto $">
     </div>
 
     <!-- Mensajes de error -->
@@ -184,9 +189,6 @@
 <script>
   const serviceSelect = document.getElementById('serviceSelect');
   const servicePrice = document.getElementById('servicePrice');
-  const productPrice = document.getElementById('productPrice');
-  const productCant = document.getElementById('productCant');
-  const productSelect = document.getElementById('productSelect');
   const toggle = document.getElementById('multiPaymentToggle');
   const productToggle = document.getElementById('productToggle');
   const singleGroup = document.getElementById('singleMethodGroup');
@@ -208,8 +210,8 @@
   const servicioSection = document.getElementById('servicioSection');
   const productSection = document.getElementById('productSection');
 
-  console.log("productPrice: "+ productPrice.value)
-  console.log("productCant: "+ productCant.value)
+  // console.log("productPrice: "+ productPrice.value)
+  // console.log("productCant: "+ productCant.value)
 
   function updatePrice() {
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
@@ -223,20 +225,6 @@
 
   updatePrice();
   serviceSelect.addEventListener('change', updatePrice);
-
-  function updateProductPrice() {
-    const selected = productSelect.options[productSelect.selectedIndex];
-    const precio = selected.getAttribute('data-precio');
-    if (precio !== null) {
-      const precioInt = Math.round(parseFloat(precio));
-      productPrice.value = `$${precioInt}`;
-    } else {
-      productPrice.value = '';
-    }
-  }
-
-  updateProductPrice(); 
-  productSelect.addEventListener('change', updateProductPrice);
 
   setTimeout(() => {
     const alerts = document.querySelectorAll('.alert');
@@ -375,6 +363,67 @@
   servicioToggle.addEventListener('change', updateToggleSections);
   productoToggle.addEventListener('change', updateToggleSections);
 
+document.addEventListener('DOMContentLoaded', function () {
+  const productSection = document.getElementById('productSection');
+
+function updatePrice(row) {
+  const precio = parseFloat(row.querySelector('.productSelect').selectedOptions[0].dataset.precio || 0);
+  const cantidad = parseInt(row.querySelector('.productCant').value || 1);
+  const total = precio * cantidad;
+  row.querySelector('.productPrice').value = `$${Math.round(total)}`;
+}
+
+  // Evento para agregar productos
+productSection.addEventListener('click', function (e) {
+  if (e.target.classList.contains('addProductBtn')) {
+    const currentRow = e.target.closest('.productRow');
+    const newRow = currentRow.cloneNode(true);
+
+    newRow.querySelector('.productSelect').selectedIndex = 0;
+    newRow.querySelector('.productCant').selectedIndex = 0;
+    newRow.querySelector('.productPrice').value = '';
+    productSection.appendChild(newRow);
+
+    // Calcular precio para la nueva fila
+    updatePrice(newRow);
+
+    const messageContainer = document.getElementById('messageContainer');
+    messageContainer.style.display = 'none';
+    messageContainer.textContent = '';
+  }
+});
+
+  // Evento para recalcular precios cuando se cambia un valor
+  productSection.addEventListener('change', function (e) {
+    if (e.target.classList.contains('productSelect') || e.target.classList.contains('productCant')) {
+      const row = e.target.closest('.productRow');
+      updatePrice(row);
+    }
+  });
+
+  // Calcular precio inicial para cada fila ya presente (por ejemplo, la primera)
+  document.querySelectorAll('.productRow').forEach(row => {
+    updatePrice(row);
+  });
+});
+
+document.addEventListener('click', function (e) {
+  if (e.target.classList.contains('removeProductBtn')) {
+    const row = e.target.closest('.productRow');
+    const rows = document.querySelectorAll('.productRow');
+
+    const messageContainer = document.getElementById('messageContainer');
+
+    if (rows.length > 1) {
+      row.remove();
+      messageContainer.style.display = 'none';
+      messageContainer.textContent = '';
+    } else {
+      messageContainer.style.display = 'block';
+      messageContainer.textContent = 'Debe haber al menos un producto.';
+    }
+  }
+});
 
 </script>
 

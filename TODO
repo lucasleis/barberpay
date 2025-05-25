@@ -4,7 +4,9 @@
     - Servicios: 
 
     - Productos:
-        - Al momento de comprar que valide cantidad
+        - Al momento de comprar que valide cantidad (preguntar si quiere cantidad o solo que este la opcion)
+        - Arreglar boton de + y -
+        - Analizar como mostrar en los pagos de hoy
 
     - Descuentos:
         - Agregar tabla descuentos
@@ -14,6 +16,7 @@
         - Agregar checkbox para vouchers (similar a multiples pagos)
 
     - Vouchers:
+        - Desarrollar todo
         - Agregar tabla vouchers
             - Debe tener id y cantidad (se va a ir restando cada vez) 
         - Hacer que no se cobre cuando se usa
@@ -23,16 +26,15 @@
         - Desglosar total por empleado
 
 - Errores:
+    - Que todos tengan el mismo formato 
 
 
 - Pagos:
-    - Pueden comprar multiples productos en una compra. ej gel y shampu
-    - Agregar cupon de descuentos
+    - Agregar cupon de descuentos 
     - Agregar algo para que puedan poner un precio de corte diferente (para amigos)
     - En venta de producto, los empleados se quedan con el 15%
     - En color y mechas, los empleados se quedan con el 50%
     - Descontar cantidad en stock
-    - Arreglar css del grid (borrar pago)
 
 - Testear:
     - Tiempos de carga

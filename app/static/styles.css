@@ -275,3 +275,17 @@ td.borrar-pago form {
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
 }
+
+.addProductBtn {
+    padding: 0.5rem;
+    height: 100%;
+    border-radius: 4px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.addProductBtn:hover {
+    background-color: #218838;
+}
