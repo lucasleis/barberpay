@@ -1,7 +1,16 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from backports.zoneinfo import ZoneInfo
+
+
 
 db = SQLAlchemy()
+
+### Funciones Auxiliares
+
+def now_buenos_aires():
+    return datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
+
 
 class Peluqueria(db.Model):
     __tablename__ = 'peluquerias'
@@ -48,7 +57,7 @@ class Producto(db.Model):
 class Appointment(db.Model):
     __tablename__ = 'turnos'
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, default=datetime.utcnow)
+    date = db.Column(db.DateTime, default=now_buenos_aires)
     barber_id = db.Column(db.Integer, db.ForeignKey('barberos.id'))
     service_id = db.Column(db.Integer, db.ForeignKey('servicios.id'))
     productos_id = db.Column(db.Integer, db.ForeignKey('productos.id'))
@@ -80,7 +89,7 @@ class Pago(db.Model):
     amount_method2 = db.Column(db.Float, nullable=False)
     amount_tip = db.Column(db.Float, nullable=True)
     
-    date = db.Column(db.DateTime, default=datetime.utcnow)
+    date = db.Column(db.DateTime, default=now_buenos_aires)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
     # Relaciones
@@ -88,3 +97,15 @@ class Pago(db.Model):
     method1 = db.relationship('MetodoPago', foreign_keys=[payment_method1_id])
     method2 = db.relationship('MetodoPago', foreign_keys=[payment_method2_id])
 
+
+class Voucher(db.Model):
+    __tablename__ = 'vouchers'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
+    cantidad = db.Column(db.Integer, nullable=False)
+    creado_en = db.Column(db.DateTime(timezone=True), default=now_buenos_aires)
+    # valido_hasta = db.Column(db.DateTime(timezone=True))
+    canjeado = db.Column(db.Boolean, default=False)
+
+    peluqueria = db.relationship('Peluqueria', backref=db.backref('vouchers', lazy=True))

@@ -52,6 +52,8 @@ def ensure_database_and_tables():
             direccion TEXT,
             telefono VARCHAR(20)
         );
+                
+        ALTER DATABASE peluqueria_db SET TIMEZONE TO 'America/Argentina/Buenos_Aires';
 
         CREATE TABLE IF NOT EXISTS barberos (
             id SERIAL PRIMARY KEY,
@@ -87,7 +89,7 @@ def ensure_database_and_tables():
 
         CREATE TABLE IF NOT EXISTS turnos (
             id SERIAL PRIMARY KEY,
-            date TIMESTAMP NOT NULL DEFAULT NOW(),
+            date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
             barber_id INTEGER REFERENCES barberos(id),
             service_id INTEGER REFERENCES servicios(id),
             productos_id INTEGER REFERENCES productos(id),
@@ -104,9 +106,19 @@ def ensure_database_and_tables():
             amount_method2 NUMERIC(10,2),
             amount_tip NUMERIC(10,2),
             cantidad INTEGER, 
-            date TIMESTAMP NOT NULL DEFAULT NOW(),
+            date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
         );
+                
+        CREATE TABLE IF NOT EXISTS vouchers (
+            id SERIAL PRIMARY KEY,
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
+            cantidad INTEGER NOT NULL CHECK (cantidad > 0),
+            creado_en TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            valido_hasta TIMESTAMP WITH TIME ZONE,
+            canjeado BOOLEAN DEFAULT FALSE
+        );
+
     """)
     conn.commit()
     cur.close()

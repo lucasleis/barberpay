@@ -363,67 +363,67 @@
   servicioToggle.addEventListener('change', updateToggleSections);
   productoToggle.addEventListener('change', updateToggleSections);
 
-document.addEventListener('DOMContentLoaded', function () {
-  const productSection = document.getElementById('productSection');
+  document.addEventListener('DOMContentLoaded', function () {
+    const productSection = document.getElementById('productSection');
 
-function updatePrice(row) {
-  const precio = parseFloat(row.querySelector('.productSelect').selectedOptions[0].dataset.precio || 0);
-  const cantidad = parseInt(row.querySelector('.productCant').value || 1);
-  const total = precio * cantidad;
-  row.querySelector('.productPrice').value = `$${Math.round(total)}`;
-}
+    function updatePrice(row) {
+      const precio = parseFloat(row.querySelector('.productSelect').selectedOptions[0].dataset.precio || 0);
+      const cantidad = parseInt(row.querySelector('.productCant').value || 1);
+      const total = precio * cantidad;
+      row.querySelector('.productPrice').value = `$${Math.round(total)}`;
+    }
 
-  // Evento para agregar productos
-productSection.addEventListener('click', function (e) {
-  if (e.target.classList.contains('addProductBtn')) {
-    const currentRow = e.target.closest('.productRow');
-    const newRow = currentRow.cloneNode(true);
+    // Evento para agregar productos
+    productSection.addEventListener('click', function (e) {
+      if (e.target.classList.contains('addProductBtn')) {
+        const currentRow = e.target.closest('.productRow');
+        const newRow = currentRow.cloneNode(true);
 
-    newRow.querySelector('.productSelect').selectedIndex = 0;
-    newRow.querySelector('.productCant').selectedIndex = 0;
-    newRow.querySelector('.productPrice').value = '';
-    productSection.appendChild(newRow);
+        newRow.querySelector('.productSelect').selectedIndex = 0;
+        newRow.querySelector('.productCant').selectedIndex = 0;
+        newRow.querySelector('.productPrice').value = '';
+        productSection.appendChild(newRow);
 
-    // Calcular precio para la nueva fila
-    updatePrice(newRow);
+        // Calcular precio para la nueva fila
+        updatePrice(newRow);
 
-    const messageContainer = document.getElementById('messageContainer');
-    messageContainer.style.display = 'none';
-    messageContainer.textContent = '';
-  }
-});
+        const messageContainer = document.getElementById('messageContainer');
+        messageContainer.style.display = 'none';
+        messageContainer.textContent = '';
+      }
+    });
 
-  // Evento para recalcular precios cuando se cambia un valor
-  productSection.addEventListener('change', function (e) {
-    if (e.target.classList.contains('productSelect') || e.target.classList.contains('productCant')) {
-      const row = e.target.closest('.productRow');
+    // Evento para recalcular precios cuando se cambia un valor
+    productSection.addEventListener('change', function (e) {
+      if (e.target.classList.contains('productSelect') || e.target.classList.contains('productCant')) {
+        const row = e.target.closest('.productRow');
+        updatePrice(row);
+      }
+    });
+
+    // Calcular precio inicial para cada fila ya presente (por ejemplo, la primera)
+    document.querySelectorAll('.productRow').forEach(row => {
       updatePrice(row);
-    }
+    });
   });
 
-  // Calcular precio inicial para cada fila ya presente (por ejemplo, la primera)
-  document.querySelectorAll('.productRow').forEach(row => {
-    updatePrice(row);
-  });
-});
+  document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('removeProductBtn')) {
+      const row = e.target.closest('.productRow');
+      const rows = document.querySelectorAll('.productRow');
 
-document.addEventListener('click', function (e) {
-  if (e.target.classList.contains('removeProductBtn')) {
-    const row = e.target.closest('.productRow');
-    const rows = document.querySelectorAll('.productRow');
+      const messageContainer = document.getElementById('messageContainer');
 
-    const messageContainer = document.getElementById('messageContainer');
-
-    if (rows.length > 1) {
-      row.remove();
-      messageContainer.style.display = 'none';
-      messageContainer.textContent = '';
-    } else {
-      messageContainer.style.display = 'block';
-      messageContainer.textContent = 'Debe haber al menos un producto.';
+      if (rows.length > 1) {
+        row.remove();
+        messageContainer.style.display = 'none';
+        messageContainer.textContent = '';
+      } else {
+        messageContainer.style.display = 'block';
+        messageContainer.textContent = 'Debe haber al menos un producto.';
+      }
     }
-  }
-});
+  });
 
 </script>
 
