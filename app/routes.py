@@ -351,10 +351,28 @@ def list_services():
 @app.route('/admin/services/add', methods=['POST'])
 def add_service():
     if "user" in session:
-        name = request.form['name']
-        precio = float(request.form['precio'])
+        name = request.form.get('name')
+        precio = float(request.form.get('precio', 0))
+
+        try:
+            precio_amigo = float(request.form.get('precio_amigo', 0) or 0)
+        except ValueError:
+            precio_amigo = 0
+
+        try:
+            precio_descuento = float(request.form.get('precio_descuento', 0) or 0)
+        except ValueError:
+            precio_descuento = 0
+
         salon_id = session.get('salon_id')
-        db.session.add(Servicio(name=name, precio=precio, peluqueria_id=salon_id))
+
+        db.session.add(Servicio(
+            name=name,
+            precio=precio,
+            precio_amigo=precio_amigo,
+            precio_descuento=precio_descuento,
+            peluqueria_id=salon_id
+        ))
         db.session.commit()
         return redirect(url_for('list_services'))
     else:
@@ -393,6 +411,24 @@ def add_product():
         db.session.add(Producto(name=name, precio=precio, peluqueria_id=salon_id,cantidad=cantidad))
         db.session.commit()
         return redirect(url_for('list_products'))
+    else:
+        return redirect(url_for("login"))
+    
+@app.route('/admin/products/update_quantity/<int:id>', methods=['POST'])
+def update_product_quantity(id):
+    if "user" in session:
+        cantidad_extra = int(request.form['cantidad'])  # Cantidad a sumar
+        salon_id = session.get('salon_id')
+
+        # Buscar el producto por ID y peluquería
+        product = Producto.query.filter_by(id=id, peluqueria_id=salon_id).first()
+
+        if product:
+            product.cantidad = (product.cantidad or 0) + cantidad_extra
+            db.session.commit()
+            return redirect(url_for('list_products'))
+        else:
+            return "Producto no encontrado o no pertenece al salón", 404
     else:
         return redirect(url_for("login"))
 

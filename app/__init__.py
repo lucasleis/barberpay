@@ -74,8 +74,10 @@ def ensure_database_and_tables():
             id SERIAL PRIMARY KEY,
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
             name VARCHAR(100) NOT NULL,
+            active BOOLEAN DEFAULT TRUE,
             precio NUMERIC(10,2) NOT NULL,
-            active BOOLEAN DEFAULT TRUE
+            precio_amigo NUMERIC(10,2) DEFAULT 0,
+            precio_descuento NUMERIC(10,2) DEFAULT 0
         );
                 
         CREATE TABLE IF NOT EXISTS productos (

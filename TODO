@@ -5,8 +5,8 @@
 
     - Productos:
         - Al momento de comprar que valide cantidad (preguntar si quiere cantidad o solo que este la opcion)
-        - Arreglar boton de + y -
-        - Analizar como mostrar en los pagos de hoy
+        - Arreglar estetica de boton de + y -
+        - En nombre poner los nombres de cada uno, y en cantidad poner x1,x1. algo asi
 
     - Descuentos:
         - Agregar tabla descuentos
@@ -39,3 +39,44 @@
 - Testear:
     - Tiempos de carga
     - Vision mobile
+
+
+
+
+- Preguntas:
+    - queres manejar cantidad de stock?
+        - si. Agregar un boton en la parte de administrar que haga una route de update sobre el id element y modifique cantidad
+
+    - corte para amigos como se manejan los porcentajes? 
+        50%. igual que los cortes comunes
+        - ponerlo como una opcion de servicios
+
+    - en la membresia cuanto se cobra cada corte?
+        - 4 cortes          ->  $36.000
+        - 4 Corte y Barba   ->  $44.0000
+
+    - si hay una persona que cobra el 60% por un corte, con color y mechas cobra el 50?
+        - siempre se cobra el 50%. sin importar barbero.
+
+    - como se manejan los descuento? quien absorve el valor del descuento?
+        - Agustin asume el valor descontado. A los barberos se le paga como corte comun. 
+        - Los productos no tienen descento, solo los servicios. 
+        - Color y Mechas tiene descuento, pero no precio amigo. 
+
+
+Corte:
+- Amigos 
+- Descuento
+
+Corte y Barba:
+- Descuento
+
+Membresia:
+- Corte
+- Corte y Barba
+
+Color
+Mechas
+
+
+

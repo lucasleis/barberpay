@@ -8,20 +8,65 @@
 {% block content %}
   <h2>Servicios</h2>
 
-  <form method="POST" action="{{ url_for('add_service') }}" class="service-form">
-    <input type="text" name="name" placeholder="Nombre del servicio" required>
-    <input type="number" name="precio" step="0.01" placeholder="Precio ($)" required>
+  <form method="POST" action="{{ url_for('add_service') }}" class="service-form-vertical">
+
+    <!-- Fila 1: Nombre y Precio -->
+    <div class="input-row">
+      <input type="text" name="name" placeholder="Nombre del servicio" required>
+      <input type="number" name="precio" step="1" placeholder="Precio ($)" required>
+    </div>
+  
+    <!-- Fila 2: Descuento -->
+    <div class="toggle-section">
+      <input type="checkbox" name="descuento" id="descuentoCheckbox" value="true" class="toggle-checkbox" onchange="toggleDescuentoField()">
+      <label for="descuentoCheckbox" class="toggle-button">Descuento</label>
+      <input type="number" name="precio_descuento" id="descuentoField" step="1" placeholder="Monto descuento ($)" class="input-condicional" style="display: none;">
+    </div>
+    
+    <!-- Fila 3: Amigo -->
+    <div class="toggle-section">
+      <input type="checkbox" name="amigo" id="amigoCheckbox" value="true" class="toggle-checkbox" onchange="toggleAmigoField()">
+      <label for="amigoCheckbox" class="toggle-button">Amigo</label>
+      <input type="number" name="precio_amigo" id="amigoField" step="1" placeholder="Monto amigo ($)" class="input-condicional" style="display: none;">
+    </div>
+  
+    <!-- Fila 4: Botón -->
     <button type="submit">Agregar servicio</button>
   </form>
+  
 
   <ul class="service-list">
     {% for service in services %}
       <li class="service-item">
-        <span>{{ service.name }} - ${{ "%.2f"|format(service.precio)|int }}</span>
+        <span>
+          {{ service.name }} - ${{ "%.2f"|format(service.precio) }}
+          {% if service.precio_amigo and service.precio_amigo > 0 %}
+            | Precio Amigo: ${{ "%.2f"|format(service.precio_amigo) }}
+          {% endif %}
+          {% if service.precio_descuento and service.precio_descuento > 0 %}
+            | Precio Descuento: ${{ "%.2f"|format(service.precio_descuento) }}
+          {% endif %}
+        </span>
         <a href="{{ url_for('delete_service', id=service.id) }}" class="delete-button" title="Eliminar">
           <i class="fas fa-trash-alt"></i>
         </a>
       </li>
     {% endfor %}
   </ul>
+
+
+  <script>
+    function toggleDescuentoField() {
+      const check = document.getElementById('descuentoCheckbox');
+      const field = document.getElementById('descuentoField');
+      field.style.display = check.checked ? 'block' : 'none';
+    }
+  
+    function toggleAmigoField() {
+      const check = document.getElementById('amigoCheckbox');
+      const field = document.getElementById('amigoField');
+      field.style.display = check.checked ? 'block' : 'none';
+    }
+  </script>
+
 {% endblock %}

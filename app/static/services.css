@@ -1,51 +1,171 @@
-.service-form {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-}
+  .service-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
 
-.service-form input,
-.service-form button {
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
+  .service-form input,
+  .service-form button {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
 
-.service-form button {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
+  .service-form button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
 
-.service-form button:hover {
-  background-color: #218838;
-}
+  .service-form button:hover {
+    background-color: #218838;
+  }
 
-.service-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 10px;
-}
+  .service-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+  }
 
-.service-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  border-bottom: 1px solid #ddd;
-  font-family: sans-serif;
-}
+  .service-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid #ddd;
+    font-family: sans-serif;
+  }
 
-.delete-button {
-  color: #dc3545;
-  text-decoration: none;
-  font-size: 18px;
-  transition: color 0.2s ease;
-}
+  .delete-button {
+    color: #dc3545;
+    text-decoration: none;
+    font-size: 18px;
+    transition: color 0.2s ease;
+  }
 
-.delete-button:hover {
-  color: #a71d2a;
-}
+  .delete-button:hover {
+    color: #a71d2a;
+  }
+
+  .descuentos-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 10px 0;
+  }
+
+  .descuento-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    font-family: sans-serif;
+  }
+
+  .input-condicional {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+
+
+  /**/
+
+  .service-form-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .input-row input {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+
+  .descuento-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+  }
+
+  .input-condicional {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    flex: 1;
+  }
+
+
+  /**/
+  .toggle-section {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .toggle-checkbox {
+    display: none;
+  }
+
+  .toggle-button {
+    padding: 10px 15px;
+    background-color: #e9ecef;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: #333;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    text-align: center;
+    min-width: 120px;
+  }
+
+  .toggle-checkbox:checked + .toggle-button {
+    background-color: black;
+    color: white;
+    border-color: black;
+  }
+
+  .input-condicional {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 200px;
+  }
+
+
+  
