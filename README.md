@@ -6,7 +6,7 @@ docker run --name postgres-peluqueria -e POSTGRES_USER=admin -e POSTGRES_PASSWOR
 
 # Iniciar ejecucion container stopped
 ```
-docker start
+docker start container_id
 ```
 
 # Acceder por consola a container postgres 
@@ -46,7 +46,12 @@ INSERT INTO peluquerias (id, nombre) VALUES (1, 'Peluquería Central');
 DROP DATABASE peluqueria_db ;
 ```
 
-6. Salir de psql
+7. Settear huso horario
+```
+SET TIMEZONE TO 'America/Argentina/Buenos_Aires';
+```
+
+8. Salir de psql
 ```
 \q
 ```

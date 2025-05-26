@@ -24,12 +24,57 @@
 
   <ul class="service-list">
     {% for product in products %}
-      <li class="service-item">
-        <span>{{ product.name }} - ${{ "%.2f"|format(product.precio)|int }}</span>
+
+    <li class="service-item">
+      <span>{{ product.name }} - ${{ "%.2f"|format(product.precio)|int }} | Cantidad: {{ product.cantidad }} </span>
+    
+      <!-- Acciones a la derecha -->
+      <div class="action-buttons">
+        <a href="#" class="edit-icon" title="Editar cantidad" onclick="openCantidadModal('{{ product.id }}'); return false;">
+          <i class="fas fa-pen"></i>
+        </a>
+        <span class="separator">|</span>
         <a href="{{ url_for('delete_product', id=product.id) }}" class="delete-button" title="Eliminar">
           <i class="fas fa-trash-alt"></i>
         </a>
-      </li>
+      </div>
+    </li>
+    
+    <!-- Modal (fuera del <li> para que se renderice una sola vez por producto) -->
+    <div id="modal-{{ product.id }}" class="modal-cantidad">
+      <div class="modal-content">
+        <h3>Modificar cantidad</h3>
+        <span class="close-modal" onclick="closeCantidadModal(this.dataset.id)" data-id="{{ product.id }}">&times;</span>
+        <form method="POST" action="{{ url_for('update_product_quantity', id=product.id) }}">
+          <input type="number" name="cantidad" min="1" placeholder="Cantidad" required class="cantidad-input">
+          <button type="submit" class="edit-button">
+            <i class="fas fa-check"></i> Confirmar
+          </button>
+        </form>
+      </div>
+    </div>
+    
     {% endfor %}
   </ul>
+
+  <script>
+    function openCantidadModal(id) {
+      document.getElementById('modal-' + id).style.display = 'flex';
+    }
+  
+    function closeCantidadModal(id) {
+      document.getElementById('modal-' + id).style.display = 'none';
+    }
+  
+    // Cerrar modal si se hace clic fuera del contenido
+    window.onclick = function(event) {
+      const modals = document.querySelectorAll(".modal-cantidad");
+      modals.forEach(modal => {
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+      });
+    }
+  </script>
+
 {% endblock %}

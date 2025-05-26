@@ -424,7 +424,7 @@ def update_product_quantity(id):
         product = Producto.query.filter_by(id=id, peluqueria_id=salon_id).first()
 
         if product:
-            product.cantidad = (product.cantidad or 0) + cantidad_extra
+            product.cantidad = cantidad_extra
             db.session.commit()
             return redirect(url_for('list_products'))
         else:

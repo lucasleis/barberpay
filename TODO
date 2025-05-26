@@ -2,9 +2,10 @@
     - Empleados:
 
     - Servicios: 
+        - Modificar las cuentas en pago
 
     - Productos:
-        - Al momento de comprar que valide cantidad (preguntar si quiere cantidad o solo que este la opcion)
+        - Restar la cantidad cuando se compra
         - Arreglar estetica de boton de + y -
         - En nombre poner los nombres de cada uno, y en cantidad poner x1,x1. algo asi
 

@@ -64,18 +64,16 @@
     <div class="productRow">
       <label for="product_id">Producto:</label>
       <div style="display: flex; gap: 1rem;">
-        <select name="product_id" class="productSelect">
+        <select name="product_id" class="productSelect" onchange="updateCantidadOptions(this)">
           {% for product in products %}
-            <option value="{{ product.id }}" data-precio="{{ product.precio }}">
+            <option value="{{ product.id }}" data-precio="{{ product.precio }}" data-cantidad="{{ product.cantidad }}">
               {{ product.name }}
             </option>
           {% endfor %}
         </select>
         <select class="productCant" name="cantidad" style="width: 100px;">
-          {% for i in range(1, 11) %}
-            <option value="{{ i }}">{{ i }}</option>
-          {% endfor %}
-        </select>       
+          <!-- Se llenará dinámicamente con JS -->
+        </select>      
         <input type="text" class="productPrice" disabled placeholder="$" style="width: 100px;">
         <button type="button" class="addProductBtn">+</button>
         <button type="button" class="removeProductBtn">−</button>
@@ -422,6 +420,29 @@
         messageContainer.style.display = 'block';
         messageContainer.textContent = 'Debe haber al menos un producto.';
       }
+    }
+  });
+
+  function updateCantidadOptions(selectElement) {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const cantidadDisponible = parseInt(selectedOption.dataset.cantidad || 0);
+
+    const cantidadSelect = document.querySelector('.productCant');
+    cantidadSelect.innerHTML = ''; // Limpiar opciones previas
+
+    for (let i = 1; i <= cantidadDisponible; i++) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = i;
+      cantidadSelect.appendChild(option);
+    }
+  }
+
+  // Cargar cantidades iniciales en base al primer producto por defecto
+  document.addEventListener('DOMContentLoaded', function () {
+    const productSelect = document.querySelector('.productSelect');
+    if (productSelect) {
+      updateCantidadOptions(productSelect);
     }
   });
 
