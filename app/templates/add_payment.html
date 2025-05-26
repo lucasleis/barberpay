@@ -20,12 +20,14 @@
 <form method="POST" id="paymentForm" action="{{ url_for('add_payment') }}">
   <input type="hidden" name="salon_id" value="{{ salon_id }}">
 
-  <label for="barber_id">Peluquero:</label>
+  <!-- Selector de Barbero -->
+  <label for="barber_id">Barbero:</label>
   <select name="barber_id" required>
     {% for b in barbers %}
       <option value="{{ b.id }}">{{ b.name }}</option>
     {% endfor %}
   </select>
+
 
   <!-- Toggle Servicio o Producto -->
   <div id="toggleContainer" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
@@ -72,7 +74,7 @@
           {% endfor %}
         </select>
         <select class="productCant" name="cantidad" style="width: 100px;">
-          <!-- Se llenará dinámicamente con JS -->
+          <!-- Se llena dinámicamente con JS -->
         </select>      
         <input type="text" class="productPrice" disabled placeholder="$" style="width: 100px;">
         <button type="button" class="addProductBtn">+</button>
@@ -86,10 +88,10 @@
   <div style="display: flex; align-items: center; justify-content: space-between;">
     <label for="method">Método de pago:</label>
     <label class="checkbox-label">
-      <input type="checkbox" id=""> ¿Usa voucher?
+      <input type="checkbox" id="multiPaymentToggle"> ¿Usa múltiples métodos?
     </label>
     <label class="checkbox-label">
-      <input type="checkbox" id="multiPaymentToggle"> ¿Usar múltiples métodos?
+      <input type="checkbox" id="membresiaCheckbox"> ¿Usa Membresía?
     </label>
   </div>
 
@@ -129,6 +131,18 @@
     </p>
     <p id="methodRepeatError" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
       Los métodos de pago deben ser diferentes.
+    </p>
+  </div>
+
+  <!-- Membresia -->
+  <div id="membresiaMethodGroup" style="display: none;">
+    <div class="membresia-method-group">
+      <input type="number" name="check_membresia" id="check_membresia" step="1" placeholder="Número de Membresía">
+    </div>
+
+    <!-- Mensajes de error -->
+    <p id="methodRepeatError2" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
+      Debe ingresar un número de membresía válido.
     </p>
   </div>
 
@@ -445,6 +459,26 @@
       updateCantidadOptions(productSelect);
     }
   });
+
+  // addListener de checkbox de membresia
+  document.addEventListener('DOMContentLoaded', function () {
+    const checkbox = document.getElementById('membresiaCheckbox');
+    const membershipDiv = document.getElementById('membresiaMethodGroup');
+    const multiPaymentToggle = document.getElementById('multiPaymentToggle');
+    const singleMethodGroup = document.getElementById('singleMethodGroup');
+
+    checkbox.addEventListener('change', function () {
+      if (checkbox.checked) {
+        membershipDiv.style.display = 'block';
+        multiPaymentToggle.closest('label').style.display = 'none'; // Oculta el label completo
+        singleMethodGroup.style.display = 'none';
+      } else {
+        membershipDiv.style.display = 'none';
+        multiPaymentToggle.closest('label').style.display = 'inline-block'; // Muestra el label
+        singleMethodGroup.style.display = 'block';
+      }
+    });
+  }); 
 
 </script>
 

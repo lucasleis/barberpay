@@ -100,14 +100,14 @@ class Pago(db.Model):
     method2 = db.relationship('MetodoPago', foreign_keys=[payment_method2_id])
 
 
-class Voucher(db.Model):
-    __tablename__ = 'vouchers'
+class Membresia(db.Model):
+    __tablename__ = 'membresia'
     
     id = db.Column(db.Integer, primary_key=True)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
-    cantidad = db.Column(db.Integer, nullable=False)
+    cantidad = db.Column(db.Integer, nullable=False, default=4)
     creado_en = db.Column(db.DateTime(timezone=True), default=now_buenos_aires)
     # valido_hasta = db.Column(db.DateTime(timezone=True))
-    canjeado = db.Column(db.Boolean, default=False)
+    # canjeado = db.Column(db.Boolean, default=False)
 
-    peluqueria = db.relationship('Peluqueria', backref=db.backref('vouchers', lazy=True))
+    peluqueria = db.relationship('Peluqueria', backref=db.backref('membresia', lazy=True))

@@ -16,11 +16,9 @@
     - Metodos de Pago:
         - Agregar checkbox para vouchers (similar a multiples pagos)
 
-    - Vouchers:
-        - Desarrollar todo
-        - Agregar tabla vouchers
-            - Debe tener id y cantidad (se va a ir restando cada vez) 
+    - Membresia:
         - Hacer que no se cobre cuando se usa
+        - 
 
     - Cierre:
         - Arreglar cuentas (Totales por método de pago)
@@ -36,6 +34,7 @@
     - En venta de producto, los empleados se quedan con el 15%
     - En color y mechas, los empleados se quedan con el 50%
     - Descontar cantidad en stock
+    - Manejar errores de que no haya peluqueria, empleado, corte, etc
 
 - Testear:
     - Tiempos de carga

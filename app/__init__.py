@@ -112,7 +112,7 @@ def ensure_database_and_tables():
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
         );
                 
-        CREATE TABLE IF NOT EXISTS vouchers (
+        CREATE TABLE IF NOT EXISTS membresias (
             id SERIAL PRIMARY KEY,
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
             cantidad INTEGER NOT NULL CHECK (cantidad > 0),
@@ -123,6 +123,18 @@ def ensure_database_and_tables():
 
     """)
     conn.commit()
+
+    # Verificar si la tabla 'peluquerias' está vacía
+    cur.execute("SELECT COUNT(*) FROM peluquerias;")
+    count = cur.fetchone()[0]
+
+    if count == 0:
+        print("Insertando peluquería inicial...")
+        cur.execute("INSERT INTO peluquerias (id, nombre) VALUES (1, 'Peluquería Central');")
+        conn.commit()
+    else:
+        print("Ya existen peluquerías registradas. No se insertó ninguna.")
+
     cur.close()
     conn.close()
     print("Tablas creadas o ya existentes.")

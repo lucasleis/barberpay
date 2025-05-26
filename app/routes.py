@@ -1,6 +1,6 @@
 from flask import current_app as app, render_template, request, redirect, url_for, session, flash
 from . import db
-from .models import Peluqueria, Empleado, Servicio, MetodoPago, Pago, Appointment, Producto
+from .models import Peluqueria, Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia
 from .auth import login_required
 from sqlalchemy.orm import aliased
 from datetime import datetime, timedelta, time
@@ -476,6 +476,26 @@ def delete_payment_method(id):
         return redirect(url_for('list_payment_methods'))
     else:
         return redirect(url_for("login"))
+
+
+### Membresias ###
+@app.route('/membresia/descontar/<int:id>', methods=['POST'])
+def descontar_membresia(id):
+    salon_id = session.get('salon_id')
+
+    # Buscar la membresía por ID y peluquería
+    membresia = Membresia.query.filter_by(id=id, peluqueria_id=salon_id).first()
+
+    if membresia:
+        if membresia.cantidad > 0:
+            membresia.cantidad -= 1
+            db.session.commit()
+            return redirect(url_for('some_view_name'))  # Cambiá esto según a dónde querés redirigir
+        else:
+            return "La membresía ya no tiene usos disponibles.", 400
+    else:
+        return "Membresía no encontrada o no pertenece al salón", 404
+
 
 
 ### Pagos ###
