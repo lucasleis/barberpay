@@ -500,7 +500,7 @@ def descontar_membresia(id):
 
 
 ### Pagos ###
-
+"""
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():
     session['salon_id'] = 1
@@ -587,6 +587,163 @@ def add_payment():
         methods=methods,
         products=products 
     )
+"""
+@app.route('/payments/new', methods=['GET', 'POST'])
+def add_payment():
+    session['salon_id'] = 1
+    raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
+
+    try:
+        salon_id = int(str(raw_salon_id).strip("{} "))
+    except (ValueError, TypeError):
+        flash("ID de peluquería inválido.", "danger")
+        return redirect(url_for("index"))
+
+    pagos_data, barbers, services, methods = get_payment_page_data(salon_id)
+    products = Producto.query.filter_by(active=True, peluqueria_id=salon_id).all()
+
+    if request.method == 'POST':
+        try:
+            barber_id = request.form.get('barber_id')
+            if not barber_id:
+                raise ValueError("Debe seleccionarse un barbero.")
+
+            print("product_id:", request.form.get('product_id'))
+            tip = float(request.form.get('tip') or 0.0)
+
+            # Verificamos los toggles
+            toggle_servicio = 'toggle_servicio' in request.form
+            toggle_producto = 'toggle_producto' in request.form
+
+            print("toggle_servicio: ",toggle_servicio)
+            print("toggle_producto: ",toggle_producto)
+
+            print("Entrando a validación de toggles")
+            if not toggle_servicio and not toggle_producto:
+                print("Se lanza ValueError por no seleccionar nada")
+                raise ValueError("Debe seleccionarse al menos un servicio o producto.")
+            print("Paso validacion toggles")
+
+            # Creamos el appointment (con servicio, productos o ambos)
+            appointment = Appointment(
+                barber_id=barber_id,
+                peluqueria_id=salon_id
+            )
+
+            if toggle_servicio:
+                service_id = request.form.get('service_id')
+                if not service_id:
+                    raise ValueError("Debe seleccionarse un servicio.")
+                appointment.service_id = service_id
+
+            if toggle_producto:
+                product_id = request.form.get('product_id')
+                product_quantity = int(request.form.get('product_quantity') or 1)
+                if not product_id:
+                    raise ValueError("Debe seleccionarse un producto.")
+                appointment.productos_id = product_id
+                appointment.product_quantity = product_quantity  # Asumimos que se agregó este campo en el modelo
+
+            db.session.add(appointment)
+            db.session.commit()
+
+            # Procesamos métodos de pago
+            multipagos = 'togglemultiPayment' in request.form
+            # toggle = request.form.get('togglemultiPayment')
+            print("multipagos:", multipagos)
+
+
+            # Simple payment
+            amount_simple_service = int(request.form.get('amount_simple'))
+            method_simple_service = int(request.form.get('methodSimple'))
+            print("amount_simple_service:", amount_simple_service)
+            print("method_simple_service:", method_simple_service)
+
+            # Multi payment
+            method_multiple_1 = int(request.form.get('method_multiple_1'))
+            amount_method_multi_1 = float(request.form.get('amount_method_multi_1') or 0)
+            print("method_multiple_1:", method_multiple_1)
+            print("amount_method_multi_1:", amount_method_multi_1)
+
+            method_multiple_2 = request.form.get('method_multiple_2')
+            amount_method_multi_2 = float(request.form.get('amount_method_multi_2') or 0)
+            print("method_multiple_2:", method_multiple_2)
+            print("amount_method_multi_2:", amount_method_multi_2)
+            
+
+            # Validar coherencia con el checkbox de múltiples pagos
+            if multipagos:
+
+                if method_multiple_1 == method_multiple_2:
+                    raise ValueError("No se puede repetir el mismo método de pago.")
+            
+                if multipagos and (not method_multiple_2):
+                    raise ValueError("Faltan datos del segundo método de pago.")
+
+                total_pagado = amount_method_multi_1 + amount_method_multi_2 + tip
+            else:
+                total_pagado = amount_simple_service
+
+            # Calculamos el total real (servicio + producto)
+            total_real = 0.0
+            if toggle_servicio:
+                service = Servicio.query.get(service_id)
+                total_real += service.precio if service else 0
+            if toggle_producto:
+                product = Producto.query.get(product_id)
+                total_real += (product.precio * product_quantity) if product else 0
+
+            print("total_pagado: ",total_pagado," total_real: ",total_real)
+
+            if abs(total_pagado - total_real) > 0.01:
+                raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
+
+            # Guardamos el pago
+            if multipagos:
+                print("ENTRA MULTIPAGO")
+                pago = Pago(
+                    appointment_id=appointment.id,
+                    payment_method1_id=method_multiple_1,
+                    payment_method2_id=method_multiple_2,
+                    amount_method1=amount_method_multi_1,
+                    amount_method2=amount_method_multi_2,
+                    amount_tip=tip,
+                    peluqueria_id=salon_id,
+                    date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
+                )
+            else:
+                print("ENTRA PAGO SIMPLE")
+                pago = Pago(
+                    appointment_id=appointment.id,
+                    payment_method1_id=method_simple_service,
+                    payment_method2_id=None,
+                    amount_method1=amount_simple_service,
+                    amount_method2=0,
+                    amount_tip=tip,
+                    peluqueria_id=salon_id,
+                    date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
+                )
+
+            db.session.add(pago)
+            db.session.commit()
+            flash("Pago registrado con éxito.", "success")
+            return redirect(url_for('add_payment'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error al registrar el pago: {str(e)}", "danger")
+
+    return render_template(
+        'add_payment.html',
+        pagos=pagos_data,
+        salon_id=salon_id,
+        barbers=barbers,
+        services=services,
+        methods=methods,
+        products=products
+    )
+
+
 
 @app.route('/payments/delete/<int:pago_id>', methods=['POST'])
 def delete_payment(pago_id):
@@ -611,9 +768,9 @@ def delete_payment(pago_id):
 
 ### Cierres ###
 """
-@app.route('/cierre/semanal')
-def show_cierre_semanal():
-    return render_template('cierre_semanal.html')
+    @app.route('/cierre/semanal')
+    def show_cierre_semanal():
+        return render_template('cierre_semanal.html')
 """
 
 @app.route("/cierre_semanal")

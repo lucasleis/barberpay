@@ -65,6 +65,7 @@ class Appointment(db.Model):
     barber_id = db.Column(db.Integer, db.ForeignKey('barberos.id'))
     service_id = db.Column(db.Integer, db.ForeignKey('servicios.id'))
     productos_id = db.Column(db.Integer, db.ForeignKey('productos.id'))
+    cantidad = db.Column(db.Integer, default=1)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
     barber = db.relationship('Empleado')

@@ -40,7 +40,7 @@
       <label class="btn full-width" for="toggleProducto">Producto</label>
     </div>
   </div>
-  <p id="toggleError" class="text-danger mt-1" style="display: none;"> 
+  <p id="toggleError" class="text-danger mt-1" style="display: none;">    <!-- Tomas como ejemplo para estandar de errores-->
     Debe seleccionar al menos "Servicio" o "Producto".
   </p>                                                    
 
@@ -63,21 +63,19 @@
 
   <!-- Selector de productos -->
   <div id="productSection">
-    <div class="productRow" data-index="0">
-      <label>Producto:</label>
+    <div class="productRow">
+      <label for="product_id">Producto:</label>
       <div style="display: flex; gap: 1rem;">
-        <select name="product_id_0" class="productSelect" onchange="updateCantidadOptions(this)">
+        <select name="product_id" class="productSelect" onchange="updateCantidadOptions(this)">
           {% for product in products %}
             <option value="{{ product.id }}" data-precio="{{ product.precio }}" data-cantidad="{{ product.cantidad }}">
               {{ product.name }}
             </option>
           {% endfor %}
         </select>
-
-        <select class="productCant" name="cantidad_0" style="width: 100px;">
+        <select class="productCant" name="cantidad" style="width: 100px;">
           <!-- Se llena dinámicamente con JS -->
-        </select>
-
+        </select>      
         <input type="text" class="productPrice" disabled placeholder="$" style="width: 100px;">
         <button type="button" class="addProductBtn">+</button>
         <button type="button" class="removeProductBtn">−</button>
@@ -90,7 +88,7 @@
   <div style="display: flex; align-items: center; justify-content: space-between;">
     <label for="method">Método de pago:</label>
     <label class="checkbox-label">
-      <input type="checkbox" id="multiPaymentToggle" name="togglemultiPayment"> ¿Usa múltiples métodos?
+      <input type="checkbox" id="multiPaymentToggle"> ¿Usa múltiples métodos?
     </label>
     <label class="checkbox-label">
       <input type="checkbox" id="membresiaCheckbox"> ¿Usa Membresía?
@@ -99,32 +97,32 @@
 
   <!-- Modo simple -->
   <div id="singleMethodGroup" class="payment-method-group">
-    <select id="methodSimple" name="methodSimple">
+    <select id="methodSimple" name="method1">
       {% for method in methods %}
         <option value="{{ method.id }}">{{ method.nombre }}</option>
       {% endfor %}
     </select>
-    <input type="hidden" name="amount_simple" id="amountSimple">
+    <input type="hidden" name="amount1" id="amountSimple">
   </div>
 
   <!-- Modo múltiple -->
   <div id="multiMethodGroup" style="display: none;">
     <div class="payment-method-group">
-      <select name="method_multiple_1" id="method_multiple_1">
+      <select id="methodMultiple">
         {% for method in methods %}
           <option value="{{ method.id }}">{{ method.nombre }}</option>
         {% endfor %}
       </select>
-      <input type="number" name="amount_method_multi_1" id="amount_method_multi-1" step="1" placeholder="Monto $">
+      <input type="number" name="amount1" id="amount1" step="1" placeholder="Monto $">
     </div>
 
     <div class="payment-method-group">
-      <select name="method_multiple_2" id="method_multiple_2">
+      <select name="method2" id="method2">
         {% for method in methods %}
           <option value="{{ method.id }}">{{ method.nombre }}</option>
         {% endfor %}
       </select>
-      <input type="number" name="amount_method_multi_2" id="amount_method_multi_2" step="1" placeholder="Monto $">
+      <input type="number" name="amount2" id="amount2" step="1" placeholder="Monto $">
     </div>
 
     <!-- Mensajes de error -->
@@ -211,12 +209,13 @@
   const errorMsg = document.getElementById('multiPaymentError');
   const repeatError = document.getElementById('methodRepeatError');
   
-  // const amount1 = document.getElementById('amount1');
-  // const amount2 = document.getElementById('amount2');
+  const amount1 = document.getElementById('amount1');
+  const amount2 = document.getElementById('amount2');
   const amountSimple = document.getElementById('amountSimple');
   const method1Select = document.getElementById('method1');
   const method2Select = document.getElementById('method2');
 
+  // const tipoPagoRadios = document.querySelectorAll('input[name="tipo_pago"]');
 
   const servicioToggle = document.getElementById('toggleServicio');
   const productoToggle = document.getElementById('toggleProducto');
@@ -411,13 +410,9 @@
     }
     });
   */
-
   form.addEventListener('submit', function (e) {
-    let valid = true;
     const toggleError = document.getElementById('toggleError');
     const toggleContainer = document.getElementById('toggleContainer');
-    console.log("servicioToggle.checked", servicioToggle.checked)
-    console.log("productoToggle.checked", productoToggle.checked)
 
     // Validación: al menos uno de los toggles debe estar activo
     if (!servicioToggle.checked && !productoToggle.checked) {
@@ -430,23 +425,23 @@
       toggleContainer.classList.remove('border', 'border-danger', 'rounded', 'p-2');
     }
 
-
     // Obtener servicio
     let servicePrecio = 0;
     let serviceId = null;
     if (servicioToggle.checked) {
-      console.log("ENTRA TOGGLE SERVICIO");
       const serviceSelect = document.getElementById('serviceSelect');
       const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
       serviceId = selectedOption.value;
       servicePrecio = parseFloat(selectedOption.getAttribute('data-precio'));
+      console.log('Servicio seleccionado:');
+      console.log(`  ID: ${serviceId}`);
+      console.log(`  Precio: ${servicePrecio}`);
     }
 
     // Obtener productos
     let productosSeleccionados = [];
     let productosPrecioTotal = 0;
     if (productoToggle.checked) {
-      console.log("ENTRA TOGGLE PRODUCTO");
       const productRows = document.querySelectorAll('#productSection .productRow');
 
       productRows.forEach((row) => {
@@ -471,59 +466,107 @@
         }
       });
 
+      // Validar que haya al menos un producto válido
       if (productosSeleccionados.length === 0) {
         alert('Debe seleccionar al menos un producto con cantidad válida');
         e.preventDefault();
         return;
       }
 
-      productosSeleccionados.forEach((producto, index) => {
-        console.log(`Producto ${index + 1}: ID: ${producto.id}, Precio: ${producto.precio}, Cantidad: ${producto.cantidad}`);
-
-        const inputId = document.createElement('input');
-        inputId.type = 'hidden';
-        inputId.name = `product_id_${index}`;
-        inputId.value = producto.id;
-        form.appendChild(inputId);
-
-        const inputCant = document.createElement('input');
-        inputCant.type = 'hidden';
-        inputCant.name = `cantidad_${index}`;
-        inputCant.value = producto.cantidad;
-        form.appendChild(inputCant);
-      });
+      /*
+        console.log('Productos seleccionados:', productosSeleccionados);
+        productosSeleccionados.forEach((producto, index) => {
+          console.log(`Producto ${index + 1}:`);
+          console.log(`  ID: ${producto.id}`);
+          console.log(`  Precio: ${producto.precio}`);
+          console.log(`  Cantidad: ${producto.cantidad}`);
+        });
+      */
     }
 
     // Calcular total esperado
     const totalEsperado = servicePrecio + productosPrecioTotal;
-    // console.log('Total esperado:', totalEsperado);
+    console.log('Total esperado:', totalEsperado);
 
-    // console.log('togglemultiPayment:', togglemultiPayment.checked);
+    // Manejo de métodos de pago
+    const amountSimple = document.getElementById('amountSimple');
+    const amountInput = document.getElementById('amount1');
+
     if (togglemultiPayment.checked) {
-      const amount1 = parseFloat(form.querySelector('input[name="amount_method_multi_1"]').value) || 0;
-      const amount2 = parseFloat(form.querySelector('input[name="amount_method_multi_2"]').value) || 0;
-      const total_multi_methods = amount1 + amount2;
+      // Modo múltiples métodos
+      methodSimple.disabled = true;
+      methodMultiple.disabled = false;
+      methodSimple.removeAttribute('name');
+      methodMultiple.setAttribute('name', 'method1');
 
-      // console.log('amount1:', amount1, ' amount2:', amount2);
-      console.log('amount1 + amount2:', total_multi_methods);
+      amountSimple.removeAttribute('name');
+      amountInput.setAttribute('name', 'amount1');
+    } else {
+      // Modo simple
+      methodMultiple.disabled = true;
+      methodSimple.disabled = false;
+      methodMultiple.removeAttribute('name');
+      methodSimple.setAttribute('name', 'method1');
+      updatePrice();
 
-      if (total_multi_methods === totalEsperado) {
-        console.log("SUMA CORRECTA");
+      amountInput.removeAttribute('name');
+      amountSimple.setAttribute('name', 'amount1');
+    }
+
+    let valid = true;
+
+    if (togglemultiPayment.checked) {
+      const amount1 = parseFloat(form.querySelector('input[name="amount1"]').value) || 0;
+      const amount2 = parseFloat(form.querySelector('input[name="amount2"]').value) || 0;
+      const total = amount1 + amount2;
+
+      const method1 = form.querySelector('select[name="method1"]').value;
+      const method2 = form.querySelector('select[name="method2"]').value;
+
+      // Validar suma de montos
+      if (total !== totalEsperado) {
+        [form.querySelector('input[name="amount1"]'), form.querySelector('input[name="amount2"]')]
+          .forEach(input => input.classList.add('input-error'));
+        errorMsg.style.display = 'block';
+        valid = false;
+      } else {
+        [form.querySelector('input[name="amount1"]'), form.querySelector('input[name="amount2"]')]
+          .forEach(input => input.classList.remove('input-error'));
+        errorMsg.style.display = 'none';
       }
 
-      // Validar que no se repita el método de pago
-      const method1 = form.querySelector('select[name="method_multiple_1"]').value;
-      const method2 = form.querySelector('select[name="method_multiple_2"]').value;
-
+      // Validar que no se repita método
       if (method1 === method2) {
-        [form.querySelector('select[name="method_multiple_1"]'), form.querySelector('select[name="method_multiple_2"]')]
+        [form.querySelector('select[name="method1"]'), form.querySelector('select[name="method2"]')]
           .forEach(select => select.classList.add('input-error'));
         repeatError.style.display = 'block';
         valid = false;
       } else {
-        [form.querySelector('select[name="method_multiple_1"]'), form.querySelector('select[name="method_multiple_2"]')]
+        [form.querySelector('select[name="method1"]'), form.querySelector('select[name="method2"]')]
           .forEach(select => select.classList.remove('input-error'));
         repeatError.style.display = 'none';
+      }
+
+    } else {
+      // Validación en pago simple
+      const amount = parseFloat(form.querySelector('input[name="amount1"]').value) || 0;
+      const method1 = form.querySelector('select[name="method1"]').value;
+
+      if (!method1) {
+        alert('Debe seleccionar un método de pago');
+        e.preventDefault();
+        return;
+      }
+
+      console.log("amount",amount)
+      console.log("totalEsperado", totalEsperado)
+      if (amount !== totalEsperado) {
+        form.querySelector('input[name="amount1"]').classList.add('input-error');
+        errorMsg.style.display = 'block';
+        valid = false;
+      } else {
+        form.querySelector('input[name="amount1"]').classList.remove('input-error');
+        errorMsg.style.display = 'none';
       }
     }
 
@@ -668,16 +711,6 @@
       }
     });
   }); 
-
-  function mostrarError(campo, mensaje) {
-    campo.classList.add('input-error');
-    mensaje.style.display = 'block';
-  }
-
-  function ocultarError(campo, mensaje) {
-    campo.classList.remove('input-error');
-    mensaje.style.display = 'none';
-  }
 
 </script>
 
