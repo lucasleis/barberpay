@@ -15,6 +15,11 @@ def get_payment_page_data(salon_id):
     MetodoPago1 = aliased(MetodoPago)
     MetodoPago2 = aliased(MetodoPago)
 
+    # Obtener fecha actual (desde las 00:00 hasta las 23:59:59 del día de hoy)
+    hoy = datetime.today().date()
+    inicio_dia = datetime.combine(hoy, time.min)  # 00:00:00
+    fin_dia = datetime.combine(hoy, time.max)     # 23:59:59.999999
+
     pagos_query = (
         Pago.query
         .join(Pago.appointment)
@@ -22,11 +27,14 @@ def get_payment_page_data(salon_id):
         .join(Appointment.service)
         .join(MetodoPago1, Pago.payment_method1_id == MetodoPago1.id)
         .outerjoin(MetodoPago2, Pago.payment_method2_id == MetodoPago2.id)
-        .filter(Pago.peluqueria_id == salon_id)
+        .filter(
+            Pago.peluqueria_id == salon_id,
+            Pago.date >= inicio_dia,
+            Pago.date <= fin_dia
+        )
         .add_entity(MetodoPago1)
         .add_entity(MetodoPago2)
         .order_by(Pago.date.desc())
-        .limit(10)
         .all()
     )
 
@@ -37,12 +45,12 @@ def get_payment_page_data(salon_id):
         pagos_data.append(pago)
 
     barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
-    services = Servicio.query.filter_by(peluqueria_id=salon_id).all()
+    services = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
     methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
 
     return pagos_data, barbers, services, methods
-"""
 
+"""
 def get_payment_page_data(salon_id):
     MetodoPago1 = aliased(MetodoPago)
     MetodoPago2 = aliased(MetodoPago)
@@ -56,7 +64,8 @@ def get_payment_page_data(salon_id):
         Pago.query
         .join(Pago.appointment)
         .join(Appointment.barber)
-        .join(Appointment.service)
+        .outerjoin(Appointment.service)  
+        .outerjoin(Appointment.producto)  # Agregado join con productos
         .join(MetodoPago1, Pago.payment_method1_id == MetodoPago1.id)
         .outerjoin(MetodoPago2, Pago.payment_method2_id == MetodoPago2.id)
         .filter(
@@ -608,21 +617,17 @@ def add_payment():
             if not barber_id:
                 raise ValueError("Debe seleccionarse un barbero.")
 
-            print("product_id:", request.form.get('product_id'))
+            # print("product_id:", request.form.get('product_id'))
             tip = float(request.form.get('tip') or 0.0)
 
             # Verificamos los toggles
             toggle_servicio = 'toggle_servicio' in request.form
             toggle_producto = 'toggle_producto' in request.form
+            # print("toggle_servicio: ", toggle_servicio)
+            # print("toggle_producto: ", toggle_producto)
 
-            print("toggle_servicio: ",toggle_servicio)
-            print("toggle_producto: ",toggle_producto)
-
-            print("Entrando a validación de toggles")
             if not toggle_servicio and not toggle_producto:
-                print("Se lanza ValueError por no seleccionar nada")
                 raise ValueError("Debe seleccionarse al menos un servicio o producto.")
-            print("Paso validacion toggles")
 
             # Creamos el appointment (con servicio, productos o ambos)
             appointment = Appointment(
@@ -638,11 +643,14 @@ def add_payment():
 
             if toggle_producto:
                 product_id = request.form.get('product_id')
-                product_quantity = int(request.form.get('product_quantity') or 1)
+                product_cantidad = int(request.form.get('product_quantity') or 1)
+                product = Producto.query.get(product_id)
+                product_precio = product.precio
+                # product_cantidad = product.cantidad
                 if not product_id:
                     raise ValueError("Debe seleccionarse un producto.")
                 appointment.productos_id = product_id
-                appointment.product_quantity = product_quantity  # Asumimos que se agregó este campo en el modelo
+                appointment.product_quantity = product_cantidad
 
             db.session.add(appointment)
             db.session.commit()
@@ -650,25 +658,25 @@ def add_payment():
             # Procesamos métodos de pago
             multipagos = 'togglemultiPayment' in request.form
             # toggle = request.form.get('togglemultiPayment')
-            print("multipagos:", multipagos)
+            # print("multipagos:", multipagos)
 
 
             # Simple payment
             amount_simple_service = int(request.form.get('amount_simple'))
             method_simple_service = int(request.form.get('methodSimple'))
-            print("amount_simple_service:", amount_simple_service)
-            print("method_simple_service:", method_simple_service)
+            # print("amount_simple_service:", amount_simple_service)
+            # print("method_simple_service:", method_simple_service)
 
             # Multi payment
             method_multiple_1 = int(request.form.get('method_multiple_1'))
             amount_method_multi_1 = float(request.form.get('amount_method_multi_1') or 0)
-            print("method_multiple_1:", method_multiple_1)
-            print("amount_method_multi_1:", amount_method_multi_1)
+            # print("method_multiple_1:", method_multiple_1)
+            # print("amount_method_multi_1:", amount_method_multi_1)
 
             method_multiple_2 = request.form.get('method_multiple_2')
             amount_method_multi_2 = float(request.form.get('amount_method_multi_2') or 0)
-            print("method_multiple_2:", method_multiple_2)
-            print("amount_method_multi_2:", amount_method_multi_2)
+            # print("method_multiple_2:", method_multiple_2)
+            # print("amount_method_multi_2:", amount_method_multi_2)
             
 
             # Validar coherencia con el checkbox de múltiples pagos
@@ -682,16 +690,33 @@ def add_payment():
 
                 total_pagado = amount_method_multi_1 + amount_method_multi_2 + tip
             else:
-                total_pagado = amount_simple_service
+                if toggle_servicio:
+                    total_pagado = amount_simple_service
+                    print("total_pagado: ",total_pagado)
+                if toggle_producto:
+                    total_pagado = (product_precio * product_cantidad)
+                    # print("product_precio: ",product_precio)
+                    # print("product_cantidad: ",product_cantidad)
 
             # Calculamos el total real (servicio + producto)
             total_real = 0.0
             if toggle_servicio:
                 service = Servicio.query.get(service_id)
                 total_real += service.precio if service else 0
+                if not toggle_producto:
+                    total_pagado = amount_simple_service + tip
+                    print("total_pagado: ",total_pagado)
+
             if toggle_producto:
-                product = Producto.query.get(product_id)
-                total_real += (product.precio * product_quantity) if product else 0
+                print("product_precio:", product_precio)
+                # print("product_cantidad:", product_cantidad)
+                total_real += (product_precio * product_cantidad) if product else 0
+                if not toggle_servicio:
+                    total_pagado = total_real + tip
+
+            if toggle_servicio and toggle_producto:
+                total_pagado = amount_simple_service + total_real + tip
+                # falta revisar ambos toggles activos
 
             print("total_pagado: ",total_pagado," total_real: ",total_real)
 
@@ -700,7 +725,7 @@ def add_payment():
 
             # Guardamos el pago
             if multipagos:
-                print("ENTRA MULTIPAGO")
+                # print("ENTRA MULTIPAGO")
                 pago = Pago(
                     appointment_id=appointment.id,
                     payment_method1_id=method_multiple_1,
@@ -712,12 +737,12 @@ def add_payment():
                     date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
                 )
             else:
-                print("ENTRA PAGO SIMPLE")
+                # print("ENTRA PAGO SIMPLE")
                 pago = Pago(
                     appointment_id=appointment.id,
                     payment_method1_id=method_simple_service,
                     payment_method2_id=None,
-                    amount_method1=amount_simple_service,
+                    amount_method1=total_pagado,
                     amount_method2=0,
                     amount_tip=tip,
                     peluqueria_id=salon_id,
@@ -767,12 +792,6 @@ def delete_payment(pago_id):
 
 
 ### Cierres ###
-"""
-    @app.route('/cierre/semanal')
-    def show_cierre_semanal():
-        return render_template('cierre_semanal.html')
-"""
-
 @app.route("/cierre_semanal")
 def cierre_semanal():
     session['salon_id'] = 1

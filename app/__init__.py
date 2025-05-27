@@ -107,7 +107,6 @@ def ensure_database_and_tables():
             amount_method1 NUMERIC(10,2) NOT NULL,
             amount_method2 NUMERIC(10,2),
             amount_tip NUMERIC(10,2),
-            cantidad INTEGER, 
             date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
         );

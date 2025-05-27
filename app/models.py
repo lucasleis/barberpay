@@ -70,6 +70,7 @@ class Appointment(db.Model):
 
     barber = db.relationship('Empleado')
     service = db.relationship('Servicio')
+    producto = db.relationship('Producto')
 
 
 class MetodoPago(db.Model):

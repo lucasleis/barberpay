@@ -32,11 +32,11 @@
   <!-- Toggle Servicio o Producto -->
   <div id="toggleContainer" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
     <div style="flex: 1;">
-      <input type="checkbox" class="btn-check" id="toggleServicio" name="toggleServicio" autocomplete="off" checked>
+      <input type="checkbox" class="btn-check" id="toggleServicio" name="toggle_servicio" autocomplete="off" checked>
       <label class="btn full-width" for="toggleServicio">Servicio</label>
     </div>
     <div style="flex: 1;">
-      <input type="checkbox" class="btn-check" id="toggleProducto" name="toggleProducto" autocomplete="off">
+      <input type="checkbox" class="btn-check" id="toggleProducto" name="toggle_producto" autocomplete="off">
       <label class="btn full-width" for="toggleProducto">Producto</label>
     </div>
   </div>
@@ -66,7 +66,7 @@
     <div class="productRow" data-index="0">
       <label>Producto:</label>
       <div style="display: flex; gap: 1rem;">
-        <select name="product_id_0" class="productSelect" onchange="updateCantidadOptions(this)">
+        <select name="product_id" class="productSelect" onchange="updateCantidadOptions(this)">
           {% for product in products %}
             <option value="{{ product.id }}" data-precio="{{ product.precio }}" data-cantidad="{{ product.cantidad }}">
               {{ product.name }}
@@ -74,7 +74,7 @@
           {% endfor %}
         </select>
 
-        <select class="productCant" name="cantidad_0" style="width: 100px;">
+        <select class="productCant" name="cantidad" style="width: 100px;">
           <!-- Se llena dinámicamente con JS -->
         </select>
 
@@ -181,9 +181,9 @@
     <tr>
       <td>{{ pago.date.strftime('%H:%M') }}</td>
       <td>{{ pago.appointment.barber.name }}</td>
-      <td>{{ pago.appointment.service.name }}</td>
-      <td> Prueba</td>
-      <td> 0 </td>
+      <td>{{ pago.appointment.service.name if pago.appointment.service else '-' }}</td>
+      <td>{{ pago.appointment.producto.name if pago.appointment.producto else '-' }}</td>
+      <td>{{ pago.appointment.cantidad if pago.appointment.producto else '-' }}</td>
       <td>{{ pago.method1.nombre }}</td>
       <td>${{ pago.amount_method1|int }}</td>
       <td>{{ pago.method2.nombre if pago.method2 else '-' }}</td>
