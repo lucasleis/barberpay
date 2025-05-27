@@ -7,6 +7,7 @@
             - Amigos
 
     - Productos:
+        - Si se cancela un pago, volver a sumar cantidad
         - Arreglar estetica de boton de + y -
         - En nombre poner los nombres de cada uno, y en cantidad poner x1,x1. algo asi
 
@@ -28,6 +29,7 @@
     - En venta de producto, los empleados se quedan con el 15%
     - En color y mechas, los empleados se quedan con el 50%
     - Manejar errores de que no haya peluqueria, empleado, corte, etc
+    - Arreglar tips
 
 - Testear:
     - Tiempos de carga
