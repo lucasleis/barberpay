@@ -10,47 +10,7 @@ from zoneinfo import ZoneInfo
 
 
 # Funciones auxiliares
-"""
-def get_payment_page_data(salon_id):
-    MetodoPago1 = aliased(MetodoPago)
-    MetodoPago2 = aliased(MetodoPago)
 
-    # Obtener fecha actual (desde las 00:00 hasta las 23:59:59 del día de hoy)
-    hoy = datetime.today().date()
-    inicio_dia = datetime.combine(hoy, time.min)  # 00:00:00
-    fin_dia = datetime.combine(hoy, time.max)     # 23:59:59.999999
-
-    pagos_query = (
-        Pago.query
-        .join(Pago.appointment)
-        .join(Appointment.barber)
-        .join(Appointment.service)
-        .join(MetodoPago1, Pago.payment_method1_id == MetodoPago1.id)
-        .outerjoin(MetodoPago2, Pago.payment_method2_id == MetodoPago2.id)
-        .filter(
-            Pago.peluqueria_id == salon_id,
-            Pago.date >= inicio_dia,
-            Pago.date <= fin_dia
-        )
-        .add_entity(MetodoPago1)
-        .add_entity(MetodoPago2)
-        .order_by(Pago.date.desc())
-        .all()
-    )
-
-    pagos_data = []
-    for pago, method1, method2 in pagos_query:
-        pago.method1 = method1
-        pago.method2 = method2
-        pagos_data.append(pago)
-
-    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
-    services = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
-    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
-
-    return pagos_data, barbers, services, methods
-
-"""
 def get_payment_page_data(salon_id):
     MetodoPago1 = aliased(MetodoPago)
     MetodoPago2 = aliased(MetodoPago)
@@ -424,23 +384,21 @@ def add_product():
     else:
         return redirect(url_for("login"))
     
-@app.route('/admin/products/update_quantity/<int:id>', methods=['POST'])
+@app.route('/products/update_quantity/<int:id>', methods=['POST'])
 def update_product_quantity(id):
-    if "user" in session:
-        cantidad_extra = int(request.form['cantidad'])  # Cantidad a sumar
-        salon_id = session.get('salon_id')
+    cantidad_extra = int(request.form['cantidad'])  # Cantidad a sumar
+    salon_id = session.get('salon_id')
 
-        # Buscar el producto por ID y peluquería
-        product = Producto.query.filter_by(id=id, peluqueria_id=salon_id).first()
+    # Buscar el producto por ID y peluquería
+    product = Producto.query.filter_by(id=id, peluqueria_id=salon_id).first()
 
-        if product:
-            product.cantidad = cantidad_extra
-            db.session.commit()
-            return redirect(url_for('list_products'))
-        else:
-            return "Producto no encontrado o no pertenece al salón", 404
+    if product:
+        product.cantidad = cantidad_extra
+        db.session.commit()
+        return redirect(url_for('list_products'))
     else:
-        return redirect(url_for("login"))
+        return "Producto no encontrado o no pertenece al salón", 404
+
 
 @app.route('/admin/products/delete/<int:id>')
 def delete_product(id):
@@ -646,10 +604,18 @@ def add_payment():
                 product_cantidad = int(request.form.get('product_quantity') or 1)
                 product = Producto.query.get(product_id)
                 product_precio = product.precio
+            
                 if not product_id:
                     raise ValueError("Debe seleccionarse un producto.")
+            
+                if product.cantidad < product_cantidad:
+                    raise ValueError(f"No hay suficiente stock del producto {product.nombre} (stock actual: {product.cantidad})")
+            
                 appointment.productos_id = product_id
                 appointment.cantidad = product_cantidad
+            
+                # Descontar del stock
+                product.cantidad -= product_cantidad
 
             db.session.add(appointment)
             db.session.commit()
@@ -766,7 +732,6 @@ def add_payment():
         methods=methods,
         products=products
     )
-
 
 
 @app.route('/payments/delete/<int:pago_id>', methods=['POST'])

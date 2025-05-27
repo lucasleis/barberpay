@@ -68,9 +68,11 @@
       <div style="display: flex; gap: 1rem;">
         <select name="product_id" class="productSelect" onchange="updateCantidadOptions(this)">
           {% for product in products %}
-            <option value="{{ product.id }}" data-precio="{{ product.precio }}" data-cantidad="{{ product.cantidad }}">
-              {{ product.name }}
-            </option>
+            {% if product.cantidad > 0 %}
+              <option value="{{ product.id }}" data-precio="{{ product.precio }}" data-cantidad="{{ product.cantidad }}">
+                {{ product.name }}
+              </option>
+            {% endif %}
           {% endfor %}
         </select>
 
