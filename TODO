@@ -5,6 +5,7 @@
         - Modificar las cuentas en pago
 
     - Productos:
+        - Almacena en turno con precio del primer elemento de servicio
         - Restar la cantidad cuando se compra
         - Arreglar estetica de boton de + y -
         - En nombre poner los nombres de cada uno, y en cantidad poner x1,x1. algo asi
@@ -80,3 +81,24 @@ Mechas
 
 
 
+- Diferentes Pagos:
+    - Servicio: (empleado se queda con el % que le corresponde)
+        - 1 metodos de pago
+        - 2 metodos de pago
+        - Membresia 
+        - Amigo
+        - Descuento
+        - Excepciones:
+            - Color (empleado se queda con el 50%)
+            - Mechas (empleado se queda con el 50%)
+
+    - Producto: (empleado se queda con el 15%)
+        - 1 metodos de pago
+        - 2 metodos de pago
+        - 1 producto
+        - hay + de 1 producto
+
+    - Servicio + Producto:
+        - 1 metodo de pago
+        - 2 metodos de pago
+        - membresia (no va en primer deploy)

@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from backports.zoneinfo import ZoneInfo
+# from backports.zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
+
 
 
 
@@ -101,7 +103,7 @@ class Pago(db.Model):
 
 
 class Membresia(db.Model):
-    __tablename__ = 'membresia'
+    __tablename__ = 'membresias'
     
     id = db.Column(db.Integer, primary_key=True)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
@@ -110,4 +112,4 @@ class Membresia(db.Model):
     # valido_hasta = db.Column(db.DateTime(timezone=True))
     # canjeado = db.Column(db.Boolean, default=False)
 
-    peluqueria = db.relationship('Peluqueria', backref=db.backref('membresia', lazy=True))
+    peluqueria = db.relationship('Peluqueria', backref=db.backref('membresias', lazy=True))

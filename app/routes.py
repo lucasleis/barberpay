@@ -5,7 +5,8 @@ from .auth import login_required
 from sqlalchemy.orm import aliased
 from datetime import datetime, timedelta, time
 from collections import defaultdict
-from backports.zoneinfo import ZoneInfo
+# from backports.zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
 
 
 # Funciones auxiliares
@@ -565,6 +566,7 @@ def add_payment():
                 amount_method2=amount2,
                 amount_tip=tip,
                 peluqueria_id=salon_id,
+                #date= now_buenos_aires()
                 date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
             )
             db.session.add(pago)

@@ -215,7 +215,7 @@
   const method1Select = document.getElementById('method1');
   const method2Select = document.getElementById('method2');
 
-  const tipoPagoRadios = document.querySelectorAll('input[name="tipo_pago"]');
+  // const tipoPagoRadios = document.querySelectorAll('input[name="tipo_pago"]');
 
   const servicioToggle = document.getElementById('toggleServicio');
   const productoToggle = document.getElementById('toggleProducto');
@@ -225,6 +225,7 @@
   // console.log("productPrice: "+ productPrice.value)
   // console.log("productCant: "+ productCant.value)
 
+  // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
   function updatePrice() {
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
     const precio = selected.getAttribute('data-precio');
@@ -235,9 +236,10 @@
     // console.log("servicePrice.value: "+servicePrice.value);
   }
 
-  updatePrice();
-  serviceSelect.addEventListener('change', updatePrice);
+  updatePrice();      // Se llama una vez al cargar la página para mostrar el precio inicial
+  serviceSelect.addEventListener('change', updatePrice);    // Actualiza el precio cada vez que se cambia el servicio seleccionado
 
+  // Oculta alertas automáticamente después de 15 segundos
   setTimeout(() => {
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(alert => {
@@ -247,12 +249,15 @@
     });
   }, 15000);
 
+  // Evento para alternar entre modo de pago simple y múltiple
   toggle.addEventListener('change', function () {
     if (this.checked) {
+      // Si se activa el pago múltiple, ocultar el modo simple y mostrar campos adicionales
       singleGroup.style.display = 'none';
       multiGroup.style.display = 'block';
       multiGroup.querySelectorAll('input').forEach(el => el.required = true);
     } else {
+      // Si se desactiva, volver al modo simple
       singleGroup.style.display = 'flex';
       multiGroup.style.display = 'none';
       multiGroup.querySelectorAll('input').forEach(el => {
@@ -265,12 +270,13 @@
     }
   });
 
+  // Validaciones al enviar el formulario
   form.addEventListener('submit', function (e) {
 
     const toggleError = document.getElementById('toggleError');
     const toggleContainer = document.getElementById('toggleContainer');
 
-    // Validar que un button de Producto o Servicio esté seleccionado
+    // Validación: al menos uno de los toggles (servicio o producto) debe estar activado
     if (!servicioToggle.checked && !productoToggle.checked) {
       toggleError.style.display = 'block';
       toggleContainer.classList.add('border', 'border-danger', 'rounded', 'p-2');
@@ -285,7 +291,7 @@
     const amountInput = document.getElementById('amount1');
 
     if (toggle.checked) {
-      // Modo múltiple
+      // Si está activado el modo de múltiples métodos de pago
       methodSimple.disabled = true;
       methodMultiple.disabled = false;
       methodSimple.removeAttribute('name');
@@ -294,7 +300,7 @@
       amountSimple.removeAttribute('name');
       amountInput.setAttribute('name', 'amount1');
     } else {
-      // Modo simple
+      // Si está activado el modo simple
       methodMultiple.disabled = true;
       methodSimple.disabled = false;
       methodMultiple.removeAttribute('name');
@@ -308,7 +314,7 @@
     let valid = true;
 
     if (toggle.checked) {
-
+      // Si está activado el modo de múltiples pagos, se valida que los montos sumen el precio del servicio
       const price = parseFloat(serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-precio'));
       const amount1 = parseFloat(form.querySelector('input[name="amount1"]').value) || 0;
       const amount2 = parseFloat(form.querySelector('input[name="amount2"]').value) || 0;
@@ -321,17 +327,19 @@
 
       // Validación de monto exacto
       if (total !== price) {
+        // Si no coincide, muestra el error, resalta los inputs y detiene el envío
         [form.querySelector('input[name="amount1"]'), form.querySelector('input[name="amount2"]')]
           .forEach(input => input.classList.add('input-error'));
         errorMsg.style.display = 'block';
         valid = false;
       } else {
+        // Si coincide, oculta el error y limpia los estilos
         [form.querySelector('input[name="amount1"]'), form.querySelector('input[name="amount2"]')]
           .forEach(input => input.classList.remove('input-error'));
         errorMsg.style.display = 'none';
       }
 
-      // Validación de métodos distintos
+      // Validación para que no se seleccione el mismo método de pago dos veces
       if (method1 === method2) {
         [form.querySelector('select[name="method1"]'), form.querySelector('select[name="method2"]')]
           .forEach(select => select.classList.add('input-error'));
@@ -349,6 +357,7 @@
     }
   });
 
+  // Limpia el error de validación en los inputs de monto al modificarlos
   document.querySelectorAll('input[name="amount1"], input[name="amount2"]').forEach(input => {
     input.addEventListener('input', () => {
       input.classList.remove('input-error');
@@ -356,6 +365,7 @@
     });
   });
 
+  // Limpia el error si se corrige la selección de métodos de pago
   document.querySelectorAll('select[name="method1"], select[name="method2"]').forEach(select => {
     select.addEventListener('change', () => {
       select.classList.remove('input-error');
@@ -363,18 +373,20 @@
     });
   });
 
+  // Función para mostrar/ocultar secciones según el toggle (servicio/producto)
   function updateToggleSections() {
     servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
     productSection.style.display = productoToggle.checked ? 'block' : 'none';
   }
 
   // Inicial
-  updateToggleSections();
+  updateToggleSections();   // Inicializa visibilidad de secciones al cargar el script
 
-  // Listeners
+  // Listeners que actualizan la visibilidad si el usuario cambia de opción
   servicioToggle.addEventListener('change', updateToggleSections);
   productoToggle.addEventListener('change', updateToggleSections);
 
+  // Espera que el DOM esté listo para manipular elementos del producto
   document.addEventListener('DOMContentLoaded', function () {
     const productSection = document.getElementById('productSection');
 
@@ -419,6 +431,7 @@
     });
   });
 
+  // Permite eliminar una fila de producto, dejando al menos una
   document.addEventListener('click', function (e) {
     if (e.target.classList.contains('removeProductBtn')) {
       const row = e.target.closest('.productRow');
@@ -437,6 +450,7 @@
     }
   });
 
+  // Actualiza dinámicamente las opciones de cantidad según el producto seleccionado
   function updateCantidadOptions(selectElement) {
     const selectedOption = selectElement.options[selectElement.selectedIndex];
     const cantidadDisponible = parseInt(selectedOption.dataset.cantidad || 0);
@@ -452,7 +466,7 @@
     }
   }
 
-  // Cargar cantidades iniciales en base al primer producto por defecto
+  // Carga las opciones de cantidad iniciales al cargar la página
   document.addEventListener('DOMContentLoaded', function () {
     const productSelect = document.querySelector('.productSelect');
     if (productSelect) {
@@ -460,7 +474,7 @@
     }
   });
 
-  // addListener de checkbox de membresia
+  // Muestra/oculta los métodos de pago según si está marcada la membresía
   document.addEventListener('DOMContentLoaded', function () {
     const checkbox = document.getElementById('membresiaCheckbox');
     const membershipDiv = document.getElementById('membresiaMethodGroup');
