@@ -74,7 +74,7 @@
           {% endfor %}
         </select>
 
-        <select class="productCant" name="cantidad" style="width: 100px;">
+        <select class="productCant" name="product_quantity" style="width: 100px;">
           <!-- Se llena dinámicamente con JS -->
         </select>
 
@@ -164,7 +164,7 @@
   <thead>
     <tr>
       <th>Hora</th>
-      <th>Peluquero</th>
+      <th>Barbero</th>
       <th>Servicio</th>
       <th>Producto</th>
       <th>Cantidad</th>
@@ -187,7 +187,7 @@
       <td>{{ pago.method1.nombre }}</td>
       <td>${{ pago.amount_method1|int }}</td>
       <td>{{ pago.method2.nombre if pago.method2 else '-' }}</td>
-      <td>${{ pago.amount_method2|int }}</td>
+      <td>{{ '-' if pago.amount_method2|int == 0 else '$' ~ (pago.amount_method2|int) }}</td>
       <td>${{ pago.amount_tip|int }}</td>
       <td>${{ pago.amount_method1|int + pago.amount_method2|int + pago.amount_tip|int }}</td>
       <td class="borrar-pago">

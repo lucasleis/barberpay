@@ -2,24 +2,20 @@
     - Empleados:
 
     - Servicios: 
-        - Modificar las cuentas en pago
+        - Se agregan valores para:
+            - Descuentos
+            - Amigos
 
     - Productos:
-        - Almacena en turno con precio del primer elemento de servicio
         - Restar la cantidad cuando se compra
         - Arreglar estetica de boton de + y -
         - En nombre poner los nombres de cada uno, y en cantidad poner x1,x1. algo asi
-        - Se esta mostrando mal la cantidad en pagos
-
-    - Descuentos:
-        - Agregar tabla descuentos
-        - Agregar form en pagos 
 
     - Metodos de Pago:
-        - Agregar checkbox para vouchers (similar a multiples pagos)
 
     - Membresia:
         - Hacer que no se cobre cuando se usa
+        - Hacer que compre un voucher como servicio, y que cuando lo compra muestre el id
 
     - Cierre:
         - Arreglar cuentas (Totales por método de pago)
@@ -30,11 +26,8 @@
 
 
 - Pagos:
-    - Agregar cupon de descuentos 
-    - Agregar algo para que puedan poner un precio de corte diferente (para amigos)
     - En venta de producto, los empleados se quedan con el 15%
     - En color y mechas, los empleados se quedan con el 50%
-    - Descontar cantidad en stock
     - Manejar errores de que no haya peluqueria, empleado, corte, etc
 
 - Testear:

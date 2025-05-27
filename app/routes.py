@@ -646,11 +646,10 @@ def add_payment():
                 product_cantidad = int(request.form.get('product_quantity') or 1)
                 product = Producto.query.get(product_id)
                 product_precio = product.precio
-                # product_cantidad = product.cantidad
                 if not product_id:
                     raise ValueError("Debe seleccionarse un producto.")
                 appointment.productos_id = product_id
-                appointment.product_quantity = product_cantidad
+                appointment.cantidad = product_cantidad
 
             db.session.add(appointment)
             db.session.commit()
