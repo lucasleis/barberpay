@@ -34,6 +34,9 @@ comandos para acceder a la bd por consola.
 4. Hacer un SELECT para ver datos de cualquier tabla
 ```
 SELECT * FROM empleados;
+
+SELECT * FROM turnos ORDER BY date DESC LIMIT 5;
+
 ```
 
 5. Hacer un INSERT

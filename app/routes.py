@@ -782,11 +782,12 @@ def add_payment():
 
             # Cálculo del total pagado
             if multipagos:
+                total_real += tip
                 if method_multiple_1 == method_multiple_2:
                     raise ValueError("No se puede repetir el mismo método de pago.")
                 if not method_multiple_1 or not method_multiple_2:
                     raise ValueError("Faltan datos del segundo método de pago.")
-                total_pagado = amount_method_multi_1 + amount_method_multi_2 + tip
+                total_pagado = amount_method_multi_1 + amount_method_multi_2
             else:
                 if toggle_servicio:
                     total_pagado = amount_simple_service 
@@ -796,7 +797,8 @@ def add_payment():
 
                 if toggle_servicio and toggle_producto:
                     total_pagado = total_real + tip
-
+                    total_real += tip
+                    
             if abs(total_pagado - total_real) > 0.01:
                 raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
 
@@ -805,7 +807,7 @@ def add_payment():
                 appointment_id=appointment.id,
                 payment_method1_id=method_simple_service if not multipagos else method_multiple_1,
                 payment_method2_id=None if not multipagos else method_multiple_2,
-                amount_method1=total_pagado if not multipagos else amount_method_multi_1,
+                amount_method1=total_pagado + tip if not multipagos else amount_method_multi_1,
                 amount_method2=0 if not multipagos else amount_method_multi_2,
                 amount_tip=tip,
                 peluqueria_id=salon_id,

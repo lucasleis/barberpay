@@ -191,7 +191,8 @@
       <td>{{ pago.method2.nombre if pago.method2 else '-' }}</td>
       <td>{{ '-' if pago.amount_method2|int == 0 else '$' ~ (pago.amount_method2|int) }}</td>
       <td>${{ pago.amount_tip|int }}</td>
-      <td>${{ pago.amount_method1|int + pago.amount_method2|int + pago.amount_tip|int }}</td>
+      <!-- <td>${{ pago.amount_method1|int + pago.amount_method2|int + pago.amount_tip|int }}</td> -->
+      <td>${{ pago.amount_method1|int + pago.amount_method2|int }}</td>
       <td class="borrar-pago">
         <form method="POST" action="{{ url_for('delete_payment', pago_id=pago.id) }}">
           <button type="submit" class="btn btn-danger" title="Eliminar">🗑️</button>
