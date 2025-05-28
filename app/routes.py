@@ -748,6 +748,8 @@ def add_payment():
 
     pagos_data, barbers, services, methods = get_payment_page_data(salon_id)
     products = Producto.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    membresias = TipoMembresia.query.filter_by(peluqueria_id=session['salon_id'], active=True).all()
+
 
     if request.method == 'POST':
         try:
@@ -758,8 +760,9 @@ def add_payment():
             tip = float(request.form.get('tip') or 0.0)
             toggle_servicio = 'toggle_servicio' in request.form
             toggle_producto = 'toggle_producto' in request.form
+            toggle_membresia = 'toggle_membresia' in request.form
 
-            if not toggle_servicio and not toggle_producto:
+            if not toggle_servicio and not toggle_producto and not toggle_membresia:
                 raise ValueError("Debe seleccionarse al menos un servicio o producto.")
 
             # Crear appointment
@@ -796,6 +799,12 @@ def add_payment():
                 appointment.cantidad = product_cantidad
                 product.cantidad -= product_cantidad
 
+            if toggle_membresia:
+                membresia_id = request.form.get('membresia_id')
+                if not membresia_id:
+                    raise ValueError("Debe seleccionarse un servicio.")
+                appointment.membresia_id = membresia_id
+
             db.session.add(appointment)
             db.session.commit()
 
@@ -821,6 +830,12 @@ def add_payment():
             if toggle_producto:
                 total_real += (product_precio * product_cantidad)  
 
+            if toggle_membresia:   
+                membresia = TipoMembresia.query.get(membresia_id)
+                total_real += float(membresia.precio) if membresia else 0
+
+            # raise ValueError(f"membresia_id total_real: {total_real}")
+
             # Cálculo del total pagado
             if multipagos:
                 total_real += tip
@@ -834,6 +849,9 @@ def add_payment():
                     total_pagado = amount_simple_service 
 
                 if toggle_producto:
+                    total_pagado = total_real 
+
+                if toggle_membresia:
                     total_pagado = total_real 
 
                 if toggle_servicio and toggle_producto:
@@ -855,6 +873,8 @@ def add_payment():
                 date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
             )
 
+            # necesito obtener valor de membresia pagada
+
             db.session.add(pago)
             db.session.commit()
             flash("Pago registrado con éxito.", "success")
@@ -871,7 +891,8 @@ def add_payment():
         barbers=barbers,
         services=services,
         methods=methods,
-        products=products
+        products=products,
+        membresias=membresias
     )
 
 

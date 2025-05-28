@@ -29,7 +29,7 @@
   </select>
 
 
-  <!-- Toggle Servicio o Producto -->
+  <!-- Toggle Servicio, Producto o Membresia-->
   <div id="toggleContainer" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
     <div style="flex: 1;">
       <input type="checkbox" class="btn-check" id="toggleServicio" name="toggle_servicio" autocomplete="off" checked>
@@ -39,9 +39,13 @@
       <input type="checkbox" class="btn-check" id="toggleProducto" name="toggle_producto" autocomplete="off">
       <label class="btn full-width" for="toggleProducto">Producto</label>
     </div>
+    <div style="flex: 1;">
+      <input type="checkbox" class="btn-check" id="toggleMembresia" name="toggle_membresia" autocomplete="off">
+      <label class="btn full-width" for="toggleMembresia">Membresía</label>
+    </div>
   </div>
   <p id="toggleError" class="text-danger mt-1" style="display: none;"> 
-    Debe seleccionar al menos "Servicio" o "Producto".
+    Debe seleccionar "Servicio", "Producto" o "Membresia".
   </p>                                                    
 
 
@@ -87,6 +91,27 @@
     </div>
   </div>
   <p id="messageContainer" class="error-msg" style="display: none; color: red; font-size: 0.9rem;"></p>
+
+
+  <!-- Selector de membresía -->
+  <div id="membresiaSection" style="display: none;">
+    <label for="membresia_id">Membresía:</label>
+    <div style="display: flex; gap: 1rem;">
+      <select name="membresia_id" id="membresiaSelect">
+        {% for membresia in membresias %}
+          <option 
+            value="{{ membresia.id }}" 
+            data-usos="{{ membresia.usos_disponibles }}"
+            data-precio="{{ membresia.precio }}">
+            {{ membresia.nombre }}
+          </option>
+        {% endfor %}
+      </select>
+      <input type="text" id="membreciaPrice" disabled placeholder="$" style="width: 100px;">
+    </div>
+  </div>
+  <p id="messageContainer" class="error-msg" style="display: none; color: red; font-size: 0.9rem;"></p>
+
 
   <!-- Metodo de Pago -->
   <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -135,6 +160,9 @@
     </p>
     <p id="methodRepeatError" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
       Los métodos de pago deben ser diferentes.
+    </p>
+    <p id="montoError" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
+      El total pagado no coincide con el total esperado.
     </p>
   </div>
 
@@ -223,11 +251,39 @@
 
   const servicioToggle = document.getElementById('toggleServicio');
   const productoToggle = document.getElementById('toggleProducto');
+  const membresiaToggle = document.getElementById('toggleMembresia');
+
   const servicioSection = document.getElementById('servicioSection');
   const productSection = document.getElementById('productSection');
+  const membresiaSelect = document.getElementById('membresiaSelect');
+  const priceInput = document.getElementById('membreciaPrice');
+
 
   // console.log("productPrice: "+ productPrice.value)
   // console.log("productCant: "+ productCant.value)
+
+  // Función para mostrar/ocultar secciones según el toggle (servicio/producto)
+  function updateToggleSections() {
+    servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
+    productSection.style.display = productoToggle.checked ? 'block' : 'none';
+    membresiaSection.style.display = membresiaToggle.checked ? 'block' : 'none';
+  }
+
+  // Actualiza dinámicamente las opciones de cantidad según el producto seleccionado
+  function updateCantidadOptions(selectElement) {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const cantidadDisponible = parseInt(selectedOption.dataset.cantidad || 0);
+
+    const cantidadSelect = document.querySelector('.productCant');
+    cantidadSelect.innerHTML = ''; // Limpiar opciones previas
+
+    for (let i = 1; i <= cantidadDisponible; i++) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = i;
+      cantidadSelect.appendChild(option);
+    }
+  }
 
   // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
   function updatePrice() {
@@ -274,259 +330,300 @@
     }
   });
 
+
+  function mostrarErrorToggle(mostrar) {
+    toggleError.style.display = mostrar ? 'block' : 'none';
+    toggleContainer.classList.toggle('border', mostrar);
+    toggleContainer.classList.toggle('border-danger', mostrar);
+    toggleContainer.classList.toggle('rounded', mostrar);
+    toggleContainer.classList.toggle('p-2', mostrar);
+  }
+
+  function obtenerPrecioServicio() {
+    const select = document.getElementById('serviceSelect');
+    const selected = select.options[select.selectedIndex];
+    return parseFloat(selected.getAttribute('data-precio')) || 0;
+  }
+
+  function obtenerProductosSeleccionados() {
+    const rows = document.querySelectorAll('#productSection .productRow');
+    const items = [];
+    let total = 0;
+
+    rows.forEach((row) => {
+      const productSelect = row.querySelector('.productSelect');
+      const cantidadSelect = row.querySelector('.productCant');
+
+      if (!productSelect || !cantidadSelect) return;
+
+      const selected = productSelect.options[productSelect.selectedIndex];
+      const id = selected.value;
+      const precio = parseFloat(selected.getAttribute('data-precio')) || 0;
+      const cantidad = parseInt(cantidadSelect.value) || 0;
+
+      if (cantidad > 0) {
+        items.push({ id, precio, cantidad });
+        total += precio * cantidad;
+      }
+    });
+
+    return { total, items };
+  }
+
+  function agregarInputsOcultos(productos) {
+    productos.forEach((producto, index) => {
+      const inputId = crearInputOculto(`product_id_${index}`, producto.id);
+      const inputCant = crearInputOculto(`cantidad_${index}`, producto.cantidad);
+      form.appendChild(inputId);
+      form.appendChild(inputCant);
+    });
+  }
+
+  function crearInputOculto(nombre, valor) {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = nombre;
+    input.value = valor;
+    return input;
+  }
+
+function validarMultiplesMetodos(totalEsperado) {
+  const form = document.querySelector('form');
+  const repeatError = document.getElementById('methodRepeatError');
+
+  const amount1 = parseFloat(form.querySelector('input[name="amount_method_multi_1"]').value) || 0;
+  const amount2 = parseFloat(form.querySelector('input[name="amount_method_multi_2"]').value) || 0;
+  const totalPagado = amount1 + amount2;
+
+  const method1 = form.querySelector('select[name="method_multiple_1"]').value;
+  const method2 = form.querySelector('select[name="method_multiple_2"]').value;
+
+  const metodoInputs = [
+    form.querySelector('select[name="method_multiple_1"]'),
+    form.querySelector('select[name="method_multiple_2"]')
+  ];
+
+  console.log("llega validar metodos")
+
+  // Validar métodos repetidos
+  if (method1 === method2) {
+    console.log("entra if method")
+    metodoInputs.forEach(select => select.classList.add('input-error'));
+    repeatError.style.display = 'block';
+    return false;
+  } else {
+    console.log("entra else method")
+    metodoInputs.forEach(select => select.classList.remove('input-error'));
+    repeatError.style.display = 'none';
+  }
+
+  console.log("llega validar total")
+
+  // Validar que el total pagado sea correcto
+  const montoError = document.getElementById('montoError');
+
+  if (totalPagado !== totalEsperado) {
+    montoError.style.display = 'block';
+    return false;
+  } else {
+    montoError.style.display = 'none';
+  }
+
+  return true;
+}
+
+
   // Validaciones al enviar el formulario
+  // Validar que haga las mismas validaciones que func python
   /*
     form.addEventListener('submit', function (e) {
+      let valid = true;
+      const toggleError = document.getElementById('toggleError');
+      const toggleContainer = document.getElementById('toggleContainer');
+      console.log("servicioToggle.checked", servicioToggle.checked)
+      console.log("productoToggle.checked", productoToggle.checked)
 
-    const toggleError = document.getElementById('toggleError');
-    const toggleContainer = document.getElementById('toggleContainer');
-
-    // Validación: al menos uno de los toggles (servicio o producto) debe estar activado
-    if (!servicioToggle.checked && !productoToggle.checked) {
-      toggleError.style.display = 'block';
-      toggleContainer.classList.add('border', 'border-danger', 'rounded', 'p-2');
-      e.preventDefault();
-      return;
-    } else {
-      toggleError.style.display = 'none';
-      toggleContainer.classList.remove('border', 'border-danger', 'rounded', 'p-2');
-    }
-
-    if (servicioToggle.checked) {
-      console.log("entra servicio");
-
-      const serviceSelect = document.getElementById('serviceSelect');
-      const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
-
-      const serviceId = selectedOption.value;
-      const servicePrecio = selectedOption.getAttribute('data-precio');
-
-      console.log('Servicio seleccionado:');
-      console.log(`  ID: ${serviceId}`);
-      console.log(`  Precio: ${servicePrecio}`);
-    }
-
-    if (productoToggle.checked) {
-      console.log("entra producto");
-    
-      const productRows = document.querySelectorAll('#productSection .productRow');
-      const productosSeleccionados = [];
-    
-      productRows.forEach((row) => {
-        const productSelect = row.querySelector('.productSelect');
-        const cantidadSelect = row.querySelector('.productCant');
-      
-        // Validación: si no hay selección, se salta
-        if (!productSelect || !cantidadSelect) return;
-      
-        const selectedOption = productSelect.options[productSelect.selectedIndex];
-        const productId = selectedOption.value;
-        const productPrecio = selectedOption.getAttribute('data-precio');
-        const cantidad = cantidadSelect.value;
-      
-        // Solo incluir si tiene cantidad válida (> 0)
-        if (cantidad && parseInt(cantidad) > 0) {
-          productosSeleccionados.push({
-            id: productId,
-            precio: productPrecio,
-            cantidad: cantidad,
-          });
-        }
-      });
-    
-      console.log('Productos seleccionados:', productosSeleccionados);
-      productosSeleccionados.forEach((producto, index) => {
-        console.log(`Producto ${index + 1}:`);
-        console.log(`  ID: ${producto.id}`);
-        console.log(`  Precio: ${producto.precio}`);
-        console.log(`  Cantidad: ${producto.cantidad}`);
-      });
-    }
-
-
-    const amountSimple = document.getElementById('amountSimple');
-    const amountInput = document.getElementById('amount1');
-
-    if (togglemultiPayment.checked) {
-      // Si está activado el modo de múltiples métodos de pago
-      methodSimple.disabled = true;
-      methodMultiple.disabled = false;
-      methodSimple.removeAttribute('name');
-      methodMultiple.setAttribute('name', 'method1');
-
-      amountSimple.removeAttribute('name');
-      amountInput.setAttribute('name', 'amount1');
-    } else {
-      // Si está activado el modo simple
-      methodMultiple.disabled = true;
-      methodSimple.disabled = false;
-      methodMultiple.removeAttribute('name');
-      methodSimple.setAttribute('name', 'method1');
-      updatePrice();
-    
-      amountInput.removeAttribute('name');
-      amountSimple.setAttribute('name', 'amount1');
-    }
-
-    let valid = true;
-
-    if (togglemultiPayment.checked) {
-      // Si está activado el modo de múltiples pagos, se valida que los montos sumen el precio del servicio
-      const price = parseFloat(serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-precio'));
-      const amount1 = parseFloat(form.querySelector('input[name="amount1"]').value) || 0;
-      const amount2 = parseFloat(form.querySelector('input[name="amount2"]').value) || 0;
-      const total = amount1 + amount2;
-
-      const method1 = form.querySelector('select[name="method1"]').value;
-      const method2 = form.querySelector('select[name="method2"]').value;
-
-      // console.log("price: " + price);
-
-      // Validación de monto exacto
-      if (total !== price) {
-        // Si no coincide, muestra el error, resalta los inputs y detiene el envío
-        [form.querySelector('input[name="amount1"]'), form.querySelector('input[name="amount2"]')]
-          .forEach(input => input.classList.add('input-error'));
-        errorMsg.style.display = 'block';
-        valid = false;
+      // Validación: al menos uno de los toggles debe estar activo
+      if (!servicioToggle.checked && !productoToggle.checked) {
+        toggleError.style.display = 'block';
+        toggleContainer.classList.add('border', 'border-danger', 'rounded', 'p-2');
+        e.preventDefault();
+        return;
       } else {
-        // Si coincide, oculta el error y limpia los estilos
-        [form.querySelector('input[name="amount1"]'), form.querySelector('input[name="amount2"]')]
-          .forEach(input => input.classList.remove('input-error'));
-        errorMsg.style.display = 'none';
+        toggleError.style.display = 'none';
+        toggleContainer.classList.remove('border', 'border-danger', 'rounded', 'p-2');
       }
 
-      // Validación para que no se seleccione el mismo método de pago dos veces
-      if (method1 === method2) {
-        [form.querySelector('select[name="method1"]'), form.querySelector('select[name="method2"]')]
-          .forEach(select => select.classList.add('input-error'));
-        repeatError.style.display = 'block';
-        valid = false;
-      } else {
-        [form.querySelector('select[name="method1"]'), form.querySelector('select[name="method2"]')]
-          .forEach(select => select.classList.remove('input-error'));
-        repeatError.style.display = 'none';
+
+      // Obtener servicio
+      let servicePrecio = 0;
+      let serviceId = null;
+      if (servicioToggle.checked) {
+        console.log("ENTRA TOGGLE SERVICIO");
+        const serviceSelect = document.getElementById('serviceSelect');
+        const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+        serviceId = selectedOption.value;
+        servicePrecio = parseFloat(selectedOption.getAttribute('data-precio'));
+      }
+
+      // Obtener productos
+      let productosSeleccionados = [];
+      let productosPrecioTotal = 0;
+      if (productoToggle.checked) {
+        console.log("ENTRA TOGGLE PRODUCTO");
+        const productRows = document.querySelectorAll('#productSection .productRow');
+
+        productRows.forEach((row) => {
+          const productSelect = row.querySelector('.productSelect');
+          const cantidadSelect = row.querySelector('.productCant');
+
+          if (!productSelect || !cantidadSelect) return;
+
+          const selectedOption = productSelect.options[productSelect.selectedIndex];
+          const productId = selectedOption.value;
+          const productPrecio = parseFloat(selectedOption.getAttribute('data-precio'));
+          const cantidad = parseInt(cantidadSelect.value);
+
+          if (cantidad > 0) {
+            productosSeleccionados.push({
+              id: productId,
+              precio: productPrecio,
+              cantidad: cantidad
+            });
+
+            productosPrecioTotal += productPrecio * cantidad;
+          }
+        });
+
+        if (productosSeleccionados.length === 0) {
+          alert('Debe seleccionar al menos un producto con cantidad válida');
+          e.preventDefault();
+          return;
+        }
+
+        productosSeleccionados.forEach((producto, index) => {
+          console.log(`Producto ${index + 1}: ID: ${producto.id}, Precio: ${producto.precio}, Cantidad: ${producto.cantidad}`);
+
+          const inputId = document.createElement('input');
+          inputId.type = 'hidden';
+          inputId.name = `product_id_${index}`;
+          inputId.value = producto.id;
+          form.appendChild(inputId);
+
+          const inputCant = document.createElement('input');
+          inputCant.type = 'hidden';
+          inputCant.name = `cantidad_${index}`;
+          inputCant.value = producto.cantidad;
+          form.appendChild(inputCant);
+        });
+      }
+
+      // Calcular total esperado
+      const totalEsperado = servicePrecio + productosPrecioTotal;
+      // console.log('Total esperado:', totalEsperado);
+
+      // console.log('togglemultiPayment:', togglemultiPayment.checked);
+      if (togglemultiPayment.checked) {
+        const amount1 = parseFloat(form.querySelector('input[name="amount_method_multi_1"]').value) || 0;
+        const amount2 = parseFloat(form.querySelector('input[name="amount_method_multi_2"]').value) || 0;
+        const total_multi_methods = amount1 + amount2;
+
+        // console.log('amount1:', amount1, ' amount2:', amount2);
+        console.log('amount1 + amount2:', total_multi_methods);
+
+        if (total_multi_methods === totalEsperado) {
+          console.log("SUMA CORRECTA");
+        }
+
+        // Validar que no se repita el método de pago
+        const method1 = form.querySelector('select[name="method_multiple_1"]').value;
+        const method2 = form.querySelector('select[name="method_multiple_2"]').value;
+
+        if (method1 === method2) {
+          [form.querySelector('select[name="method_multiple_1"]'), form.querySelector('select[name="method_multiple_2"]')]
+            .forEach(select => select.classList.add('input-error'));
+          repeatError.style.display = 'block';
+          valid = false;
+        } else {
+          [form.querySelector('select[name="method_multiple_1"]'), form.querySelector('select[name="method_multiple_2"]')]
+            .forEach(select => select.classList.remove('input-error'));
+          repeatError.style.display = 'none';
+        }
       }
 
       if (!valid) {
         e.preventDefault();
       }
-    }
     });
   */
-
   form.addEventListener('submit', function (e) {
     let valid = true;
+
     const toggleError = document.getElementById('toggleError');
     const toggleContainer = document.getElementById('toggleContainer');
-    console.log("servicioToggle.checked", servicioToggle.checked)
-    console.log("productoToggle.checked", productoToggle.checked)
 
-    // Validación: al menos uno de los toggles debe estar activo
-    if (!servicioToggle.checked && !productoToggle.checked) {
-      toggleError.style.display = 'block';
-      toggleContainer.classList.add('border', 'border-danger', 'rounded', 'p-2');
+    const servicioActivo = servicioToggle.checked;
+    const productoActivo = productoToggle.checked;
+    const membresiaActivo = membresiaToggle.checked;
+
+    // Validar toggles
+    if (!servicioActivo && !productoActivo && !membresiaActivo) {
+      mostrarErrorToggle(true);
       e.preventDefault();
       return;
     } else {
-      toggleError.style.display = 'none';
-      toggleContainer.classList.remove('border', 'border-danger', 'rounded', 'p-2');
+      mostrarErrorToggle(false);
     }
 
+    if (servicioActivo || productoActivo){
+      const servicePrecio = servicioActivo ? obtenerPrecioServicio() : 0;
+      const productosData = productoActivo ? obtenerProductosSeleccionados() : { total: 0, items: [] };
 
-    // Obtener servicio
-    let servicePrecio = 0;
-    let serviceId = null;
-    if (servicioToggle.checked) {
-      console.log("ENTRA TOGGLE SERVICIO");
-      const serviceSelect = document.getElementById('serviceSelect');
-      const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
-      serviceId = selectedOption.value;
-      servicePrecio = parseFloat(selectedOption.getAttribute('data-precio'));
-    }
-
-    // Obtener productos
-    let productosSeleccionados = [];
-    let productosPrecioTotal = 0;
-    if (productoToggle.checked) {
-      console.log("ENTRA TOGGLE PRODUCTO");
-      const productRows = document.querySelectorAll('#productSection .productRow');
-
-      productRows.forEach((row) => {
-        const productSelect = row.querySelector('.productSelect');
-        const cantidadSelect = row.querySelector('.productCant');
-
-        if (!productSelect || !cantidadSelect) return;
-
-        const selectedOption = productSelect.options[productSelect.selectedIndex];
-        const productId = selectedOption.value;
-        const productPrecio = parseFloat(selectedOption.getAttribute('data-precio'));
-        const cantidad = parseInt(cantidadSelect.value);
-
-        if (cantidad > 0) {
-          productosSeleccionados.push({
-            id: productId,
-            precio: productPrecio,
-            cantidad: cantidad
-          });
-
-          productosPrecioTotal += productPrecio * cantidad;
-        }
-      });
-
-      if (productosSeleccionados.length === 0) {
+      if (productoActivo && productosData.items.length === 0) {
         alert('Debe seleccionar al menos un producto con cantidad válida');
         e.preventDefault();
         return;
       }
 
-      productosSeleccionados.forEach((producto, index) => {
-        console.log(`Producto ${index + 1}: ID: ${producto.id}, Precio: ${producto.precio}, Cantidad: ${producto.cantidad}`);
+      agregarInputsOcultos(productosData.items);
 
-        const inputId = document.createElement('input');
-        inputId.type = 'hidden';
-        inputId.name = `product_id_${index}`;
-        inputId.value = producto.id;
-        form.appendChild(inputId);
+      const totalEsperado = servicePrecio + productosData.total;
+      console.log("totalEsperado: ",totalEsperado)
 
-        const inputCant = document.createElement('input');
-        inputCant.type = 'hidden';
-        inputCant.name = `cantidad_${index}`;
-        inputCant.value = producto.cantidad;
-        form.appendChild(inputCant);
-      });
+      if (togglemultiPayment.checked) {
+        const validMultiPago = validarMultiplesMetodos(totalEsperado);
+        if (!validMultiPago) valid = false;
+      }
+      console.log("pasa if")
+
     }
 
-    // Calcular total esperado
-    const totalEsperado = servicePrecio + productosPrecioTotal;
-    // console.log('Total esperado:', totalEsperado);
+    if (membresiaActivo){
 
-    // console.log('togglemultiPayment:', togglemultiPayment.checked);
-    if (togglemultiPayment.checked) {
-      const amount1 = parseFloat(form.querySelector('input[name="amount_method_multi_1"]').value) || 0;
-      const amount2 = parseFloat(form.querySelector('input[name="amount_method_multi_2"]').value) || 0;
-      const total_multi_methods = amount1 + amount2;
+      const usa_membresia = document.getElementById('membresiaCheckbox');
+      
+      if (usa_membresia.checked) {
 
-      // console.log('amount1:', amount1, ' amount2:', amount2);
-      console.log('amount1 + amount2:', total_multi_methods);
+        const num_membresia = document.getElementById('check_membresia');
+        console.log("num_membresia: ", num_membresia)
 
-      if (total_multi_methods === totalEsperado) {
-        console.log("SUMA CORRECTA");
-      }
-
-      // Validar que no se repita el método de pago
-      const method1 = form.querySelector('select[name="method_multiple_1"]').value;
-      const method2 = form.querySelector('select[name="method_multiple_2"]').value;
-
-      if (method1 === method2) {
-        [form.querySelector('select[name="method_multiple_1"]'), form.querySelector('select[name="method_multiple_2"]')]
-          .forEach(select => select.classList.add('input-error'));
-        repeatError.style.display = 'block';
-        valid = false;
       } else {
-        [form.querySelector('select[name="method_multiple_1"]'), form.querySelector('select[name="method_multiple_2"]')]
-          .forEach(select => select.classList.remove('input-error'));
-        repeatError.style.display = 'none';
+        console.log("paga membresia")
+        const precioActual = obtenerPrecioMembresiaSeleccionada();
+        console.log('Precio de la membresía seleccionada:', precioActual);
+
+        const totalEsperado = precioActual;
+
+        if (togglemultiPayment.checked) {
+          const validMultiPago = validarMultiplesMetodos(totalEsperado);
+          if (!validMultiPago) valid = false;
+          
+          if (validMultiPago){
+            console.log('Precio valido');
+          } else {
+            console.log('Error en cuentas');
+          } 
+        }
       }
     }
 
@@ -534,6 +631,7 @@
       e.preventDefault();
     }
   });
+
 
   // Limpia el error de validación en los inputs de monto al modificarlos
   document.querySelectorAll('input[name="amount1"], input[name="amount2"]').forEach(input => {
@@ -551,18 +649,13 @@
     });
   });
 
-  // Función para mostrar/ocultar secciones según el toggle (servicio/producto)
-  function updateToggleSections() {
-    servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
-    productSection.style.display = productoToggle.checked ? 'block' : 'none';
-  }
-
   // Inicial
   updateToggleSections();   // Inicializa visibilidad de secciones al cargar el script
 
   // Listeners que actualizan la visibilidad si el usuario cambia de opción
   servicioToggle.addEventListener('change', updateToggleSections);
   productoToggle.addEventListener('change', updateToggleSections);
+  membresiaToggle.addEventListener('change', updateToggleSections);
 
   // Espera que el DOM esté listo para manipular elementos del producto
   document.addEventListener('DOMContentLoaded', function () {
@@ -628,22 +721,6 @@
     }
   });
 
-  // Actualiza dinámicamente las opciones de cantidad según el producto seleccionado
-  function updateCantidadOptions(selectElement) {
-    const selectedOption = selectElement.options[selectElement.selectedIndex];
-    const cantidadDisponible = parseInt(selectedOption.dataset.cantidad || 0);
-
-    const cantidadSelect = document.querySelector('.productCant');
-    cantidadSelect.innerHTML = ''; // Limpiar opciones previas
-
-    for (let i = 1; i <= cantidadDisponible; i++) {
-      const option = document.createElement('option');
-      option.value = i;
-      option.textContent = i;
-      cantidadSelect.appendChild(option);
-    }
-  }
-
   // Carga las opciones de cantidad iniciales al cargar la página
   document.addEventListener('DOMContentLoaded', function () {
     const productSelect = document.querySelector('.productSelect');
@@ -681,6 +758,27 @@
     campo.classList.remove('input-error');
     mensaje.style.display = 'none';
   }
+
+
+  // funciones para membresia
+
+  function obtenerPrecioMembresiaSeleccionada() {
+    const selectedOption = membresiaSelect.options[membresiaSelect.selectedIndex];
+    const precio = selectedOption.getAttribute('data-precio');
+    return precio ? parseFloat(precio) : 0;
+  }
+
+  membresiaSelect.addEventListener('change', function () {
+    const selectedOption = membresiaSelect.options[membresiaSelect.selectedIndex];
+    const precio = selectedOption.getAttribute('data-precio');
+
+    priceInput.value = precio ? `$${parseFloat(precio).toFixed(0)}` : '';
+  });
+
+  // Trigger al cargar la página para preseleccionados
+  document.addEventListener('DOMContentLoaded', () => {
+    membresiaSelect.dispatchEvent(new Event('change'));
+  });
 
 </script>
 

@@ -108,6 +108,10 @@ class TipoMembresia(db.Model):
     nombre = db.Column(db.String(100), nullable=False)
     precio = db.Column(db.Numeric(10, 2), nullable=False)
     usos = db.Column(db.Integer, nullable=False)
+    active = db.Column(db.Boolean, default=True)  
+
+    peluqueria = db.relationship('Peluqueria', backref=db.backref('tipos_membresia', lazy=True))
+
 
 
 class Membresia(db.Model):
