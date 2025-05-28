@@ -554,6 +554,32 @@ def delete_membership_type(id):
 """
 
 
+### Membresias ###
+
+@app.route('/membresias/incrementar/<int:id>', methods=['POST'])
+def incrementar_usos_membresia(id):
+    membresia = Membresia.query.get(id)
+    if not membresia:
+        return "Membresía no encontrada", 404
+
+    membresia.usos_disponibles += 1
+    db.session.commit()
+    return "Uso agregado exitosamente", 200
+
+@app.route('/membresias/decrementar/<int:id>', methods=['POST'])
+def decrementar_usos_membresia(id):
+    membresia = Membresia.query.get(id)
+    if not membresia:
+        return "Membresía no encontrada", 404
+
+    if membresia.usos_disponibles <= 0:
+        return "No hay usos disponibles para descontar", 400
+
+    membresia.usos_disponibles -= 1
+    db.session.commit()
+    return "Uso descontado exitosamente", 200
+
+
 ### Pagos ###
 """
     @app.route('/payments/new', methods=['GET', 'POST'])
@@ -804,6 +830,29 @@ def add_payment():
                 if not membresia_id:
                     raise ValueError("Debe seleccionarse un servicio.")
                 appointment.membresia_id = membresia_id
+
+                check_membresia = request.form.get('membresiaCheckbox') 
+                if check_membresia == 'on':
+                    print("Checkbox seleccionado")
+
+                    # Buscar la membresía
+                    membresia = Membresia.query.get(membresia_id)
+                    if not membresia:
+                        raise ValueError("Membresía no encontrada.")
+
+                    # Validar usos disponibles
+                    if membresia.usos_disponibles <= 0:
+                        raise ValueError("No hay usos disponibles para descontar en esta membresía.")
+
+                    # Restar uno
+                    membresia.usos_disponibles -= 1
+                    db.session.commit()
+
+                    flash(f"Membresía #{membresia.id}: Quedan {membresia.usos_disponibles} usos disponibles.", "success")
+                    return redirect(url_for('add_payment'))
+                else:
+                    print("Checkbox NO seleccionado")
+
 
             db.session.add(appointment)
             db.session.commit()
