@@ -1,12 +1,12 @@
 from flask import current_app as app, render_template, request, redirect, url_for, session, flash
 from . import db
-from .models import Peluqueria, Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia
+from .models import Peluqueria, Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia
 from .auth import login_required
 from sqlalchemy.orm import aliased
 from datetime import datetime, timedelta, time
 from collections import defaultdict
-# from backports.zoneinfo import ZoneInfo
-from zoneinfo import ZoneInfo
+from backports.zoneinfo import ZoneInfo
+# from zoneinfo import ZoneInfo
 
 
 # Funciones auxiliares
@@ -493,205 +493,246 @@ def delete_payment_method(id):
         return redirect(url_for("login"))
 
 
-### Membresias ###
-@app.route('/membresia/descontar/<int:id>', methods=['POST'])
-def descontar_membresia(id):
-    salon_id = session.get('salon_id')
+### Tipos de Membresias ###
 
-    # Buscar la membresía por ID y peluquería
-    membresia = Membresia.query.filter_by(id=id, peluqueria_id=salon_id).first()
-
-    if membresia:
-        if membresia.cantidad > 0:
-            membresia.cantidad -= 1
-            db.session.commit()
-            return redirect(url_for('some_view_name'))  # Cambiá esto según a dónde querés redirigir
-        else:
-            return "La membresía ya no tiene usos disponibles.", 400
+@app.route('/admin/memberships')
+def list_memberships():
+    if "user" in session:
+        salon_id = session.get('salon_id')
+        tipos = TipoMembresia.query.filter_by(peluqueria_id=salon_id).all()
+        return render_template('memberships.html', tipos_membresia=tipos)
     else:
-        return "Membresía no encontrada o no pertenece al salón", 404
+        return redirect(url_for("login"))
 
+@app.route('/admin/memberships/add', methods=['POST'])
+def add_membership():
+    if "user" in session:
+        salon_id = session.get('salon_id')
+        nombre = request.form['nombre']
+        precio = request.form['precio']
+        usos = request.form['cantidad'] 
+
+        nueva = TipoMembresia(
+            peluqueria_id=salon_id,
+            nombre=nombre,
+            precio=precio,
+            usos=usos
+        )
+        db.session.add(nueva)
+        db.session.commit()
+        return redirect(url_for('list_memberships'))
+    else:
+        return redirect(url_for("login"))
+
+@app.route('/admin/memberships/delete/<int:id>')
+def delete_membership_type(id):
+    if "user" in session:
+        tipo = TipoMembresia.query.get_or_404(id)
+        db.session.delete(tipo)
+        db.session.commit()
+        return redirect(url_for('list_memberships'))
+    else:
+        return redirect(url_for("login"))
+
+"""
+    @app.route('/membresia/descontar/<int:id>', methods=['POST'])
+    def descontar_membresia(id):
+        salon_id = session.get('salon_id')
+
+        # Buscar la membresía por ID y peluquería
+        membresia = Membresia.query.filter_by(id=id, peluqueria_id=salon_id).first()
+
+        if membresia:
+            if membresia.cantidad > 0:
+                membresia.cantidad -= 1
+                db.session.commit()
+                return redirect(url_for('some_view_name'))  # Cambiá esto según a dónde querés redirigir
+            else:
+                return "La membresía ya no tiene usos disponibles.", 400
+        else:
+            return "Membresía no encontrada o no pertenece al salón", 404
+"""
 
 
 ### Pagos ###
 """
-@app.route('/payments/new', methods=['GET', 'POST'])
-def add_payment():
-    session['salon_id'] = 1
-    raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
-
-    try:
-        salon_id = int(str(raw_salon_id).strip("{} "))
-    except (ValueError, TypeError):
-        flash("ID de peluquería inválido.", "danger")
-        return redirect(url_for("index"))
-
-    pagos_data, barbers, services, methods = get_payment_page_data(salon_id)
-    products = Producto.query.filter_by(active=True, peluqueria_id=salon_id).all()
-
-    if request.method == 'POST':
+    @app.route('/payments/new', methods=['GET', 'POST'])
+    def add_payment():
+        session['salon_id'] = 1
+        raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
+    
         try:
-            barber_id = request.form.get('barber_id')
-            if not barber_id:
-                raise ValueError("Debe seleccionarse un barbero.")
-
-            # print("product_id:", request.form.get('product_id'))
-            tip = float(request.form.get('tip') or 0.0)
-
-            # Verificamos los toggles
-            toggle_servicio = 'toggle_servicio' in request.form
-            toggle_producto = 'toggle_producto' in request.form
-            # print("toggle_servicio: ", toggle_servicio)
-            # print("toggle_producto: ", toggle_producto)
-
-            if not toggle_servicio and not toggle_producto:
-                raise ValueError("Debe seleccionarse al menos un servicio o producto.")
-
-            # Creamos el appointment (con servicio, productos o ambos)
-            appointment = Appointment(
-                barber_id=barber_id,
-                peluqueria_id=salon_id
-            )
-
-            if toggle_servicio:
-                service_id = request.form.get('service_id')
-                if not service_id:
-                    raise ValueError("Debe seleccionarse un servicio.")
-                appointment.service_id = service_id
-
-            if toggle_producto:
-                product_id = request.form.get('product_id')
-                product_cantidad = int(request.form.get('product_quantity') or 1)
-                product = Producto.query.get(product_id)
-                product_precio = product.precio
-
-                if not product_id:
-                    raise ValueError("Debe seleccionarse un producto.")
-
-                if product.cantidad < product_cantidad:
-                    raise ValueError(f"No hay suficiente stock del producto {product.nombre} (stock actual: {product.cantidad})")
-
-                appointment.productos_id = product_id
-                appointment.cantidad = product_cantidad
-
-                # Descontar del stock
-                product.cantidad -= product_cantidad
-
-            db.session.add(appointment)
-            db.session.commit()
-
-            # Procesamos métodos de pago
-            multipagos = 'togglemultiPayment' in request.form
-            # toggle = request.form.get('togglemultiPayment')
-            # print("multipagos:", multipagos)
-
-
-            # Simple payment
-            amount_simple_service = int(request.form.get('amount_simple'))
-            method_simple_service = int(request.form.get('methodSimple'))
-            # print("amount_simple_service:", amount_simple_service)
-            # print("method_simple_service:", method_simple_service)
-
-            # Multi payment
-            method_multiple_1 = int(request.form.get('method_multiple_1'))
-            amount_method_multi_1 = float(request.form.get('amount_method_multi_1') or 0)
-            # print("method_multiple_1:", method_multiple_1)
-            # print("amount_method_multi_1:", amount_method_multi_1)
-
-            method_multiple_2 = request.form.get('method_multiple_2')
-            amount_method_multi_2 = float(request.form.get('amount_method_multi_2') or 0)
-            # print("method_multiple_2:", method_multiple_2)
-            # print("amount_method_multi_2:", amount_method_multi_2)
-            
-
-            # Validar coherencia con el checkbox de múltiples pagos
-            if multipagos:
-
-                if method_multiple_1 == method_multiple_2:
-                    raise ValueError("No se puede repetir el mismo método de pago.")
-            
-                if multipagos and (not method_multiple_2):
-                    raise ValueError("Faltan datos del segundo método de pago.")
-
-                total_pagado = amount_method_multi_1 + amount_method_multi_2 + tip
-            else:
+            salon_id = int(str(raw_salon_id).strip("{} "))
+        except (ValueError, TypeError):
+            flash("ID de peluquería inválido.", "danger")
+            return redirect(url_for("index"))
+    
+        pagos_data, barbers, services, methods = get_payment_page_data(salon_id)
+        products = Producto.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    
+        if request.method == 'POST':
+            try:
+                barber_id = request.form.get('barber_id')
+                if not barber_id:
+                    raise ValueError("Debe seleccionarse un barbero.")
+    
+                # print("product_id:", request.form.get('product_id'))
+                tip = float(request.form.get('tip') or 0.0)
+    
+                # Verificamos los toggles
+                toggle_servicio = 'toggle_servicio' in request.form
+                toggle_producto = 'toggle_producto' in request.form
+                # print("toggle_servicio: ", toggle_servicio)
+                # print("toggle_producto: ", toggle_producto)
+    
+                if not toggle_servicio and not toggle_producto:
+                    raise ValueError("Debe seleccionarse al menos un servicio o producto.")
+    
+                # Creamos el appointment (con servicio, productos o ambos)
+                appointment = Appointment(
+                    barber_id=barber_id,
+                    peluqueria_id=salon_id
+                )
+    
                 if toggle_servicio:
-                    total_pagado = amount_simple_service
-                    print("total_pagado: ",total_pagado)
+                    service_id = request.form.get('service_id')
+                    if not service_id:
+                        raise ValueError("Debe seleccionarse un servicio.")
+                    appointment.service_id = service_id
+    
                 if toggle_producto:
-                    total_pagado = (product_precio * product_cantidad)
-                    # print("product_precio: ",product_precio)
-                    # print("product_cantidad: ",product_cantidad)
-
-            # Calculamos el total real (servicio + producto)
-            total_real = 0.0
-            if toggle_servicio:
-                service = Servicio.query.get(service_id)
-                total_real += service.precio if service else 0
-                if not toggle_producto:
-                    total_pagado = amount_simple_service + tip
-                    print("total_pagado: ",total_pagado)
-
-            if toggle_producto:
-                print("product_precio:", product_precio)
-                # print("product_cantidad:", product_cantidad)
-                total_real += (product_precio * product_cantidad) if product else 0
-                if not toggle_servicio:
-                    total_pagado = total_real + tip
-
-            if toggle_servicio and toggle_producto:
-                total_pagado = amount_simple_service + total_real + tip
-                # falta revisar ambos toggles activos
-
-            print("total_pagado: ",total_pagado," total_real: ",total_real)
-
-            if abs(total_pagado - total_real) > 0.01:
-                raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
-
-            # Guardamos el pago
-            if multipagos:
-                # print("ENTRA MULTIPAGO")
-                pago = Pago(
-                    appointment_id=appointment.id,
-                    payment_method1_id=method_multiple_1,
-                    payment_method2_id=method_multiple_2,
-                    amount_method1=amount_method_multi_1,
-                    amount_method2=amount_method_multi_2,
-                    amount_tip=tip,
-                    peluqueria_id=salon_id,
-                    date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
-                )
-            else:
-                # print("ENTRA PAGO SIMPLE")
-                pago = Pago(
-                    appointment_id=appointment.id,
-                    payment_method1_id=method_simple_service,
-                    payment_method2_id=None,
-                    amount_method1=total_pagado,
-                    amount_method2=0,
-                    amount_tip=tip,
-                    peluqueria_id=salon_id,
-                    date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
-                )
-
-            db.session.add(pago)
-            db.session.commit()
-            flash("Pago registrado con éxito.", "success")
-            return redirect(url_for('add_payment'))
-
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Error al registrar el pago: {str(e)}", "danger")
-
-    return render_template(
-        'add_payment.html',
-        pagos=pagos_data,
-        salon_id=salon_id,
-        barbers=barbers,
-        services=services,
-        methods=methods,
-        products=products
-    )
+                    product_id = request.form.get('product_id')
+                    product_cantidad = int(request.form.get('product_quantity') or 1)
+                    product = Producto.query.get(product_id)
+                    product_precio = product.precio
+    
+                    if not product_id:
+                        raise ValueError("Debe seleccionarse un producto.")
+    
+                    if product.cantidad < product_cantidad:
+                        raise ValueError(f"No hay suficiente stock del producto {product.nombre} (stock actual: {product.cantidad})")
+    
+                    appointment.productos_id = product_id
+                    appointment.cantidad = product_cantidad
+    
+                    # Descontar del stock
+                    product.cantidad -= product_cantidad
+    
+                db.session.add(appointment)
+                db.session.commit()
+    
+                # Procesamos métodos de pago
+                multipagos = 'togglemultiPayment' in request.form
+                # toggle = request.form.get('togglemultiPayment')
+                # print("multipagos:", multipagos)
+    
+    
+                # Simple payment
+                amount_simple_service = int(request.form.get('amount_simple'))
+                method_simple_service = int(request.form.get('methodSimple'))
+                # print("amount_simple_service:", amount_simple_service)
+                # print("method_simple_service:", method_simple_service)
+    
+                # Multi payment
+                method_multiple_1 = int(request.form.get('method_multiple_1'))
+                amount_method_multi_1 = float(request.form.get('amount_method_multi_1') or 0)
+                # print("method_multiple_1:", method_multiple_1)
+                # print("amount_method_multi_1:", amount_method_multi_1)
+    
+                method_multiple_2 = request.form.get('method_multiple_2')
+                amount_method_multi_2 = float(request.form.get('amount_method_multi_2') or 0)
+                # print("method_multiple_2:", method_multiple_2)
+                # print("amount_method_multi_2:", amount_method_multi_2)
+                
+    
+                # Validar coherencia con el checkbox de múltiples pagos
+                if multipagos:
+                
+                    if method_multiple_1 == method_multiple_2:
+                        raise ValueError("No se puede repetir el mismo método de pago.")
+                
+                    if multipagos and (not method_multiple_2):
+                        raise ValueError("Faltan datos del segundo método de pago.")
+    
+                    total_pagado = amount_method_multi_1 + amount_method_multi_2 + tip
+                else:
+                    if toggle_servicio:
+                        total_pagado = amount_simple_service
+                        print("total_pagado: ",total_pagado)
+                    if toggle_producto:
+                        total_pagado = (product_precio * product_cantidad)
+                        # print("product_precio: ",product_precio)
+                        # print("product_cantidad: ",product_cantidad)
+    
+                # Calculamos el total real (servicio + producto)
+                total_real = 0.0
+                if toggle_servicio:
+                    service = Servicio.query.get(service_id)
+                    total_real += service.precio if service else 0
+                    if not toggle_producto:
+                        total_pagado = amount_simple_service + tip
+                        print("total_pagado: ",total_pagado)
+    
+                if toggle_producto:
+                    print("product_precio:", product_precio)
+                    # print("product_cantidad:", product_cantidad)
+                    total_real += (product_precio * product_cantidad) if product else 0
+                    if not toggle_servicio:
+                        total_pagado = total_real + tip
+    
+                if toggle_servicio and toggle_producto:
+                    total_pagado = amount_simple_service + total_real + tip
+                    # falta revisar ambos toggles activos
+    
+                print("total_pagado: ",total_pagado," total_real: ",total_real)
+    
+                if abs(total_pagado - total_real) > 0.01:
+                    raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
+    
+                # Guardamos el pago
+                if multipagos:
+                    # print("ENTRA MULTIPAGO")
+                    pago = Pago(
+                        appointment_id=appointment.id,
+                        payment_method1_id=method_multiple_1,
+                        payment_method2_id=method_multiple_2,
+                        amount_method1=amount_method_multi_1,
+                        amount_method2=amount_method_multi_2,
+                        amount_tip=tip,
+                        peluqueria_id=salon_id,
+                        date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
+                    )
+                else:
+                    # print("ENTRA PAGO SIMPLE")
+                    pago = Pago(
+                        appointment_id=appointment.id,
+                        payment_method1_id=method_simple_service,
+                        payment_method2_id=None,
+                        amount_method1=total_pagado,
+                        amount_method2=0,
+                        amount_tip=tip,
+                        peluqueria_id=salon_id,
+                        date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
+                    )
+    
+                db.session.add(pago)
+                db.session.commit()
+                flash("Pago registrado con éxito.", "success")
+                return redirect(url_for('add_payment'))
+    
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Error al registrar el pago: {str(e)}", "danger")
+    
+        return render_template(
+            'add_payment.html',
+            pagos=pagos_data,
+            salon_id=salon_id,
+            barbers=barbers,
+            services=services,
+            methods=methods,
+            products=products
+        )
 """
 
 @app.route('/payments/new', methods=['GET', 'POST'])

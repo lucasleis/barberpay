@@ -111,13 +111,22 @@ def ensure_database_and_tables():
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
         );
                 
+        CREATE TABLE IF NOT EXISTS tipos_membresia (
+            id SERIAL PRIMARY KEY,
+            nombre VARCHAR(100) NOT NULL,
+            precio NUMERIC(10,2) NOT NULL,
+            usos INTEGER NOT NULL,
+            active BOOLEAN DEFAULT TRUE,
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
+        );
+                             
         CREATE TABLE IF NOT EXISTS membresias (
             id SERIAL PRIMARY KEY,
+            tipo_membresia_id INTEGER NOT NULL REFERENCES tipos_membresia(id),
+            usos_disponibles INTEGER NOT NULL,
+            fecha_compra TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
-            cantidad INTEGER NOT NULL CHECK (cantidad > 0),
-            creado_en TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-            valido_hasta TIMESTAMP WITH TIME ZONE,
-            canjeado BOOLEAN DEFAULT FALSE
+            active BOOLEAN DEFAULT TRUE
         );
 
     """)

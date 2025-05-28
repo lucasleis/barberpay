@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='memberships.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+  <h2>Tipos de Membresía</h2>
+
+  <form method="POST" action="{{ url_for('add_membership') }}" class="membership-form">
+    <input type="text" name="nombre" placeholder="Nombre de la membresía" required>
+    <input type="number" name="precio" step="1" placeholder="Precio ($)" required>
+    <input type="number" name="cantidad" min="1" placeholder="Cantidad de usos" required>
+    <button type="submit">Agregar tipo de membresía</button>
+  </form>
+
+  <ul class="membership-list">
+    {% for tipo in tipos_membresia %}
+      <li class="membership-item">
+        <span>
+          {{ tipo.nombre }} - ${{ "%.2f"|format(tipo.precio)|int }} 
+          ({{ tipo.usos }} usos)
+        </span>
+        <a href="{{ url_for('delete_membership_type', id=tipo.id) }}" class="delete-button" title="Eliminar">
+          <i class="fas fa-trash-alt"></i>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

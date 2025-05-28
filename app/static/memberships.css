@@ -1,0 +1,51 @@
+.membership-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  
+  .membership-form input,
+  .membership-form button {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  .membership-form button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .membership-form button:hover {
+    background-color: #218838;
+  }
+  
+  .membership-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+  }
+  
+  .membership-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid #ddd;
+    font-family: sans-serif;
+  }
+  
+  .delete-button {
+    color: #dc3545;
+    text-decoration: none;
+    font-size: 18px;
+    transition: color 0.2s ease;
+  }
+  
+  .delete-button:hover {
+    color: #a71d2a;
+  }
