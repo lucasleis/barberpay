@@ -771,15 +771,15 @@ def add_payment():
                 peluqueria_id=salon_id
             )
 
+            product_precio = 0
+            product_cantidad = 0
+            product = None
+
             if toggle_servicio:
                 service_id = request.form.get('service_id')
                 if not service_id:
                     raise ValueError("Debe seleccionarse un servicio.")
                 appointment.service_id = service_id
-
-            product_precio = 0
-            product_cantidad = 0
-            product = None
 
             if toggle_producto:
                 product_id = request.form.get('product_id')
@@ -834,8 +834,6 @@ def add_payment():
                 membresia = TipoMembresia.query.get(membresia_id)
                 total_real += float(membresia.precio) if membresia else 0
 
-            # raise ValueError(f"membresia_id total_real: {total_real}")
-
             # Cálculo del total pagado
             if multipagos:
                 total_real += tip
@@ -873,11 +871,24 @@ def add_payment():
                 date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
             )
 
-            # necesito obtener valor de membresia pagada
+            if toggle_membresia :
+                cant_usos = int(membresia.usos) if membresia else 0
+
+                membresia = Membresia(
+                    tipo_membresia_id=membresia_id,
+                    usos_disponibles = cant_usos,
+                    peluqueria_id=salon_id,
+                )
+
+                db.session.add(membresia)
 
             db.session.add(pago)
             db.session.commit()
             flash("Pago registrado con éxito.", "success")
+
+            if toggle_membresia :
+                flash(f"Numero de membresia: {membresia.id}", "success")
+
             return redirect(url_for('add_payment'))
 
         except Exception as e:

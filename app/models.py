@@ -113,7 +113,6 @@ class TipoMembresia(db.Model):
     peluqueria = db.relationship('Peluqueria', backref=db.backref('tipos_membresia', lazy=True))
 
 
-
 class Membresia(db.Model):
     __tablename__ = 'membresias'
 

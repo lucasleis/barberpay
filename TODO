@@ -15,7 +15,7 @@
 
     - Membresia:
         - Hacer que no se cobre cuando se usa
-        - Hacer que compre un voucher como servicio, y que cuando lo compra muestre el id
+        - Si se cancela un pago, volver a sumar cantidad
 
     - Cierre:
         - Arreglar cuentas (Totales por método de pago)
