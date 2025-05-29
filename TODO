@@ -9,11 +9,11 @@
     - Productos:
         - Arreglar estetica de boton de + y -
         - En nombre poner los nombres de cada uno, y en cantidad poner x1,x1. algo asi
+        - Arrglar table para que guarde multiples productos
 
     - Metodos de Pago:
 
     - Membresia:
-        - Mostrar valores en pagos
 
     - Cierre:
         - Arreglar cuentas (Totales por método de pago)
@@ -37,8 +37,6 @@
 
 
 - Preguntas:
-    - queres manejar cantidad de stock?
-        - si. Agregar un boton en la parte de administrar que haga una route de update sobre el id element y modifique cantidad
 
     - corte para amigos como se manejan los porcentajes? 
         50%. igual que los cortes comunes
