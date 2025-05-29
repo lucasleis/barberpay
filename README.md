@@ -69,6 +69,3 @@ SELECT pg_terminate_backend(<pid>);
 \q
 ```
 
-
-### Probar comando
-    - flask db upgrade

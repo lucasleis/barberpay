@@ -121,6 +121,7 @@ def ensure_database_and_tables():
         CREATE TABLE IF NOT EXISTS pagos (
             id SERIAL PRIMARY KEY,
             appointment_id INTEGER NOT NULL REFERENCES turnos(id),
+            membresia_comprada_id INTEGER REFERENCES membresias(id),
             payment_method1_id INTEGER NOT NULL REFERENCES metodos_pago(id),
             payment_method2_id INTEGER REFERENCES metodos_pago(id),
             amount_method1 NUMERIC(10,2) NOT NULL,

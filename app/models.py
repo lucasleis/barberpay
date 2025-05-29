@@ -34,6 +34,15 @@ class Empleado(db.Model):
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
 
+class MetodoPago(db.Model):
+    __tablename__ = 'metodos_pago'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(50), unique=True, nullable=False)
+    active = db.Column(db.Boolean, default=True)
+    peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
+    active = db.Column(db.Boolean, default=True)
+
+
 class Servicio(db.Model):
     __tablename__ = 'servicios'
     id = db.Column(db.Integer, primary_key=True)
@@ -51,15 +60,6 @@ class Producto(db.Model):
     name = db.Column(db.String(100), nullable=False)
     precio = db.Column(db.Float, nullable=False)
     cantidad = db.Column(db.Integer, nullable=False)
-    peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
-    active = db.Column(db.Boolean, default=True)
-
-
-class MetodoPago(db.Model):
-    __tablename__ = 'metodos_pago'
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(50), unique=True, nullable=False)
-    active = db.Column(db.Boolean, default=True)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
     active = db.Column(db.Boolean, default=True)
 
@@ -112,7 +112,10 @@ class Pago(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     appointment_id = db.Column(db.Integer, db.ForeignKey('turnos.id'), nullable=False)      # en esta var guarda id de servicios, productos o membresia  
-    
+    # puede ser NULL si sólo se compra membresía
+
+    membresia_comprada_id = db.Column(db.Integer, db.ForeignKey('membresias.id'), nullable=True)
+
     payment_method1_id = db.Column(db.Integer, db.ForeignKey('metodos_pago.id'), nullable=False)
     payment_method2_id = db.Column(db.Integer, db.ForeignKey('metodos_pago.id'), nullable=True)
     
@@ -127,3 +130,5 @@ class Pago(db.Model):
     appointment = db.relationship('Appointment')
     method1 = db.relationship('MetodoPago', foreign_keys=[payment_method1_id])
     method2 = db.relationship('MetodoPago', foreign_keys=[payment_method2_id])
+    membresia_comprada = db.relationship('Membresia')
+
