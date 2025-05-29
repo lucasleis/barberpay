@@ -198,6 +198,7 @@
       <th>Servicio</th>
       <th>Producto</th>
       <th>Cantidad</th>
+      <th>Membresia</th>
       <th>M. Pago </th>
       <th>Monto</th>
       <th>M. Pago</th>
@@ -214,6 +215,7 @@
       <td>{{ pago.appointment.service.name if pago.appointment.service else '-' }}</td>
       <td>{{ pago.appointment.producto.name if pago.appointment.producto else '-' }}</td>
       <td>{{ pago.appointment.cantidad if pago.appointment.producto else '-' }}</td>
+      <td>{{ pago.appointment.membresia.id if pago.appointment.membresia else '-' }}</td>
       <td>{{ pago.method1.nombre }}</td>
       <td>${{ pago.amount_method1|int }}</td>
       <td>{{ pago.method2.nombre if pago.method2 else '-' }}</td>

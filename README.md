@@ -54,7 +54,21 @@ DROP DATABASE peluqueria_db ;
 SET TIMEZONE TO 'America/Argentina/Buenos_Aires';
 ```
 
-8. Salir de psql
+8. Ver sesiones abieras
+```
+SELECT pid, datname, usename, application_name, client_addr, state FROM pg_stat_activity WHERE datname = 'peluqueria_db';
+```
+
+9. Kill session
+```
+SELECT pg_terminate_backend(<pid>);
+```
+
+10. Salir de psql
 ```
 \q
 ```
+
+
+### Probar comando
+    - flask db upgrade

@@ -829,7 +829,22 @@ def add_payment():
                 membresia_id = request.form.get('membresia_id')
                 if not membresia_id:
                     raise ValueError("Debe seleccionarse un servicio.")
-                appointment.membresia_id = membresia_id
+                #appointment.membresia_id = membresia_id
+
+                tipo = TipoMembresia.query.get(membresia_id)
+                if not tipo:
+                    raise ValueError("Tipo de membresía no encontrado.")
+                
+                # Crear una nueva membresía real
+                membresia_real = Membresia(
+                    tipo_membresia_id=tipo.id,
+                    usos_disponibles=tipo.usos,
+                    peluqueria_id=salon_id,
+                )
+                db.session.add(membresia_real)
+                db.session.flush()  # Para obtener el ID sin hacer commit
+                
+                appointment.membresia_id = membresia_real.id
 
                 check_membresia = request.form.get('membresiaCheckbox') 
                 if check_membresia == 'on':

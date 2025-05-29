@@ -88,28 +88,6 @@ def ensure_database_and_tables():
             cantidad INTEGER,
             active BOOLEAN DEFAULT TRUE
         );
-
-        CREATE TABLE IF NOT EXISTS turnos (
-            id SERIAL PRIMARY KEY,
-            date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-            barber_id INTEGER REFERENCES barberos(id),
-            service_id INTEGER REFERENCES servicios(id),
-            productos_id INTEGER REFERENCES productos(id),
-            cantidad INTEGER,
-            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
-        );
-
-        CREATE TABLE IF NOT EXISTS pagos (
-            id SERIAL PRIMARY KEY,
-            appointment_id INTEGER NOT NULL REFERENCES turnos(id),
-            payment_method1_id INTEGER NOT NULL REFERENCES metodos_pago(id),
-            payment_method2_id INTEGER REFERENCES metodos_pago(id),
-            amount_method1 NUMERIC(10,2) NOT NULL,
-            amount_method2 NUMERIC(10,2),
-            amount_tip NUMERIC(10,2),
-            date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
-        );
                 
         CREATE TABLE IF NOT EXISTS tipos_membresia (
             id SERIAL PRIMARY KEY,
@@ -127,6 +105,29 @@ def ensure_database_and_tables():
             fecha_compra TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
             active BOOLEAN DEFAULT TRUE
+        );
+
+        CREATE TABLE IF NOT EXISTS turnos (
+            id SERIAL PRIMARY KEY,
+            date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+            barber_id INTEGER REFERENCES barberos(id),
+            service_id INTEGER REFERENCES servicios(id),
+            productos_id INTEGER REFERENCES productos(id),
+            cantidad INTEGER,
+            membresia_id INTEGER REFERENCES membresias(id),
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS pagos (
+            id SERIAL PRIMARY KEY,
+            appointment_id INTEGER NOT NULL REFERENCES turnos(id),
+            payment_method1_id INTEGER NOT NULL REFERENCES metodos_pago(id),
+            payment_method2_id INTEGER REFERENCES metodos_pago(id),
+            amount_method1 NUMERIC(10,2) NOT NULL,
+            amount_method2 NUMERIC(10,2),
+            amount_tip NUMERIC(10,2),
+            date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
         );
 
     """)

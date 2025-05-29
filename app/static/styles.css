@@ -289,3 +289,13 @@ td.borrar-pago form {
 .addProductBtn:hover {
     background-color: #218838;
 }
+
+
+.h2, h2 {
+    text-align: center;
+    font-size: 2 rem;
+}
+
+.p, p {
+    text-align: center;
+}
