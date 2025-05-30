@@ -5,8 +5,8 @@ from .auth import login_required
 from sqlalchemy.orm import aliased
 from datetime import datetime, timedelta, time
 from collections import defaultdict
-from backports.zoneinfo import ZoneInfo
-# from zoneinfo import ZoneInfo
+# from backports.zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
 
 
 # Funciones auxiliares
@@ -654,7 +654,6 @@ def add_payment():
 
                 check_membresia = request.form.get('membresiaCheckbox') 
                 if check_membresia == 'on':
-                    print("Checkbox seleccionado")
 
                     # Buscar la membresía
                     num_membresia = request.form.get('check_membresia') 

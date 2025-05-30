@@ -258,8 +258,8 @@
   const priceInput = document.getElementById('membreciaPrice');
 
   // Función para mostrar/ocultar secciones según el toggle (servicio/producto)
-  function updateToggleSections(e) {
-    const source = e.target.id;
+  function updateToggleSections(e = null) {
+    const source = e?.target?.id || null;
 
     if (source === 'toggleMembresia' && membresiaToggle.checked) {
       // Si el usuario activó membresía, desactiva los otros
@@ -293,7 +293,6 @@
       initMembresiaSection();
     }
   }
-
 
   // Listeners que actualizan la visibilidad si el usuario cambia de opción
   servicioToggle.addEventListener('change', updateToggleSections);
@@ -518,6 +517,7 @@
 
         const num_membresia = document.getElementById('check_membresia');
         console.log("num_membresia: ", num_membresia)
+        console.log("Valor ingresado: ", num_membresia.value);
 
       } else {
         console.log("paga membresia")
@@ -564,27 +564,7 @@
   // Inicial
   updateToggleSections();   // Inicializa visibilidad de secciones al cargar el script
 
-  
-  // Muestra/oculta los métodos de pago según si está marcada la membresía
-  document.addEventListener('DOMContentLoaded', function () {
-    const checkbox_use_member = document.getElementById('membresiaCheckbox');
-    const membershipDiv = document.getElementById('membresiaMethodGroup');
-    const multiPaymentToggle = document.getElementById('multiPaymentToggle');
-    const singleMethodGroup = document.getElementById('singleMethodGroup');
-
-    checkbox_use_member.addEventListener('change', function () {
-      if (checkbox_use_member.checked) {
-        membershipDiv.style.display = 'block';
-        multiPaymentToggle.closest('label').style.display = 'none'; // Oculta el label completo
-        singleMethodGroup.style.display = 'none';
-      } else {
-        membershipDiv.style.display = 'none';
-        multiPaymentToggle.closest('label').style.display = 'inline-block'; // Muestra el label
-        singleMethodGroup.style.display = 'block';
-      }
-    });
-  }); 
-
+ 
   function mostrarError(campo, mensaje) {
     campo.classList.add('input-error');
     mensaje.style.display = 'block';
@@ -595,6 +575,37 @@
     mensaje.style.display = 'none';
   }
 
+  // Muestra/oculta los métodos de pago según si está marcada la membresía
+  function setupMembresiaCheckboxToggle() {
+    const checkbox_use_member = document.getElementById('membresiaCheckbox');
+    const membershipDiv = document.getElementById('membresiaMethodGroup');
+    const multiPaymentToggle = document.getElementById('multiPaymentToggle');
+    const singleMethodGroup = document.getElementById('singleMethodGroup');
+    const multiMethodGroup = document.getElementById('multiMethodGroup');
+
+    if (!checkbox_use_member || !membershipDiv || !multiPaymentToggle || !singleMethodGroup) {
+      console.warn("❌ Uno o más elementos no se encontraron.");
+      return;
+    }
+
+    checkbox_use_member.addEventListener('change', function () {
+      if (checkbox_use_member.checked) {
+        membershipDiv.style.display = 'block';
+        multiPaymentToggle.closest('label').style.display = 'none';
+        singleMethodGroup.style.display = 'none';
+        multiMethodGroup.style.display = 'none';
+      } else {
+        membershipDiv.style.display = 'none';
+        multiPaymentToggle.closest('label').style.display = 'inline-block';
+        singleMethodGroup.style.display = 'block';
+        
+        if (multiPaymentToggle.checked){
+          multiMethodGroup.style.display = 'block';
+          singleGroup.style.display = 'none';
+        }
+      }
+    });
+  }
 
   // Init toggle producto
   function initProductSection() {
@@ -683,6 +694,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     initProductSection();
     initMembresiaSection();
+    setupMembresiaCheckboxToggle();
   });
 
 </script>

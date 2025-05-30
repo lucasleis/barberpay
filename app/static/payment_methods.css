@@ -11,7 +11,12 @@
 }
 
 .delete-button {
-  color: red;
+  color: #dc3545;
   text-decoration: none;
-  font-size: 1.2em;
+  font-size: 18px;
+  transition: color 0.2s ease;
+}
+
+.delete-button:hover {
+  color: #a71d2a;
 }
