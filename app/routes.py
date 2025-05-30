@@ -660,39 +660,35 @@ def add_payment():
                 peluqueria_id=salon_id
             )
 
-            product_precio = 0
-            product_cantidad = 0
-            product = None
-
             if toggle_servicio:
                 service_id = request.form.get('service_id')
                 if not service_id:
                     raise ValueError("Debe seleccionarse un servicio.")
                 appointment.service_id = service_id
 
+            total_producto = 0.0
             if toggle_producto:
-                product_id = request.form.get('product_id')
-                product_cantidad = int(request.form.get('product_quantity') or 0)
-                if not product_id:
-                    raise ValueError("Debe seleccionarse un producto.")
+                product_ids = request.form.getlist('product_id[]')
+                product_quantities = request.form.getlist('product_quantity[]')
+                product_quantities = list(map(int, product_quantities))
 
-                product = Producto.query.get(product_id)
-                if not product:
-                    raise ValueError("Producto no encontrado.")
+                for pid, qty in zip(product_ids, product_quantities):
+                    product = Producto.query.get(pid)
+                    if not product:
+                        raise ValueError(f"Producto con ID {pid} no encontrado.")
 
-                if product.cantidad < product_cantidad:
-                    raise ValueError(f"No hay suficiente stock del producto {product.nombre} (stock actual: {product.cantidad})")
+                    if product.cantidad < qty:
+                        raise ValueError(f"No hay suficiente stock del producto {product.nombre} (stock actual: {product.cantidad})")
 
-                product_precio = product.precio
-                # Crear el registro en AppointmentTurno (ProductoTurno)
-                turno_producto = AppointmentTurno(
-                    turno=appointment,
-                    producto=product,
-                    cantidad=product_cantidad,
-                    precio_unitario=product_precio
-                )
-                db.session.add(turno_producto)
-                product.cantidad -= product_cantidad
+                    turno_producto = AppointmentTurno(
+                        turno=appointment,
+                        producto=product,
+                        cantidad=qty,
+                        precio_unitario=product.precio
+                    )
+                    db.session.add(turno_producto)
+                    product.cantidad -= qty
+                    total_producto += product.precio * qty
 
             membresia_real = None
             if toggle_membresia:
@@ -702,49 +698,35 @@ def add_payment():
 
                 check_membresia = request.form.get('membresiaCheckbox') 
                 if check_membresia == 'on':
-
-                    # Buscar la membresía
                     num_membresia = request.form.get('check_membresia') 
-                    
                     membresia = Membresia.query.get(num_membresia)
                     if not membresia:
                         raise ValueError("Membresía no encontrada.")
 
-                    # Validar usos disponibles
                     if membresia.usos_disponibles <= 0:
                         raise ValueError("No hay usos disponibles para descontar en esta membresía.")
 
-                    # Restar uno
                     membresia.usos_disponibles -= 1
                     db.session.add(membresia)
-                    
-                    # Asociar membresía con el appointment
                     appointment.membresia_id = membresia.id
-                    
                     flash(f"Membresía #{membresia.id}: Quedan {membresia.usos_disponibles} usos disponibles.", "success")
                 else:
                     tipo = TipoMembresia.query.get(membresia_id)
                     if not tipo:
                         raise ValueError("Tipo de membresía no encontrado.")
 
-                    # Crear una nueva membresía real
                     membresia_real = Membresia(
                         tipo_membresia_id=tipo.id,
                         usos_disponibles=tipo.usos,
                         peluqueria_id=salon_id,
                     )
                     db.session.add(membresia_real)
-                    db.session.flush()  # Para obtener el ID sin hacer commit
-
+                    db.session.flush()
                     appointment.membresia_id = membresia_real.id
 
             db.session.add(appointment)
-
-            # --- Aquí eliminé la segunda creación y agregado de turno_producto ---
-
             db.session.commit()
 
-            # Procesar métodos de pago
             multipagos = 'togglemultiPayment' in request.form
 
             method_simple_service = int(request.form.get('methodSimple') or 0)
@@ -755,7 +737,6 @@ def add_payment():
             amount_method_multi_1 = float(request.form.get('amount_method_multi_1') or 0)
             amount_method_multi_2 = float(request.form.get('amount_method_multi_2') or 0)
 
-            # Cálculo de total real
             total_real = 0.0
             total_pagado = 0.0
 
@@ -764,13 +745,12 @@ def add_payment():
                 total_real += service.precio if service else 0  
 
             if toggle_producto:
-                total_real += (product_precio * product_cantidad)  
+                total_real += total_producto
 
             if toggle_membresia:   
                 membresia = TipoMembresia.query.get(membresia_id)
                 total_real += float(membresia.precio) if membresia else 0
 
-            # Cálculo del total pagado
             if multipagos:
                 total_real += tip
                 if method_multiple_1 == method_multiple_2:
@@ -779,28 +759,18 @@ def add_payment():
                     raise ValueError("Faltan datos del segundo método de pago.")
                 total_pagado = amount_method_multi_1 + amount_method_multi_2
             else:
-                if toggle_servicio:
-                    total_pagado = amount_simple_service 
-
-                if toggle_producto:
-                    total_pagado = total_real 
-
-                if toggle_membresia:
-                    total_pagado = total_real 
-
-                if toggle_servicio and toggle_producto:
+                if toggle_servicio or toggle_producto or toggle_membresia:
                     total_pagado = total_real + tip
                     total_real += tip
                     
             if abs(total_pagado - total_real) > 0.01:
                 raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
 
-            # Crear el pago
             pago = Pago(
                 appointment_id=appointment.id,
                 payment_method1_id=method_simple_service if not multipagos else method_multiple_1,
                 payment_method2_id=None if not multipagos else method_multiple_2,
-                amount_method1=total_pagado + tip if not multipagos else amount_method_multi_1,
+                amount_method1=total_pagado if not multipagos else amount_method_multi_1,
                 amount_method2=0 if not multipagos else amount_method_multi_2,
                 amount_tip=tip,
                 peluqueria_id=salon_id,
@@ -843,19 +813,13 @@ def delete_payment(pago_id):
     try:
         appointment = Appointment.query.get(pago.appointment_id)
 
-        """
-        if appointment and appointment.producto:
-            producto = Producto.query.get(appointment.productos_id)
-            if producto:
-                producto.cantidad += appointment.cantidad  # suma la cantidad que se había restado
-        """
         # Si el turno tenía productos, devolver cantidad al stock
         if appointment and appointment.productos_turno:
             for pt in appointment.productos_turno:
                 producto = Producto.query.get(pt.producto_id)
                 if producto:
                     producto.cantidad += pt.cantidad  # Devolver al stock
-
+                db.session.delete(pt)  # Eliminar la relación entre el turno y el producto
 
         # Manejar membresías
         if appointment and appointment.membresia:
@@ -874,7 +838,6 @@ def delete_payment(pago_id):
             db.session.delete(appointment)
 
         db.session.commit()
-        # flash("Pago eliminado con éxito. Producto y membresía actualizados.", "success")
         flash("Pago eliminado con éxito.", "success")
 
     except Exception as e:

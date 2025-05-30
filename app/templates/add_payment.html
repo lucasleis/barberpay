@@ -70,7 +70,7 @@
     <div class="productRow" data-index="0">
       <label>Producto:</label>
       <div style="display: flex; gap: 1rem;">
-        <select name="product_id" class="productSelect" onchange="updateCantidadOptions(this)">
+        <select name="product_id[]" class="productSelect" onchange="updateCantidadOptions(this)">
           {% for product in products %}
             {% if product.cantidad > 0 %}
               <option value="{{ product.id }}" data-precio="{{ product.precio }}" data-cantidad="{{ product.cantidad }}">
@@ -80,7 +80,7 @@
           {% endfor %}
         </select>
 
-        <select class="productCant" name="product_quantity" style="width: 100px;">
+        <select class="productCant" name="product_quantity[]" style="width: 100px;">
           <!-- Se llena dinámicamente con JS -->
         </select>
 
@@ -647,6 +647,9 @@
         if (e.target.classList.contains('addProductBtn')) {
           const currentRow = e.target.closest('.productRow');
           const newRow = currentRow.cloneNode(true);
+
+          newRow.querySelector('.productSelect').setAttribute('name', 'product_id[]');
+          newRow.querySelector('.productCant').setAttribute('name', 'product_quantity[]');
 
           newRow.querySelector('.productSelect').selectedIndex = 0;
           newRow.querySelector('.productCant').selectedIndex = 0;
