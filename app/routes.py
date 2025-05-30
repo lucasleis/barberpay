@@ -1,8 +1,8 @@
 from flask import current_app as app, render_template, request, redirect, url_for, session, flash
 from . import db
-from .models import Peluqueria, Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia
+from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno
 from .auth import login_required
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
 from collections import defaultdict
 # from backports.zoneinfo import ZoneInfo
@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 
 
 # Funciones auxiliares
-
+"""
 def get_payment_page_data(salon_id):
     MetodoPago1 = aliased(MetodoPago)
     MetodoPago2 = aliased(MetodoPago)
@@ -25,13 +25,57 @@ def get_payment_page_data(salon_id):
         .join(Pago.appointment)
         .join(Appointment.barber)
         .outerjoin(Appointment.service)  
-        .outerjoin(Appointment.producto)  # Agregado join con productos
+        .outerjoin(Appointment.productos_turno)
         .join(MetodoPago1, Pago.payment_method1_id == MetodoPago1.id)
         .outerjoin(MetodoPago2, Pago.payment_method2_id == MetodoPago2.id)
         .filter(
             Pago.peluqueria_id == salon_id,
             Pago.date >= inicio_dia,
             Pago.date <= fin_dia
+        )
+        .add_entity(MetodoPago1)
+        .add_entity(MetodoPago2)
+        .order_by(Pago.date.desc())
+        .all()
+    )
+
+    pagos_data = []
+    for pago, method1, method2 in pagos_query:
+        pago.method1 = method1
+        pago.method2 = method2
+        pagos_data.append(pago)
+
+    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    services = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
+
+    return pagos_data, barbers, services, methods
+"""
+def get_payment_page_data(salon_id):
+    MetodoPago1 = aliased(MetodoPago)
+    MetodoPago2 = aliased(MetodoPago)
+
+    hoy = datetime.today().date()
+    inicio_dia = datetime.combine(hoy, time.min)
+    fin_dia = datetime.combine(hoy, time.max)
+
+    pagos_query = (
+        db.session.query(Pago)
+        .join(Pago.appointment)
+        .join(Appointment.barber)
+        .outerjoin(Appointment.service)
+        .outerjoin(Appointment.productos_turno)
+        .join(MetodoPago1, Pago.payment_method1_id == MetodoPago1.id)
+        .outerjoin(MetodoPago2, Pago.payment_method2_id == MetodoPago2.id)
+        .filter(
+            Pago.peluqueria_id == salon_id,
+            Pago.date >= inicio_dia,
+            Pago.date <= fin_dia
+        )
+        .options(
+            selectinload(Pago.appointment)
+                .selectinload(Appointment.productos_turno)
+                .joinedload(AppointmentTurno.producto)
         )
         .add_entity(MetodoPago1)
         .add_entity(MetodoPago2)
@@ -446,7 +490,6 @@ def update_product_quantity(id):
     else:
         return "Producto no encontrado o no pertenece al salón", 404
 
-
 @app.route('/admin/products/delete/<int:id>')
 def delete_product(id):
     if "user" in session:
@@ -597,7 +640,6 @@ def add_payment():
     products = Producto.query.filter_by(active=True, peluqueria_id=salon_id).all()
     membresias = TipoMembresia.query.filter_by(peluqueria_id=session['salon_id'], active=True).all()
 
-
     if request.method == 'POST':
         try:
             barber_id = request.form.get('barber_id')
@@ -630,7 +672,7 @@ def add_payment():
 
             if toggle_producto:
                 product_id = request.form.get('product_id')
-                product_cantidad = int(request.form.get('product_quantity'))
+                product_cantidad = int(request.form.get('product_quantity') or 0)
                 if not product_id:
                     raise ValueError("Debe seleccionarse un producto.")
 
@@ -642,8 +684,14 @@ def add_payment():
                     raise ValueError(f"No hay suficiente stock del producto {product.nombre} (stock actual: {product.cantidad})")
 
                 product_precio = product.precio
-                appointment.productos_id = product_id
-                appointment.cantidad = product_cantidad
+                # Crear el registro en AppointmentTurno (ProductoTurno)
+                turno_producto = AppointmentTurno(
+                    turno=appointment,
+                    producto=product,
+                    cantidad=product_cantidad,
+                    precio_unitario=product_precio
+                )
+                db.session.add(turno_producto)
                 product.cantidad -= product_cantidad
 
             membresia_real = None
@@ -657,7 +705,6 @@ def add_payment():
 
                     # Buscar la membresía
                     num_membresia = request.form.get('check_membresia') 
-                    # print("num_membresia: ",num_membresia)
                     
                     membresia = Membresia.query.get(num_membresia)
                     if not membresia:
@@ -676,7 +723,6 @@ def add_payment():
                     
                     flash(f"Membresía #{membresia.id}: Quedan {membresia.usos_disponibles} usos disponibles.", "success")
                 else:
-                    print("Checkbox NO seleccionado")
                     tipo = TipoMembresia.query.get(membresia_id)
                     if not tipo:
                         raise ValueError("Tipo de membresía no encontrado.")
@@ -693,6 +739,9 @@ def add_payment():
                     appointment.membresia_id = membresia_real.id
 
             db.session.add(appointment)
+
+            # --- Aquí eliminé la segunda creación y agregado de turno_producto ---
+
             db.session.commit()
 
             # Procesar métodos de pago
@@ -794,11 +843,19 @@ def delete_payment(pago_id):
     try:
         appointment = Appointment.query.get(pago.appointment_id)
 
-        # Si compró un producto, devolver cantidad al stock
+        """
         if appointment and appointment.producto:
             producto = Producto.query.get(appointment.productos_id)
             if producto:
                 producto.cantidad += appointment.cantidad  # suma la cantidad que se había restado
+        """
+        # Si el turno tenía productos, devolver cantidad al stock
+        if appointment and appointment.productos_turno:
+            for pt in appointment.productos_turno:
+                producto = Producto.query.get(pt.producto_id)
+                if producto:
+                    producto.cantidad += pt.cantidad  # Devolver al stock
+
 
         # Manejar membresías
         if appointment and appointment.membresia:

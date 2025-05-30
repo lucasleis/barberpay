@@ -197,7 +197,6 @@
       <th>Barbero</th>
       <th>Servicio</th>
       <th>Producto</th>
-      <th>Cantidad</th>
       <th>Membresia</th>
       <th>M. Pago </th>
       <th>Monto</th>
@@ -213,8 +212,20 @@
       <td>{{ pago.date.strftime('%H:%M') }}</td>
       <td>{{ pago.appointment.barber.name }}</td>
       <td>{{ pago.appointment.service.name if pago.appointment.service else '-' }}</td>
-      <td>{{ pago.appointment.producto.name if pago.appointment.producto else '-' }}</td>
-      <td>{{ pago.appointment.cantidad if pago.appointment.producto else '-' }}</td>
+      <td>
+        {% set productos = {} %}
+        {% for pt in pago.appointment.productos_turno %}
+          {% set nombre = pt.producto.name %}
+          {% if nombre in productos %}
+            {% set _ = productos.update({nombre: productos[nombre] + pt.cantidad}) %}
+          {% else %}
+            {% set _ = productos.update({nombre: pt.cantidad}) %}
+          {% endif %}
+        {% endfor %}
+        {% for nombre, cantidad in productos.items() %}
+          {{ nombre }} x {{ cantidad }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+      </td>
       <td>{{ pago.appointment.membresia.id if pago.appointment.membresia else '-' }}</td>
       <td>{{ pago.method1.nombre }}</td>
       <td>${{ pago.amount_method1|int }}</td>

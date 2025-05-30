@@ -40,7 +40,6 @@ class MetodoPago(db.Model):
     nombre = db.Column(db.String(50), unique=True, nullable=False)
     active = db.Column(db.Boolean, default=True)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
-    active = db.Column(db.Boolean, default=True)
 
 
 class Servicio(db.Model):
@@ -90,21 +89,38 @@ class Membresia(db.Model):
     peluqueria = db.relationship('Peluqueria', backref=db.backref('membresias', lazy=True))
 
 
+class AppointmentTurno(db.Model):
+    __tablename__ = 'productos_turno'
+    id = db.Column(db.Integer, primary_key=True)
+    turno_id = db.Column(db.Integer, db.ForeignKey('turnos.id', ondelete='CASCADE'), nullable=False)
+    producto_id = db.Column(db.Integer, db.ForeignKey('productos.id'), nullable=False)
+    cantidad = db.Column(db.Integer, nullable=False)
+    precio_unitario = db.Column(db.Float, nullable=False)
+
+    producto = db.relationship('Producto')
+    turno = db.relationship('Appointment', back_populates='productos_turno')
+
+
 class Appointment(db.Model):
     __tablename__ = 'turnos'
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, default=now_buenos_aires)
     barber_id = db.Column(db.Integer, db.ForeignKey('barberos.id'))
     service_id = db.Column(db.Integer, db.ForeignKey('servicios.id'))
-    productos_id = db.Column(db.Integer, db.ForeignKey('productos.id'))
-    cantidad = db.Column(db.Integer, default=1)
+    # productos_id = db.Column(db.Integer, db.ForeignKey('productos.id'))
+    # cantidad = db.Column(db.Integer, default=1)
     membresia_id = db.Column(db.Integer, db.ForeignKey('membresias.id'))
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
+    # tiene_productos = db.Column(db.Boolean, default=False)
+    # total_productos = db.Column(db.Integer, default=0)
+    # importe_productos = db.Column(db.Float, default=0.0)
+
     barber = db.relationship('Empleado')
     service = db.relationship('Servicio')
-    producto = db.relationship('Producto')
+    # producto = db.relationship('Producto')
     membresia = db.relationship('Membresia')
+    productos_turno = db.relationship('AppointmentTurno', back_populates='turno', cascade="all, delete-orphan")
 
 
 class Pago(db.Model):

@@ -112,10 +112,16 @@ def ensure_database_and_tables():
             date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
             barber_id INTEGER REFERENCES barberos(id),
             service_id INTEGER REFERENCES servicios(id),
-            productos_id INTEGER REFERENCES productos(id),
-            cantidad INTEGER,
             membresia_id INTEGER REFERENCES membresias(id),
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS productos_turno (
+            id SERIAL PRIMARY KEY,
+            turno_id INTEGER NOT NULL REFERENCES turnos(id) ON DELETE CASCADE,
+            producto_id INTEGER NOT NULL REFERENCES productos(id),
+            cantidad INTEGER NOT NULL,
+            precio_unitario NUMERIC(10,2) NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS pagos (
