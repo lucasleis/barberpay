@@ -21,55 +21,54 @@
   <input type="hidden" name="salon_id" value="{{ salon_id }}">
 
   <!-- Selector de Barbero -->
-  <label for="barber_id">Barbero:</label>
-  <select name="barber_id" required>
-    {% for b in barbers %}
-      <option value="{{ b.id }}">{{ b.name }}</option>
-    {% endfor %}
-  </select>
-
+  <div class="form-group">
+    <label for="barber_id">Barbero:</label>
+    <select name="barber_id" required>
+      {% for b in barbers %}
+        <option value="{{ b.id }}">{{ b.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
 
   <!-- Toggle Servicio, Producto o Membresia-->
-  <div id="toggleContainer" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-    <div style="flex: 1;">
-      <input type="checkbox" class="btn-check" id="toggleServicio" name="toggle_servicio" autocomplete="off" checked>
-      <label class="btn full-width" for="toggleServicio">Servicio</label>
+  <div class="form-group">
+    <div id="toggleContainer">
+      <div>
+        <input type="checkbox" class="btn-check" id="toggleServicio" name="toggle_servicio" autocomplete="off" checked>
+        <label class="btn full-width" for="toggleServicio">Servicio</label>
+      </div>
+      <div>
+        <input type="checkbox" class="btn-check" id="toggleProducto" name="toggle_producto" autocomplete="off">
+        <label class="btn full-width" for="toggleProducto">Producto</label>
+      </div>
+      <div>
+        <input type="checkbox" class="btn-check" id="toggleMembresia" name="toggle_membresia" autocomplete="off">
+        <label class="btn full-width" for="toggleMembresia">Membresía</label>
+      </div>
     </div>
-    <div style="flex: 1;">
-      <input type="checkbox" class="btn-check" id="toggleProducto" name="toggle_producto" autocomplete="off">
-      <label class="btn full-width" for="toggleProducto">Producto</label>
-    </div>
-    <div style="flex: 1;">
-      <input type="checkbox" class="btn-check" id="toggleMembresia" name="toggle_membresia" autocomplete="off">
-      <label class="btn full-width" for="toggleMembresia">Membresía</label>
-    </div>
+    <p id="toggleError" class="text-danger mt-1" style="display: none;"> 
+      Debe seleccionar "Servicio", "Producto" o "Membresia".
+    </p>
   </div>
-  <p id="toggleError" class="text-danger mt-1" style="display: none;"> 
-    Debe seleccionar "Servicio", "Producto" o "Membresia".
-  </p>                                                    
-
 
   <!-- Selector de servicio -->
-  <div id="servicioSection">
+  <div id="servicioSection" class="form-group">
     <label for="service_id">Servicio y precio:</label>
     <div style="display: flex; gap: 1rem;">
       <select name="service_id" id="serviceSelect" required>
         {% for s in services %}
-          <option value="{{ s.id }}" data-precio="{{ s.precio }}">
-            {{ s.name }}
-          </option>
+          <option value="{{ s.id }}" data-precio="{{ s.precio }}">{{ s.name }}</option>
         {% endfor %}
       </select>
       <input type="text" id="servicePrice" disabled placeholder="$" style="width: 100px;">
     </div>
   </div>
 
-
   <!-- Selector de productos -->
-  <div id="productSection" style="display: none;">
+  <div id="productSection" class="form-group" style="display: none;">
     <div class="productRow" data-index="0">
       <label>Producto:</label>
-      <div style="display: flex; gap: 1rem;">
+      <div>
         <select name="product_id[]" class="productSelect" onchange="updateCantidadOptions(this)">
           {% for product in products %}
             {% if product.cantidad > 0 %}
@@ -79,111 +78,90 @@
             {% endif %}
           {% endfor %}
         </select>
-
-        <select class="productCant" name="product_quantity[]" style="width: 100px;">
+        <select class="productCant" name="product_quantity[]">
           <!-- Se llena dinámicamente con JS -->
         </select>
-
-        <input type="text" class="productPrice" disabled placeholder="$" style="width: 100px;">
-        <button type="button" class="addProductBtn">+</button>
-        <button type="button" class="removeProductBtn">−</button>
+        <input type="text" class="productPrice" disabled placeholder="$">
+        <button type="button" class="addProductBtn btn-primary">+</button>
+        <button type="button" class="removeProductBtn btn-primary">−</button>
       </div>
     </div>
   </div>
-  <p id="messageContainer" class="error-msg" style="display: none; color: red; font-size: 0.9rem;"></p>
-
 
   <!-- Selector de membresía -->
-  <div id="membresiaSection" style="display: none;">
+  <div id="membresiaSection" class="form-group" style="display: none;">
     <label for="membresia_id">Membresía:</label>
     <div style="display: flex; gap: 1rem;">
       <select name="membresia_id" id="membresiaSelect">
         {% for membresia in membresias %}
-          <option 
-            value="{{ membresia.id }}" 
-            data-usos="{{ membresia.usos_disponibles }}"
-            data-precio="{{ membresia.precio }}">
+          <option value="{{ membresia.id }}" data-usos="{{ membresia.usos_disponibles }}" data-precio="{{ membresia.precio }}">
             {{ membresia.nombre }}
           </option>
         {% endfor %}
       </select>
-      <input type="text" id="membreciaPrice" disabled placeholder="$" style="width: 100px;">
+      <input type="text" id="membreciaPrice" disabled placeholder="$">
     </div>
   </div>
-  <p id="messageContainer" class="error-msg" style="display: none; color: red; font-size: 0.9rem;"></p>
-
 
   <!-- Metodo de Pago -->
-  <div style="display: flex; align-items: center; justify-content: space-between;">
-    <label for="method">Método de pago:</label>
-    <label class="checkbox-label">
-      <input type="checkbox" id="multiPaymentToggle" name="togglemultiPayment"> ¿Usa múltiples métodos?
-    </label>
-    <label class="checkbox-label">
-      <input type="checkbox" id="membresiaCheckbox" name="membresiaCheckbox"> ¿Usa Membresía?
-    </label>
-  </div>
-
-  <!-- Modo simple -->
-  <div id="singleMethodGroup" class="payment-method-group">
-    <select id="methodSimple" name="methodSimple">
-      {% for method in methods %}
-        <option value="{{ method.id }}">{{ method.nombre }}</option>
-      {% endfor %}
-    </select>
-    <input type="hidden" name="amount_simple" id="amountSimple">
-  </div>
-
-  <!-- Modo múltiple -->
-  <div id="multiMethodGroup" style="display: none;">
-    <div class="payment-method-group">
-      <select name="method_multiple_1" id="method_multiple_1">
-        {% for method in methods %}
-          <option value="{{ method.id }}">{{ method.nombre }}</option>
-        {% endfor %}
-      </select>
-      <input type="number" name="amount_method_multi_1" id="amount_method_multi-1" step="1" placeholder="Monto $">
+  <div class="form-group">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <label for="method">Método de pago:</label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="multiPaymentToggle" name="togglemultiPayment"> ¿Usa múltiples métodos?
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="membresiaCheckbox" name="membresiaCheckbox"> ¿Usa Membresía?
+      </label>
     </div>
 
-    <div class="payment-method-group">
-      <select name="method_multiple_2" id="method_multiple_2">
-        {% for method in methods %}
-          <option value="{{ method.id }}">{{ method.nombre }}</option>
-        {% endfor %}
-      </select>
-      <input type="number" name="amount_method_multi_2" id="amount_method_multi_2" step="1" placeholder="Monto $">
-    </div>
+    <div class="payment-method-container">
+      <!-- Modo simple -->
+      <div id="singleMethodGroup">
+        <select id="methodSimple" name="methodSimple">
+          {% for method in methods %}
+            <option value="{{ method.id }}">{{ method.nombre }}</option>
+          {% endfor %}
+        </select>
+        <input type="hidden" name="amount_simple" id="amountSimple">
+      </div>
 
-    <!-- Mensajes de error -->
-    <p id="multiPaymentError" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
-      La suma de los montos debe ser igual al precio del servicio.
-    </p>
-    <p id="methodRepeatError" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
-      Los métodos de pago deben ser diferentes.
-    </p>
-    <p id="montoError" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
-      El total pagado no coincide con el total esperado.
-    </p>
+      <!-- Membresia -->
+      <div id="membresiaMethodGroup" style="display: none;">
+        <div class="membresia-method-group">
+          <input type="number" name="check_membresia" id="check_membresia" step="1" placeholder="Número de Membresía">
+        </div>
+      </div>
+
+      <!-- Modo múltiple -->
+      <div id="multiMethodGroup" style="display: none;">
+        <div class="payment-method-group">
+          <select name="method_multiple_1" id="method_multiple_1">
+            {% for method in methods %}
+              <option value="{{ method.id }}">{{ method.nombre }}</option>
+            {% endfor %}
+          </select>
+          <input type="number" name="amount_method_multi_1" id="amount_method_multi-1" step="1" placeholder="Monto $">
+        </div>
+
+        <div class="payment-method-group">
+          <select name="method_multiple_2" id="method_multiple_2">
+            {% for method in methods %}
+              <option value="{{ method.id }}">{{ method.nombre }}</option>
+            {% endfor %}
+          </select>
+          <input type="number" name="amount_method_multi_2" id="amount_method_multi_2" step="1" placeholder="Monto $">
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Membresia -->
-  <div id="membresiaMethodGroup" style="display: none;" class="payment-method-group">
-    <div class="membresia-method-group">
-      <input type="number" name="check_membresia" id="check_membresia" step="1" placeholder="Número de Membresía">
-    </div>
-
-    <!-- Mensajes de error -->
-    <p id="methodRepeatError2" class="error-msg" style="display: none; color: red; font-size: 0.9rem;">
-      Debe ingresar un número de membresía válido.
-    </p>
-  </div>
-
-  <!-- Propina y botón -->
-  <div class="mb-3">
-    <label for="tip" class="form-label">Propina:</label>
+  <!-- Propina -->
+  <div class="form-group">
+    <label for="tip">Propina:</label>
     <div class="propina-row">
-      <input type="number" name="tip" id="tip" step="100" placeholder="$">
-      <button type="submit">Guardar pago</button>
+      <input type="number" name="tip" id="tip" step="100" placeholder="$" class="form-control">
+      <button type="submit" class="btn-primary">Guardar pago</button>
     </div>
   </div>
 </form>
@@ -364,11 +342,14 @@
 
   // Evento para alternar entre modo de pago simple y múltiple
   togglemultiPayment.addEventListener('change', function () {
+    const container = document.querySelector('.payment-method-container');
+    
     if (this.checked) {
       // Si se activa el pago múltiple, ocultar el modo simple y mostrar campos adicionales
       singleGroup.style.display = 'none';
       multiGroup.style.display = 'block';
       multiGroup.querySelectorAll('input').forEach(el => el.required = true);
+      container.classList.add('multiple');
     } else {
       // Si se desactiva, volver al modo simple
       singleGroup.style.display = 'flex';
@@ -380,6 +361,7 @@
       multiGroup.querySelectorAll('select').forEach(el => el.classList.remove('input-error'));
       errorMsg.style.display = 'none';
       repeatError.style.display = 'none';
+      container.classList.remove('multiple');
     }
   });
 
@@ -625,6 +607,7 @@
         if (multiPaymentToggle.checked){
           multiMethodGroup.style.display = 'block';
           singleGroup.style.display = 'none';
+          // singleMethodGroup.style.display = 'none'; 
         }
       }
     });

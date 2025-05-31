@@ -30,23 +30,34 @@ main {
 form {
     margin-bottom: 2rem;
     background: white;
-    padding: 1rem;
+    padding: 2rem;
     border-radius: 5px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
 }
 
 input[type="text"],
 input[type="number"],
-select {
+select,
+.btn-primary {
     width: 100%;
     padding: 0.5rem;
-    margin-top: 5px;
-    margin-bottom: 1rem;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
+    height: 38px;
+    font-size: 16px;
+    margin: 0;
 }
 
 button {
@@ -85,12 +96,15 @@ a:hover {
 }
 
 select {
-  background-color: white;
-  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 16px 16px;
-  padding-right: 2rem; 
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: white;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px 16px;
+    padding-right: 2rem;
 }
 
 .input-error {
@@ -104,27 +118,60 @@ select {
     margin-bottom: 1rem;
 }
 
-.input-error {
-    border: 1px solid red;
-    background-color: #ffe6e6;
+.payment-method-group:last-child {
+    margin-bottom: 0;
+}
+
+.payment-method-group select,
+.payment-method-group input {
+    margin: 0;
+}
+
+.payment-method-group select {
+    flex: 2;
+}
+
+.payment-method-group input {
+    flex: 1;
 }
 
 .propina-row {
     display: flex;
-    gap: 1rem;
     align-items: center;
-    margin-bottom: 1rem;
+    gap: 1rem;
+    margin-top: 0;
+    margin-bottom: 2rem;
 }
 
-.propina-row input {
+.propina-row input[type="number"] {
     flex: 1;
-    margin-bottom: 0; 
+    margin: 0;
+    width: 50%;
 }
 
-.propina-row button {
-    white-space: nowrap; 
-    height: 100%; 
-    padding: 0.5rem 1rem;
+.propina-row .btn-primary {
+    flex: 1;
+    margin: 0;
+    white-space: nowrap;
+    width: 50%;
+}
+
+/* Ajuste general para inputs numéricos */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Ajuste para inputs deshabilitados */
+input:disabled,
+input[readonly] {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
 }
 
 .alert {
@@ -280,20 +327,51 @@ td.borrar-pago form {
     transition: background-color 0.2s ease-in-out;
 }
 
-.addProductBtn {
-    padding: 0.5rem;
-    height: 100%;
-    border-radius: 4px;
+.btn-primary {
     background-color: #28a745;
     color: white;
-    border: none;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+    border: 1px solid #28a745;
 }
 
-.addProductBtn:hover {
+.btn-primary:hover {
     background-color: #218838;
+    border-color: #218838;
 }
 
+/* Removing redundant styles */
+.addProductBtn, .removeProductBtn {
+    margin: 0;
+}
+
+.productRow {
+    margin-bottom: 1rem;
+}
+
+.productRow > div {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.productRow .productSelect {
+    flex: 2;
+}
+
+.productRow .productCant,
+.productRow .productPrice {
+    width: 100px !important;
+    flex: none;
+}
+
+.productRow .btn-primary {
+    width: 38px;
+    padding: 0;
+}
 
 .h2, h2 {
     text-align: center;
@@ -302,4 +380,88 @@ td.borrar-pago form {
 
 .p, p {
     text-align: center;
+}
+
+.iconBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: #28a745;
+  cursor: pointer;
+}
+
+.iconBtn:hover {
+  color: #218838;
+}
+
+/* Toggle container styles */
+#toggleContainer {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#toggleContainer > div {
+    flex: 1;
+}
+
+/* Disabled input styles */
+input:disabled {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.payment-method-container {
+    position: relative;
+    margin-bottom: 1rem;
+    min-height: 38px; /* Altura mínima para modo simple */
+    transition: min-height 0.3s ease;
+}
+
+.payment-method-container.multiple {
+    min-height: 90px; /* Altura para acomodar dos filas de inputs */
+}
+
+#singleMethodGroup,
+#membresiaMethodGroup {
+    width: 100%;
+    height: 38px;
+}
+
+#multiMethodGroup {
+    width: 100%;
+}
+
+.payment-method-group {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.payment-method-group:last-child {
+    margin-bottom: 0;
+}
+
+.payment-method-group select,
+.payment-method-group input {
+    margin: 0;
+}
+
+.payment-method-group select {
+    flex: 2;
+}
+
+.payment-method-group input {
+    flex: 1;
+}
+
+/* Mantener el grupo de propina siempre visible */
+.form-group {
+    position: relative;
+    z-index: 1;
+}
+
+#membresiaMethodGroup {
+    z-index: 2;
 }

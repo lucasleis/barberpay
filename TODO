@@ -25,7 +25,8 @@
     - En venta de producto, los empleados se quedan con el 15%
     - En color y mechas, los empleados se quedan con el 50%
     - Manejar errores de que no haya peluqueria, empleado, corte, etc
-    - Arreglar tips
+    - Arreglar propinas (sumar propina cuando se paga con multiples metodos)
+    - que el monto de pagos hoy no tenga incluido la propina
 
 - Testear:
     - Tiempos de carga
