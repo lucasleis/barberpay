@@ -104,7 +104,7 @@
   </div>
 
   <!-- Metodo de Pago -->
-  <div class="form-group">
+  <div class="form-group payment-methods">
     <div style="display: flex; align-items: center; justify-content: space-between;">
       <label for="method">Método de pago:</label>
       <label class="checkbox-label">
@@ -218,7 +218,7 @@
         {% if pago.method2 %}
           ${{ pago.amount_method1|int }} - ${{ pago.amount_method2|int }}
         {% else %}
-          ${{ pago.amount_method1|int }}
+          ${{ pago.amount_method1|int - pago.amount_tip|int }}
         {% endif %}
       </td>
       <td>${{ pago.amount_tip|int }}</td>
@@ -342,14 +342,14 @@
 
   // Evento para alternar entre modo de pago simple y múltiple
   togglemultiPayment.addEventListener('change', function () {
-    const container = document.querySelector('.payment-method-container');
+    const paymentMethodsGroup = document.querySelector('.form-group.payment-methods');
     
     if (this.checked) {
       // Si se activa el pago múltiple, ocultar el modo simple y mostrar campos adicionales
       singleGroup.style.display = 'none';
       multiGroup.style.display = 'block';
       multiGroup.querySelectorAll('input').forEach(el => el.required = true);
-      container.classList.add('multiple');
+      paymentMethodsGroup.classList.add('multiple');
     } else {
       // Si se desactiva, volver al modo simple
       singleGroup.style.display = 'flex';
@@ -361,7 +361,7 @@
       multiGroup.querySelectorAll('select').forEach(el => el.classList.remove('input-error'));
       errorMsg.style.display = 'none';
       repeatError.style.display = 'none';
-      container.classList.remove('multiple');
+      paymentMethodsGroup.classList.remove('multiple');
     }
   });
 

@@ -7,7 +7,6 @@
             - Amigos
 
     - Productos:
-        - Arreglar estetica de boton de + y -
 
     - Metodos de Pago:
 
@@ -27,6 +26,7 @@
     - Manejar errores de que no haya peluqueria, empleado, corte, etc
     - Arreglar propinas (sumar propina cuando se paga con multiples metodos)
     - que el monto de pagos hoy no tenga incluido la propina
+    - se estan mostrando los pagos restando en la tabla. revisar que es lo mejor cuando este la tabla de cierres
 
 - Testear:
     - Tiempos de carga
