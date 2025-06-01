@@ -90,7 +90,7 @@
 
   <!-- Selector de membresía -->
   <div id="membresiaSection" class="form-group" style="display: none;">
-    <label for="membresia_id">Membresía:</label>
+    <label for="membresia_id">Membresía y precio:</label>
     <div style="display: flex; gap: 1rem;">
       <select name="membresia_id" id="membresiaSelect">
         {% for membresia in membresias %}
@@ -99,7 +99,7 @@
           </option>
         {% endfor %}
       </select>
-      <input type="text" id="membreciaPrice" disabled placeholder="$">
+      <input type="text" id="membreciaPrice" disabled placeholder="$" style="width: 100px;">
     </div>
   </div>
 
