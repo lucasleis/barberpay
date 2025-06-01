@@ -8,27 +8,32 @@
 {% block content %}
   <h2>Productos</h2>
 
-  <form method="POST" action="{{ url_for('add_product') }}" class="service-form">
-    <div class="nombre-cantidad">
-      <input type="text" name="name" placeholder="Nombre del producto" required>
-      <select id="productCant" name="cantidad">
-        {% for i in range(1, 11) %}
-          <option value="{{ i }}">{{ i }}</option>
-        {% endfor %}
-      </select>
+  <form method="POST" action="{{ url_for('add_product') }}">
+    <div class="form-group">
+      <label for="name">Producto:</label>
+      <div class="nombre-cantidad">
+        <input type="text" name="name" id="name" placeholder="Nombre del producto" required>
+        <select id="productCant" name="cantidad">
+          {% for i in range(1, 11) %}
+            <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
-  
-    <input type="number" name="precio" step="1" placeholder="Precio ($)" required>
-    <button type="submit">Agregar producto</button>
+
+    <div class="form-group">
+      <label for="precio">Precio:</label>
+      <input type="number" name="precio" id="precio" step="1" placeholder="Precio ($)" required>
+    </div>
+
+    <button type="submit">Agregar Producto</button>
   </form>
 
-  <ul class="service-list">
+  <ul class="barber-list">
     {% for product in products %}
-
-    <li class="service-item">
+    <li class="barber-item">
       <span>{{ product.name }} - ${{ "%.2f"|format(product.precio)|int }} | Cantidad: {{ product.cantidad }} </span>
     
-      <!-- Acciones a la derecha -->
       <div class="action-buttons">
         <a href="#" class="edit-icon" title="Editar cantidad" onclick="openCantidadModal('{{ product.id }}'); return false;">
           <i class="fas fa-pen"></i>
@@ -40,20 +45,22 @@
       </div>
     </li>
     
-    <!-- Modal (fuera del <li> para que se renderice una sola vez por producto) -->
+    <!-- Modal para editar cantidad -->
     <div id="modal-{{ product.id }}" class="modal-cantidad">
       <div class="modal-content">
         <h3>Modificar cantidad</h3>
         <span class="close-modal" onclick="closeCantidadModal(this.dataset.id)" data-id="{{ product.id }}">&times;</span>
         <form method="POST" action="{{ url_for('update_product_quantity', id=product.id) }}">
-          <input type="number" name="cantidad" min="1" placeholder="Cantidad" required class="cantidad-input">
+          <div class="form-group">
+            <label for="cantidad-{{ product.id }}">Nueva cantidad:</label>
+            <input type="number" name="cantidad" id="cantidad-{{ product.id }}" min="1" placeholder="Cantidad" required class="cantidad-input">
+          </div>
           <button type="submit" class="edit-button">
             <i class="fas fa-check"></i> Confirmar
           </button>
         </form>
       </div>
     </div>
-    
     {% endfor %}
   </ul>
 
@@ -76,5 +83,4 @@
       });
     }
   </script>
-
 {% endblock %}
