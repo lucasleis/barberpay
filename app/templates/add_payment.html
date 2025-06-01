@@ -225,7 +225,7 @@
           ${{ pago.amount_method1|int - pago.amount_tip|int }}
         {% endif %}
       </td>
-      <!-- <td>${{ pago.amount_method1|int + pago.amount_method2|int + pago.amount_tip|int }}</td> -->
+      <td>${{ pago.amount_tip|int }}</td> 
       <td>${{ pago.amount_method1|int + pago.amount_method2|int }}</td>
       <td class="borrar-pago">
         <form method="POST" action="{{ url_for('delete_payment', pago_id=pago.id) }}">
