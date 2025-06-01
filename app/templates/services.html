@@ -8,36 +8,43 @@
 {% block content %}
   <h2>Servicios</h2>
 
-  <form method="POST" action="{{ url_for('add_service') }}" class="service-form-vertical">
-
-    <!-- Fila 1: Nombre y Precio -->
-    <div class="input-row">
-      <input type="text" name="name" placeholder="Nombre del servicio" required>
-      <input type="number" name="precio" step="1" placeholder="Precio ($)" required>
+  <form method="POST" action="{{ url_for('add_service') }}">
+    <div class="form-group">
+      <label for="name">Nombre:</label>
+      <input type="text" name="name" id="name" placeholder="Nombre del servicio" required>
     </div>
-  
-    <!-- Fila 2: Descuento -->
-    <div class="toggle-section">
-      <input type="checkbox" name="descuento" id="descuentoCheckbox" value="true" class="toggle-checkbox" onchange="toggleDescuentoField()">
-      <label for="descuentoCheckbox" class="toggle-button">Descuento</label>
-      <input type="number" name="precio_descuento" id="descuentoField" step="1" placeholder="Monto descuento ($)" class="input-condicional" style="display: none;">
+
+    <div class="form-group">
+      <label for="precio">Precio:</label>
+      <input type="number" name="precio" id="precio" step="1" placeholder="Precio ($)" required>
+    </div>
+
+    <div class="form-group toggle-container">
+      <div class="toggle-section">
+        <input type="checkbox" name="descuento" id="descuentoCheckbox" value="true" class="toggle-checkbox" onchange="toggleDescuentoField()">
+        <label for="descuentoCheckbox" class="toggle-button">Descuento</label>
+      </div>
+      <div class="input-wrapper">
+        <input type="number" name="precio_descuento" id="descuentoField" step="1" placeholder="Monto descuento ($)" class="input-condicional" style="display: none;">
+      </div>
     </div>
     
-    <!-- Fila 3: Amigo -->
-    <div class="toggle-section">
-      <input type="checkbox" name="amigo" id="amigoCheckbox" value="true" class="toggle-checkbox" onchange="toggleAmigoField()">
-      <label for="amigoCheckbox" class="toggle-button">Amigo</label>
-      <input type="number" name="precio_amigo" id="amigoField" step="1" placeholder="Monto amigo ($)" class="input-condicional" style="display: none;">
+    <div class="form-group toggle-container">
+      <div class="toggle-section">
+        <input type="checkbox" name="amigo" id="amigoCheckbox" value="true" class="toggle-checkbox" onchange="toggleAmigoField()">
+        <label for="amigoCheckbox" class="toggle-button">Amigo</label>
+      </div>
+      <div class="input-wrapper">
+        <input type="number" name="precio_amigo" id="amigoField" step="1" placeholder="Monto amigo ($)" class="input-condicional" style="display: none;">
+      </div>
     </div>
-  
-    <!-- Fila 4: Botón -->
-    <button type="submit">Agregar servicio</button>
-  </form>
-  
 
-  <ul class="service-list">
+    <button type="submit">Agregar Servicio</button>
+  </form>
+
+  <ul class="barber-list">
     {% for service in services %}
-      <li class="service-item">
+      <li class="barber-item">
         <span>
           {{ service.name }} - ${{ "%.2f"|format(service.precio) }}
           {% if service.precio_amigo and service.precio_amigo > 0 %}
@@ -54,7 +61,6 @@
     {% endfor %}
   </ul>
 
-
   <script>
     function toggleDescuentoField() {
       const check = document.getElementById('descuentoCheckbox');
@@ -68,5 +74,4 @@
       field.style.display = check.checked ? 'block' : 'none';
     }
   </script>
-
 {% endblock %}

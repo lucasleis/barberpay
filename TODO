@@ -12,7 +12,8 @@
         - Acomodar pagina. se ve rara
 
     - Membresia:
-        - No esta descontando cantidad al utilizar membresia
+        - Solo se descuenta membresia cuando esta seleccionada el toggle de membresia. hacer que cuando este otro tambien descuente
+        - que se muestre diferente cuando se utiliza membresia
 
     - Cierre:
         - Arreglar cuentas (Totales por método de pago)
