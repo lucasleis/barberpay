@@ -9,8 +9,10 @@
     - Productos:
 
     - Metodos de Pago:
+        - Acomodar pagina. se ve rara
 
     - Membresia:
+        - No esta descontando cantidad al utilizar membresia
 
     - Cierre:
         - Arreglar cuentas (Totales por método de pago)
