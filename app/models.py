@@ -107,18 +107,15 @@ class Appointment(db.Model):
     date = db.Column(db.DateTime, default=now_buenos_aires)
     barber_id = db.Column(db.Integer, db.ForeignKey('barberos.id'))
     service_id = db.Column(db.Integer, db.ForeignKey('servicios.id'))
-    # productos_id = db.Column(db.Integer, db.ForeignKey('productos.id'))
-    # cantidad = db.Column(db.Integer, default=1)
     membresia_id = db.Column(db.Integer, db.ForeignKey('membresias.id'))
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
-    # tiene_productos = db.Column(db.Boolean, default=False)
-    # total_productos = db.Column(db.Integer, default=0)
-    # importe_productos = db.Column(db.Float, default=0.0)
+    tipo_precio_servicio = db.Column(db.String, nullable=False)  # 'comun', 'amigo', 'descuento'
+    #precio_aplicado = db.Column(db.Numeric(10, 2), nullable=False)
 
+    # Relaciones
     barber = db.relationship('Empleado')
     service = db.relationship('Servicio')
-    # producto = db.relationship('Producto')
     membresia = db.relationship('Membresia')
     productos_turno = db.relationship('AppointmentTurno', back_populates='turno', cascade="all, delete-orphan")
 

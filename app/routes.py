@@ -666,6 +666,13 @@ def add_payment():
                     raise ValueError("Debe seleccionarse un servicio.")
                 appointment.service_id = service_id
 
+                if request.form.get('precioDescuentoCheckbox') == 'on':
+                    appointment.tipo_precio_servicio = "descuento"
+                elif request.form.get('precioAmigoCheckbox') == 'on':
+                    appointment.tipo_precio_servicio = "amigo"
+                else:
+                    appointment.tipo_precio_servicio = "comun"
+
             total_producto = 0.0
             if toggle_producto:
                 product_ids = request.form.getlist('product_id[]')
@@ -730,7 +737,7 @@ def add_payment():
             multipagos = 'togglemultiPayment' in request.form
 
             method_simple_service = int(request.form.get('methodSimple') or 0)
-            amount_simple_service = float(request.form.get('amount_simple') or 0)
+            # amount_simple_service = float(request.form.get('amount_simple') or 0)
 
             method_multiple_1 = int(request.form.get('method_multiple_1') or 0)
             method_multiple_2 = int(request.form.get('method_multiple_2') or 0)
@@ -741,8 +748,12 @@ def add_payment():
             total_pagado = 0.0
 
             if toggle_servicio:
-                service = Servicio.query.get(service_id)
-                total_real += service.precio if service else 0  
+                # service = Servicio.query.get(service_id)
+                # total_real += service.precio if service else 0  
+                precio = request.form.get('servicePrice')
+                precio = precio.split("$")
+                service_price = int(precio[1] or 0)
+                total_real += service_price
 
             if toggle_producto:
                 total_real += total_producto
@@ -757,7 +768,8 @@ def add_payment():
             if multipagos:
                 total_real += tip
                 if method_multiple_1 == method_multiple_2:
-                    raise ValueError("No se puede repetir el mismo método de pago.")
+                    flash(f"No se puede repetir el mismo método de pago.")
+                    #raise ValueError("No se puede repetir el mismo método de pago.")
                 if not method_multiple_1 or not method_multiple_2:
                     raise ValueError("Faltan datos del segundo método de pago.")
                 total_pagado = amount_method_multi_1 + amount_method_multi_2
@@ -767,7 +779,9 @@ def add_payment():
                     total_real += tip
                     
             if abs(total_pagado - total_real) > 0.01:
-                raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
+                flash(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).", "danger")
+                #raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
+
 
             pago = Pago(
                 appointment_id=appointment.id,

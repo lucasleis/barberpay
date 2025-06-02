@@ -12,6 +12,7 @@
 
     - Membresia:
         - Fijar posicion de label membresiaLabel
+        - Al usar membresia no se puede poner propina
 
     - Cierre:
         - Arreglar cuentas (Totales por método de pago)

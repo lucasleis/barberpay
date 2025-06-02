@@ -66,14 +66,14 @@
       <select name="service_id" id="serviceSelect" required>
         {% for s in services %}
           <option value="{{ s.id }}"
-                  data-precio="{{ s.precio }}"
-                  data-precio-amigo="{{ s.precio_amigo or 0 }}"
-                  data-precio-descuento="{{ s.precio_descuento or 0 }}">
+              data-precio="{{ s.precio }}"
+              data-precio-amigo="{{ s.precio_amigo or 0 }}"
+              data-precio-descuento="{{ s.precio_descuento or 0 }}">
             {{ s.name }}
           </option>
         {% endfor %}
       </select>
-      <input type="text" id="servicePrice" disabled placeholder="$" style="width: 100px;">
+      <input type="text" id="servicePrice" name="servicePrice" readonly placeholder="$" style="width: 100px;">
     </div>
   </div>
 
@@ -341,17 +341,6 @@
   }
 
   // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
-  /*
-    function updatePrice() {
-      const selected = serviceSelect.options[serviceSelect.selectedIndex];
-      const precio = selected.getAttribute('data-precio');
-      const precioFloat = Math.round(parseFloat(precio).toFixed(2));
-      servicePrice.value = `$${precioFloat}`;
-      amountSimple.value = precioFloat;
-
-      // console.log("servicePrice.value: "+servicePrice.value);
-    }
-  */
   function updatePrice() {
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
     let precio = selected.getAttribute('data-precio');
@@ -483,7 +472,7 @@
       form.querySelector('select[name="method_multiple_2"]')
     ];
 
-    console.log("llega validar metodos")
+    // console.log("llega validar metodos")
 
     // Validar métodos repetidos
     if (method1 === method2) {
@@ -547,7 +536,7 @@
       agregarInputsOcultos(productosData.items);
 
       const totalEsperado = servicePrecio + productosData.total;
-      console.log("totalEsperado: ",totalEsperado)
+      // console.log("totalEsperado: ",totalEsperado)
 
       if (togglemultiPayment.checked) {
         const validMultiPago = validarMultiplesMetodos(totalEsperado);
@@ -556,20 +545,19 @@
 
     }
 
-    if (membresiaActivo){
+    if (valid && membresiaActivo){
 
       const usa_membresia = document.getElementById('membresiaCheckbox');
       
       if (usa_membresia.checked) {
 
         const num_membresia = document.getElementById('check_membresia');
-        console.log("num_membresia: ", num_membresia)
-        console.log("Valor ingresado: ", num_membresia.value);
+        // console.log("num_membresia: ", num_membresia)
+        // console.log("Valor ingresado: ", num_membresia.value);
 
       } else {
-        console.log("paga membresia")
         const precioActual = obtenerPrecioMembresiaSeleccionada();
-        console.log('Precio de la membresía seleccionada:', precioActual);
+        // console.log('Precio de la membresía seleccionada:', precioActual);
 
         const totalEsperado = precioActual;
 
@@ -586,8 +574,13 @@
       }
     }
 
-    if (!valid) {
+    if (valid) {
+      console.log('Entra valid');
+      form.submit(); 
+    } else {
+      console.log('Entra invalid');
       e.preventDefault();
+      return
     }
   });
 
