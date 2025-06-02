@@ -107,11 +107,11 @@
   <div class="form-group payment-methods">
     <div style="display: flex; align-items: center; justify-content: space-between;">
       <label for="method">Método de pago:</label>
-      <label class="checkbox-label">
-        <input type="checkbox" id="multiPaymentToggle" name="togglemultiPayment"> ¿Usa múltiples métodos?
+      <label id="membresiaLabel" name="membresiaLabel" class="checkbox-label" style="display: none;">
+        <input type="checkbox" id="membresiaCheckbox" name="membresiaCheckbox"> ¿Usa Membresía?
       </label>
       <label class="checkbox-label">
-        <input type="checkbox" id="membresiaCheckbox" name="membresiaCheckbox"> ¿Usa Membresía?
+        <input type="checkbox" id="multiPaymentToggle" name="togglemultiPayment"> ¿Usa múltiples métodos?
       </label>
     </div>
 
@@ -261,6 +261,9 @@
   const membresiaSelect = document.getElementById('membresiaSelect');
   const priceInput = document.getElementById('membreciaPrice');
 
+  const membresiaLabel = document.getElementById('membresiaLabel');
+
+
   // Función para mostrar/ocultar secciones según el toggle (servicio/producto)
   function updateToggleSections(e = null) {
     const source = e?.target?.id || null;
@@ -279,10 +282,11 @@
       membresiaToggle.checked = false;
     }
 
-    // Mostrar u ocultar secciones si lo necesitás acá
+    // Mostrar u ocultar secciones 
     servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
     productSection.style.display = productoToggle.checked ? 'block' : 'none';
     membresiaSection.style.display = membresiaToggle.checked ? 'block' : 'none';
+    membresiaLabel.style.display = membresiaToggle.checked ? 'block' : 'none';
 
 
     if (productoToggle.checked) {
