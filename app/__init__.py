@@ -113,7 +113,10 @@ def ensure_database_and_tables():
             barber_id INTEGER REFERENCES barberos(id),
             service_id INTEGER REFERENCES servicios(id),
             membresia_id INTEGER REFERENCES membresias(id),
-            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
+        
+            tipo_precio_servicio TEXT NOT NULL CHECK (tipo_precio_servicio IN ('comun', 'amigo', 'descuento')),
+            precio_aplicado NUMERIC(10,2) NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS productos_turno (

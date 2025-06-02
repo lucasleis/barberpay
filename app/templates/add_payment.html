@@ -53,11 +53,24 @@
 
   <!-- Selector de servicio -->
   <div id="servicioSection" class="form-group">
-    <label for="service_id">Servicio y precio:</label>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <label for="service_id">Servicio y precio:</label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="precioDescuentoCheckbox" name="precioDescuentoCheckbox"> ¿Precio Descuento?
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="precioAmigoCheckbox" name="precioAmigoCheckbox"> ¿Precio Amigo?
+      </label>
+    </div>
     <div style="display: flex; gap: 1rem;">
       <select name="service_id" id="serviceSelect" required>
         {% for s in services %}
-          <option value="{{ s.id }}" data-precio="{{ s.precio }}">{{ s.name }}</option>
+          <option value="{{ s.id }}"
+                  data-precio="{{ s.precio }}"
+                  data-precio-amigo="{{ s.precio_amigo or 0 }}"
+                  data-precio-descuento="{{ s.precio_descuento or 0 }}">
+            {{ s.name }}
+          </option>
         {% endfor %}
       </select>
       <input type="text" id="servicePrice" disabled placeholder="$" style="width: 100px;">
@@ -263,6 +276,10 @@
 
   const membresiaLabel = document.getElementById('membresiaLabel');
 
+  // checkboxs 
+  const precioAmigoCheckbox = document.getElementById('precioAmigoCheckbox');
+  const precioDescuentoCheckbox = document.getElementById('precioDescuentoCheckbox');
+
 
   // Función para mostrar/ocultar secciones según el toggle (servicio/producto)
   function updateToggleSections(e = null) {
@@ -270,7 +287,7 @@
 
     if (source === 'toggleMembresia' && membresiaToggle.checked) {
       // Si el usuario activó membresía, desactiva los otros
-      console.log("Activando membresía");
+      // console.log("Activando membresía");
       servicioToggle.checked = false;
       productoToggle.checked = false;
     }
@@ -278,7 +295,7 @@
     if ((source === 'toggleServicio' && servicioToggle.checked) || 
         (source === 'toggleProducto' && productoToggle.checked)) {
       // Si el usuario activó servicio o producto, desactiva membresía
-      console.log("Activando servicio o producto");
+      // console.log("Activando servicio o producto");
       membresiaToggle.checked = false;
     }
 
@@ -324,18 +341,37 @@
   }
 
   // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
+  /*
+    function updatePrice() {
+      const selected = serviceSelect.options[serviceSelect.selectedIndex];
+      const precio = selected.getAttribute('data-precio');
+      const precioFloat = Math.round(parseFloat(precio).toFixed(2));
+      servicePrice.value = `$${precioFloat}`;
+      amountSimple.value = precioFloat;
+
+      // console.log("servicePrice.value: "+servicePrice.value);
+    }
+  */
   function updatePrice() {
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
-    const precio = selected.getAttribute('data-precio');
+    let precio = selected.getAttribute('data-precio');
+
+    if (precioAmigoCheckbox.checked) {
+      precio = selected.getAttribute('data-precio-amigo');
+    } else if (precioDescuentoCheckbox.checked) {
+      precio = selected.getAttribute('data-precio-descuento');
+    }
+
     const precioFloat = Math.round(parseFloat(precio).toFixed(2));
     servicePrice.value = `$${precioFloat}`;
     amountSimple.value = precioFloat;
-
-    // console.log("servicePrice.value: "+servicePrice.value);
   }
+
 
   updatePrice();      // Se llama una vez al cargar la página para mostrar el precio inicial
   serviceSelect.addEventListener('change', updatePrice);    // Actualiza el precio cada vez que se cambia el servicio seleccionado
+  precioAmigoCheckbox.addEventListener('change', updatePrice);
+  precioDescuentoCheckbox.addEventListener('change', updatePrice);
 
   // Oculta alertas automáticamente después de 15 segundos
   setTimeout(() => {
@@ -517,7 +553,6 @@
         const validMultiPago = validarMultiplesMetodos(totalEsperado);
         if (!validMultiPago) valid = false;
       }
-      console.log("pasa if")
 
     }
 
@@ -620,6 +655,24 @@
     });
   }
 
+  function initServicesSection() {
+    // Cuando se selecciona "precio amigo", desmarca "precio descuento"
+    precioAmigoCheckbox.addEventListener('change', function () {
+      if (this.checked) {
+        precioDescuentoCheckbox.checked = false;
+      }
+    });
+
+    // Cuando se selecciona "precio descuento", desmarca "precio amigo"
+    precioDescuentoCheckbox.addEventListener('change', function () {
+      if (this.checked) {
+        precioAmigoCheckbox.checked = false;
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', updatePrice);
+  }
+
   // Init toggle producto
   function initProductSection() {
     const productSection = document.getElementById('productSection');
@@ -708,6 +761,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    initServicesSection();
     initProductSection();
     initMembresiaSection();
     setupMembresiaCheckboxToggle();
