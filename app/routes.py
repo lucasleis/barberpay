@@ -751,6 +751,9 @@ def add_payment():
                 membresia = TipoMembresia.query.get(membresia_id)
                 total_real += float(membresia.precio) if membresia else 0
 
+                if check_membresia == 'on':
+                    total_real = 0 
+
             if multipagos:
                 total_real += tip
                 if method_multiple_1 == method_multiple_2:
@@ -819,17 +822,23 @@ def delete_payment(pago_id):
                 producto = Producto.query.get(pt.producto_id)
                 if producto:
                     producto.cantidad += pt.cantidad  # Devolver al stock
-                db.session.delete(pt)  # Eliminar la relación entre el turno y el producto
+                db.session.delete(pt)  
 
         # Manejar membresías
         if appointment and appointment.membresia:
             membresia = Membresia.query.get(appointment.membresia_id)
             if membresia:
-                # Si el pago tenía una membresía comprada (nueva), eliminarla
+                # Si el pago era por una membresía comprada (nueva)
                 if pago.membresia_comprada_id and pago.membresia_comprada_id == membresia.id:
-                    db.session.delete(membresia)
-                # Si no, era una membresía existente que se usó, devolver el uso
+                    tipo = TipoMembresia.query.get(membresia.tipo_membresia_id)
+                    if tipo and membresia.usos_disponibles == tipo.usos:
+                        # Nunca fue usada → se puede eliminar
+                        db.session.delete(membresia)
+                    else:
+                        flash("No se puede eliminar la compra de una membresía que ya fue usada.", "warning")
+                        return redirect(url_for('add_payment'))
                 else:
+                    # Si se usó una membresía existente, devolver 1 uso
                     membresia.usos_disponibles += 1
 
         # Eliminar el pago y el turno
