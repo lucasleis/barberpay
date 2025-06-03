@@ -167,6 +167,12 @@
         </div>
       </div>
     </div>
+    <p id="methodRepeatError" class="text-danger mt-1" style="display: none;">
+      No puede elegir el mismo método de pago dos veces
+    </p>
+    <p id="montoError" class="text-danger mt-1" style="display: none;">
+      La suma de los métodos de pago y la propina debe coincidir con el total a pagar
+    </p>
   </div>
 
   <!-- Propina -->
@@ -459,9 +465,11 @@
   function validarMultiplesMetodos(totalEsperado) {
     const form = document.querySelector('form');
     const repeatError = document.getElementById('methodRepeatError');
+    const montoError = document.getElementById('montoError');
 
     const amount1 = parseFloat(form.querySelector('input[name="amount_method_multi_1"]').value) || 0;
     const amount2 = parseFloat(form.querySelector('input[name="amount_method_multi_2"]').value) || 0;
+    const propina = parseFloat(form.querySelector('input[name="tip"]').value) || 0;
     const totalPagado = amount1 + amount2;
 
     const method1 = form.querySelector('select[name="method_multiple_1"]').value;
@@ -472,30 +480,35 @@
       form.querySelector('select[name="method_multiple_2"]')
     ];
 
-    // console.log("llega validar metodos")
+    const montoInputs = [
+      form.querySelector('input[name="amount_method_multi_1"]'),
+      form.querySelector('input[name="amount_method_multi_2"]'),
+      form.querySelector('input[name="tip"]')
+    ];
+
+    // Ocultar mensajes de error inicialmente
+    repeatError.style.display = 'none';
+    montoError.style.display = 'none';
+    metodoInputs.forEach(select => select.classList.remove('input-error'));
+    montoInputs.forEach(input => input.classList.remove('input-error'));
 
     // Validar métodos repetidos
     if (method1 === method2) {
-      console.log("entra if method")
       metodoInputs.forEach(select => select.classList.add('input-error'));
       repeatError.style.display = 'block';
       return false;
-    } else {
-      console.log("entra else method")
-      metodoInputs.forEach(select => select.classList.remove('input-error'));
-      repeatError.style.display = 'none';
     }
 
-    console.log("llega validar total")
-
     // Validar que el total pagado sea correcto
-    const montoError = document.getElementById('montoError');
-
-    if (totalPagado !== totalEsperado) {
+    console.log("totalPagado: ",totalPagado)
+    console.log("totalEsperado: ",totalEsperado)
+    console.log("propina: ",propina)
+    console.log("totalEsperado + propina: ",totalEsperado+propina)
+    console.log("totalPagado - (totalEsperado + propina): ",totalPagado - totalEsperado + propina)
+    if (Math.abs(totalPagado - (totalEsperado + propina)) > 0.01) {
+      montoInputs.forEach(input => input.classList.add('input-error'));
       montoError.style.display = 'block';
       return false;
-    } else {
-      montoError.style.display = 'none';
     }
 
     return true;
@@ -505,6 +518,9 @@
   // Validaciones al enviar el formulario
   // Validar que haga las mismas validaciones que func python
   form.addEventListener('submit', function (e) {
+    // Siempre prevenir el envío por defecto primero
+    e.preventDefault();
+    
     let valid = true;
 
     const toggleError = document.getElementById('toggleError');
@@ -516,72 +532,44 @@
 
     // Validar toggles
     if (!servicioActivo && !productoActivo && !membresiaActivo) {
-      mostrarErrorToggle(true);
-      e.preventDefault();
-      return;
-    } else {
-      mostrarErrorToggle(false);
-    }
-
-    if (servicioActivo || productoActivo){
-      const servicePrecio = servicioActivo ? obtenerPrecioServicio() : 0;
-      const productosData = productoActivo ? obtenerProductosSeleccionados() : { total: 0, items: [] };
-
-      if (productoActivo && productosData.items.length === 0) {
-        alert('Debe seleccionar al menos un producto con cantidad válida');
-        e.preventDefault();
+        mostrarErrorToggle(true);
         return;
-      }
-
-      agregarInputsOcultos(productosData.items);
-
-      const totalEsperado = servicePrecio + productosData.total;
-      // console.log("totalEsperado: ",totalEsperado)
-
-      if (togglemultiPayment.checked) {
-        const validMultiPago = validarMultiplesMetodos(totalEsperado);
-        if (!validMultiPago) valid = false;
-      }
-
     }
+    mostrarErrorToggle(false);
 
-    if (valid && membresiaActivo){
+    if (servicioActivo || productoActivo) {
+        const servicePrecio = servicioActivo ? obtenerPrecioServicio() : 0;
+        const productosData = productoActivo ? obtenerProductosSeleccionados() : { total: 0, items: [] };
 
-      const usa_membresia = document.getElementById('membresiaCheckbox');
-      
-      if (usa_membresia.checked) {
-
-        const num_membresia = document.getElementById('check_membresia');
-        // console.log("num_membresia: ", num_membresia)
-        // console.log("Valor ingresado: ", num_membresia.value);
-
-      } else {
-        const precioActual = obtenerPrecioMembresiaSeleccionada();
-        // console.log('Precio de la membresía seleccionada:', precioActual);
-
-        const totalEsperado = precioActual;
-
-        if (togglemultiPayment.checked) {
-          const validMultiPago = validarMultiplesMetodos(totalEsperado);
-          if (!validMultiPago) valid = false;
-          
-          if (validMultiPago){
-            console.log('Precio valido');
-          } else {
-            console.log('Error en cuentas');
-          } 
+        if (productoActivo && productosData.items.length === 0) {
+            alert('Debe seleccionar al menos un producto con cantidad válida');
+            return;
         }
-      }
+
+        agregarInputsOcultos(productosData.items);
+
+        const totalEsperado = servicePrecio + productosData.total;
+
+        if (togglemultiPayment.checked && !validarMultiplesMetodos(totalEsperado)) {
+            return;
+        }
     }
 
-    if (valid) {
-      console.log('Entra valid');
-      form.submit(); 
-    } else {
-      console.log('Entra invalid');
-      e.preventDefault();
-      return
+    if (membresiaActivo) {
+        const usa_membresia = document.getElementById('membresiaCheckbox');
+        
+        if (!usa_membresia.checked) {
+            const precioActual = obtenerPrecioMembresiaSeleccionada();
+            const totalEsperado = precioActual;
+
+            if (togglemultiPayment.checked && !validarMultiplesMetodos(totalEsperado)) {
+                return;
+            }
+        }
     }
+
+    // Si llega aca, todo es válido
+    e.target.submit();
   });
 
 
