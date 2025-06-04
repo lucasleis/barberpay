@@ -177,9 +177,10 @@
 
   <!-- Propina -->
   <div class="form-group">
-    <label for="tip">Propina:</label>
+    <label for="tip">Propina y Total a Pagar:</label>
     <div class="propina-row">
-      <input type="number" name="tip" id="tip" step="100" placeholder="$" class="form-control">
+      <input type="number" name="tip" id="tip" step="1" placeholder="$" class="form-control">
+      <input type="text" name="totalPago" id="totalPago" placeholder="$" class="form-control" readonly>
       <button type="submit" class="btn-primary">Guardar pago</button>
     </div>
   </div>
@@ -347,6 +348,45 @@
   }
 
   // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
+  function updatePriceTotal() {
+    let precioTotal = 0;
+
+    const servicioActivo = servicioToggle.checked;
+    const productoActivo = productoToggle.checked;
+    const membresiaActivo = membresiaToggle.checked;
+
+    // 1. Si está activada membresía, usar su precio y nada más
+    if (membresiaActivo) {
+      precioTotal = obtenerPrecioMembresia();
+    } else {
+      // 2. Si hay servicio, sumar su precio (considerando amigo/desc)
+      if (servicioActivo) {
+        const selected = serviceSelect.options[serviceSelect.selectedIndex];
+        let precio = selected.getAttribute('data-precio');
+
+        if (precioAmigoCheckbox.checked) {
+          precio = selected.getAttribute('data-precio-amigo');
+        } else if (precioDescuentoCheckbox.checked) {
+          precio = selected.getAttribute('data-precio-descuento');
+        }
+
+        precioTotal += parseFloat(precio) || 0;
+      }
+
+      // 3. Si hay productos, sumar sus precios
+      if (productoActivo) {
+        const productosData = obtenerProductosSeleccionados();
+        precioTotal += productosData.total;
+      }
+    }
+
+    // Mostrar en input
+    const totalPagoInput = document.getElementById('totalPago');
+    totalPagoInput.value = `$${Math.round(precioTotal)}`;
+  }
+
+
+  // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
   function updatePrice() {
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
     let precio = selected.getAttribute('data-precio');
@@ -363,10 +403,12 @@
   }
 
 
-  updatePrice();      // Se llama una vez al cargar la página para mostrar el precio inicial
+  updatePrice();                                            // Se llama una vez al cargar la página para mostrar el precio inicial
   serviceSelect.addEventListener('change', updatePrice);    // Actualiza el precio cada vez que se cambia el servicio seleccionado
   precioAmigoCheckbox.addEventListener('change', updatePrice);
   precioDescuentoCheckbox.addEventListener('change', updatePrice);
+  updatePriceTotal();
+
 
   // Oculta alertas automáticamente después de 15 segundos
   setTimeout(() => {
@@ -670,6 +712,7 @@
       const cantidad = parseInt(row.querySelector('.productCant').value || 1);
       const total = precio * cantidad;
       row.querySelector('.productPrice').value = `$${Math.round(total)}`;
+      updatePriceTotal();
     }
 
     if (!productSection.dataset.listenersAdded) {
@@ -737,6 +780,7 @@
       const selectedOption = membresiaSelect.options[membresiaSelect.selectedIndex];
       const precio = selectedOption.getAttribute('data-precio');
       priceInput.value = precio ? `$${parseFloat(precio).toFixed(0)}` : '';
+      updatePriceTotal();
     }
 
     if (!membresiaSelect.dataset.listenerAdded) {
@@ -753,6 +797,7 @@
     initProductSection();
     initMembresiaSection();
     setupMembresiaCheckboxToggle();
+    updatePriceTotal();
   });
 
 </script>
