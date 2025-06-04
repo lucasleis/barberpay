@@ -420,6 +420,13 @@
     return parseFloat(selected.getAttribute('data-precio')) || 0;
   }
 
+  function obtenerPrecioMembresia() {
+    const input = document.getElementById('membreciaPrice');
+    const valor = input.value.replace('$', '').trim();
+    return parseFloat(valor) || 0;
+  }
+
+
   function obtenerProductosSeleccionados() {
     const rows = document.querySelectorAll('#productSection .productRow');
     const items = [];
@@ -559,7 +566,7 @@
         const usa_membresia = document.getElementById('membresiaCheckbox');
         
         if (!usa_membresia.checked) {
-            const precioActual = obtenerPrecioMembresiaSeleccionada();
+            const precioActual = obtenerPrecioMembresia();
             const totalEsperado = precioActual;
 
             if (togglemultiPayment.checked && !validarMultiplesMetodos(totalEsperado)) {

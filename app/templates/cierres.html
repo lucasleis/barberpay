@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='cierre_entre_dias.css') }}">
+
+<h3>Cierres</h3>
+<form id="form-fechas" class="form-fechas">
+  <label for="fechaInicio">Seleccionar fecha:</label>
+  <span class="rango-fechas">
+    Desde
+    <input type="date" name="fechaInicio" id="fechaInicio">
+    hasta
+    <input type="date" name="fechaFinal" id="fechaFinal">
+  </span>
+
+  <button type="submit" class="boton-cierre">Ver cierre</button>
+</form>
+
+<div id="resultados-cierres">
+  <!-- Aquí se renderizarán los resultados desde JavaScript -->
+</div>
+
+<script>
+  document.getElementById('form-fechas').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const fechaInicio = document.getElementById('fechaInicio').value;
+    const fechaFinal = document.getElementById('fechaFinal').value;
+
+    const response = await fetch('/pagos_entre_fechas', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        start_date: fechaInicio,
+        end_date: fechaFinal
+      })
+    });
+
+    const data = await response.json();
+    renderCierres(data);
+  });
+
+  function renderCierres(data) {
+    const contenedor = document.getElementById('resultados-cierres');
+    contenedor.innerHTML = ''; // Limpia resultados anteriores
+
+    if (!data.pagos.length) {
+      contenedor.innerHTML = '<p>No se encontraron pagos en el rango seleccionado.</p>';
+      return;
+    }
+
+    // Renderiza el resumen de cierres (puedes mejorar el diseño)
+    let html = `
+      <h5>Resumen de pagos</h5>
+      <p><strong>Total general:</strong> $${parseInt(data.totales.monto_total)}</p>
+      <p><strong>Total propietario:</strong> $${parseInt(data.totales.propietario_total)}</p>
+
+      <h6>Totales por empleado:</h6>
+      <ul>
+        ${Object.entries(data.totales.empleados).map(([nombre, datos]) =>
+          `<li><strong>${nombre}</strong>: $${parseInt(datos.monto)} (${datos.cortes} cortes)</li>`).join('')
+        }
+      </ul>
+
+      <h6>Totales por método de pago:</h6>
+      <ul>
+        ${Object.entries(data.totales.metodos_pago).map(([m, v]) =>
+          `<li>${m}: $${parseInt(v)}</li>`).join('')
+        }
+      </ul>
+    `;
+
+    // Tabla de pagos
+    html += `
+      <table class="table table-striped table-bordered text-center" style="margin-top: 1rem;">
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Empleado</th><th>% Empleado</th>
+            <th>Servicio</th><th>Valor Servicio</th>
+            <th>Producto</th><th>Valor Producto</th>
+            <th>Membresia</th><th>Valor Membresia</th>
+            <th>M. de Pago</th><th>Monto</th><th>Propina</th>
+            <th>$ Empleado</th><th>$ Propietario</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.pagos.map(p => `
+            <tr>
+              <td>${p.fecha}</td>
+              <td>${p.empleado}</td>
+              <td>${p.porcentaje_empleado}%</td>
+              <td>${p.servicio}</td>
+              <td>$${parseInt(p.valor_servicio)}</td>
+              <td>${p.producto || ''}</td>
+              <td>$${parseInt(p.valor_producto)}</td>
+              <td>${p.membresia || ''}</td>
+              <td>$${parseInt(p.valor_membresia)}</td>
+              <td>${p.metodo_pago.join(', ')}</td>
+              <td>$${parseInt(p.monto)}</td>
+              <td>$${parseInt(p.propina)}</td>
+              <td>$${parseInt(p.pago_empleado)}</td>
+              <td>$${parseInt(p.pago_propietario)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+
+    contenedor.innerHTML = html;
+  }
+</script>
+
+{% endblock %}

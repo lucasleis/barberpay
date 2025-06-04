@@ -1,56 +1,16 @@
-from flask import current_app as app, render_template, request, redirect, url_for, session, flash
+from flask import current_app as app, render_template, request, redirect, url_for, session, flash, jsonify
 from . import db
 from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno
 from .auth import login_required
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
 from collections import defaultdict
-# from backports.zoneinfo import ZoneInfo
-from zoneinfo import ZoneInfo
+from backports.zoneinfo import ZoneInfo
+# from zoneinfo import ZoneInfo
 
 
 # Funciones auxiliares
-"""
-def get_payment_page_data(salon_id):
-    MetodoPago1 = aliased(MetodoPago)
-    MetodoPago2 = aliased(MetodoPago)
 
-    # Obtener fecha actual (desde las 00:00 hasta las 23:59:59 del día de hoy)
-    hoy = datetime.today().date()
-    inicio_dia = datetime.combine(hoy, time.min)  # 00:00:00
-    fin_dia = datetime.combine(hoy, time.max)     # 23:59:59.999999
-
-    pagos_query = (
-        Pago.query
-        .join(Pago.appointment)
-        .join(Appointment.barber)
-        .outerjoin(Appointment.service)  
-        .outerjoin(Appointment.productos_turno)
-        .join(MetodoPago1, Pago.payment_method1_id == MetodoPago1.id)
-        .outerjoin(MetodoPago2, Pago.payment_method2_id == MetodoPago2.id)
-        .filter(
-            Pago.peluqueria_id == salon_id,
-            Pago.date >= inicio_dia,
-            Pago.date <= fin_dia
-        )
-        .add_entity(MetodoPago1)
-        .add_entity(MetodoPago2)
-        .order_by(Pago.date.desc())
-        .all()
-    )
-
-    pagos_data = []
-    for pago, method1, method2 in pagos_query:
-        pago.method1 = method1
-        pago.method2 = method2
-        pagos_data.append(pago)
-
-    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
-    services = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
-    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
-
-    return pagos_data, barbers, services, methods
-"""
 def get_payment_page_data(salon_id):
     MetodoPago1 = aliased(MetodoPago)
     MetodoPago2 = aliased(MetodoPago)
@@ -95,6 +55,7 @@ def get_payment_page_data(salon_id):
 
     return pagos_data, barbers, services, methods
 
+"""
 def get_cierre_semanal_data(salon_id):
     MetodoPago1 = aliased(MetodoPago)
     MetodoPago2 = aliased(MetodoPago)
@@ -272,6 +233,151 @@ def get_cierre_entre_fechas_data(salon_id, fecha_inicio_str, fecha_final_str):
         })
 
     return cierre_ordenado
+"""
+
+def calcular_pagos_entre_fechas(start_date, end_date):
+
+    data = request.get_json()
+    start_date = datetime.fromisoformat(data['start_date'])
+    end_date = datetime.fromisoformat(data['end_date'])
+
+    pagos = Pago.query.options(
+        joinedload(Pago.appointment).joinedload(Appointment.productos_turno).joinedload(AppointmentTurno.producto),
+        joinedload(Pago.appointment).joinedload(Appointment.barber),
+        joinedload(Pago.appointment).joinedload(Appointment.service),
+        joinedload(Pago.membresia_comprada).joinedload(Membresia.tipo_membresia),
+        joinedload(Pago.appointment).joinedload(Appointment.membresia).joinedload(Membresia.tipo_membresia),
+        joinedload(Pago.method1),
+        joinedload(Pago.method2)
+    ).filter(Pago.date >= start_date, Pago.date <= end_date).all()
+
+    total_general = 0
+    total_propietario = 0
+    total_por_empleado = defaultdict(lambda: {"monto": 0, "propinas": 0, "cortes": 0})
+    total_por_metodo_pago = defaultdict(float)
+
+    lista_pagos = []
+
+    for pago in pagos:
+        pago_dict = {
+            "fecha": pago.date.strftime('%Y-%m-%d'),
+            "empleado": "",
+            "porcentaje_empleado": 0,
+            "servicio": "",
+            "valor_servicio": 0,
+            "producto": "",
+            "valor_producto": 0,
+            "membresia": "",
+            "valor_membresia": 0,
+            "metodo_pago": [],
+            "monto": (pago.amount_method1 or 0) + (pago.amount_method2 or 0),
+            "propina": pago.amount_tip or 0,
+            "pago_empleado": 0,
+            "pago_propietario": 0,
+        }
+
+        total_pago = pago_dict["monto"] + pago_dict["propina"]
+        total_general += total_pago
+
+        empleado = None
+        porcentaje = 0
+
+        if pago.appointment and pago.appointment.service:
+            servicio = pago.appointment.service
+            tipo_precio = pago.appointment.tipo_precio_servicio
+            if tipo_precio == 'comun':
+                monto_servicio = servicio.precio
+            elif tipo_precio == 'amigo':
+                monto_servicio = servicio.precio_amigo
+            elif tipo_precio == 'descuento':
+                monto_servicio = servicio.precio_descuento
+            else:
+                monto_servicio = 0
+
+            empleado = pago.appointment.barber
+            porcentaje = empleado.porcentaje
+            pago_empleado = (monto_servicio * porcentaje) / 100
+            pago_dict.update({
+                "empleado": empleado.name,
+                "porcentaje_empleado": porcentaje,
+                "servicio": servicio.name,
+                "valor_servicio": monto_servicio,
+                "pago_empleado": pago_empleado,
+                "pago_propietario": monto_servicio - pago_empleado,
+            })
+            total_por_empleado[empleado.name]["monto"] += float(pago_empleado)
+            total_por_empleado[empleado.name]["cortes"] += 1
+            total_propietario += float(monto_servicio - pago_empleado)
+
+        if pago.appointment and pago.appointment.productos_turno:
+            for pt in pago.appointment.productos_turno:
+                producto = pt.producto
+                monto_producto = pt.precio_unitario * pt.cantidad
+                porcentaje = 30  # fijo
+                empleado = pago.appointment.barber
+                pago_empleado = (monto_producto * porcentaje) / 100
+                pago_dict.update({
+                    "empleado": empleado.name,
+                    "porcentaje_empleado": porcentaje,
+                    "producto": producto.name,
+                    "valor_producto": monto_producto,
+                    "pago_empleado": float(pago_empleado),
+                    "pago_propietario": float(monto_servicio - pago_empleado),
+               })
+                total_por_empleado[empleado.name]["monto"] += float(pago_empleado)
+                total_propietario += float(monto_producto - pago_empleado)
+
+
+        if pago.membresia_comprada:
+            tipo = pago.membresia_comprada.tipo_membresia
+            monto = float(tipo.precio)
+            pago_dict.update({
+                "membresia": tipo.nombre,
+                "valor_membresia": monto,
+                "pago_empleado": 0,
+                "pago_propietario": monto,
+            })
+            total_propietario += monto
+
+        elif pago.appointment and pago.appointment.membresia:
+            tipo = pago.appointment.membresia.tipo_membresia
+            empleado = pago.appointment.barber
+            porcentaje = empleado.porcentaje
+            monto = float(tipo.precio) / tipo.usos
+            pago_empleado = (monto * porcentaje) / 100
+            pago_dict.update({
+                "empleado": empleado.name,
+                "porcentaje_empleado": porcentaje,
+                "membresia": tipo.nombre + " (uso)",
+                "valor_membresia": monto,
+                "pago_empleado": pago_empleado,
+                "pago_propietario": 0,
+            })
+            total_por_empleado[empleado.name]["monto"] += float(pago_empleado)
+            total_por_empleado[empleado.name]["cortes"] += 1
+
+        if pago.amount_tip and empleado:
+            total_por_empleado[empleado.name]["propinas"] += pago.amount_tip
+
+        if pago.method1:
+            total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
+            pago_dict["metodo_pago"].append(pago.method1.nombre)
+        if pago.method2:
+            total_por_metodo_pago[pago.method2.nombre] += pago.amount_method2 or 0
+            pago_dict["metodo_pago"].append(pago.method2.nombre)
+
+        lista_pagos.append(pago_dict)
+
+    return {
+        "pagos": lista_pagos,
+        "totales": {
+            "monto_total": total_general,
+            "propietario_total": total_propietario,
+            "empleados": total_por_empleado,
+            "metodos_pago": total_por_metodo_pago,
+        }
+    }
+
 
 def calcular_total_servicio(service_id):
     """Calcula el total para un servicio"""
@@ -871,6 +977,7 @@ def delete_payment(pago_id):
 
 
 ### Cierres ###
+"""
 @app.route("/cierre_semanal")
 def cierre_semanal():
     session['salon_id'] = 1
@@ -905,4 +1012,18 @@ def cierre_entre_dias():
         semanas = get_cierre_semanal_data(salon_id)
 
     return render_template("cierre_entre_dias.html", semanas=semanas)  
+"""
 
+@app.route('/pagos_entre_fechas', methods=['POST'])
+def pagos_entre_fechas():
+    data = request.get_json()
+    start_date = datetime.fromisoformat(data['start_date'])
+    end_date = datetime.fromisoformat(data['end_date'])
+    resultado = calcular_pagos_entre_fechas(start_date, end_date)
+    return jsonify(resultado)
+
+@app.route('/cierres/<int:salon_id>', methods=['GET'])
+def cierre_entre_dias(salon_id):
+    # En este ejemplo, semanas es vacío hasta que el usuario consulte fechas
+    semanas = []
+    return render_template('cierres.html', semanas=semanas, salon_id=salon_id)
