@@ -5,18 +5,15 @@
         - Se agregan valores para:
             - Descuentos
             - Amigos
-        - permitir modificar valores y nombres
 
     - Productos:
         - ver como pone cuando es para familiar. que no se cobra pero se paga al peluquero
         - settear % que les queda a los barberos
-        - permitir modificar valores y nombres
 
     - Metodos de Pago:
 
     - Membresia:
         - Al usar membresia no se puede poner propina
-        - Probar como funciona update 
 
     - Cierre:
         - Arreglar cuentas (Totales por método de pago)

@@ -323,6 +323,32 @@ def delete_barber(id):
     else:
         return redirect(url_for("login"))
 
+@app.route('/admin/barbers/update/<int:id>', methods=['POST'])
+def update_barber(id):
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    original = Empleado.query.get_or_404(id)
+    original.active = False  
+
+    name = request.form.get('name')
+    try:
+        porcentaje = float(request.form.get('porcentaje', 0))
+    except ValueError:
+        porcentaje = 0
+
+    nuevo = Empleado(
+        name=name,
+        porcentaje=porcentaje,
+        peluqueria_id=original.peluqueria_id,
+        active=True
+    )
+
+    db.session.add(nuevo)
+    db.session.commit()
+
+    return redirect(url_for('list_barbers'))
+
 
 ### Servicios ###
 
@@ -376,7 +402,7 @@ def delete_service(id):
     else:
         return redirect(url_for("login"))
 
-@app.route('/update_service/<int:id>', methods=['POST'])             ### PROBAR ###
+@app.route('/update_service/<int:id>', methods=['POST'])
 def update_service(id):
     if "user" not in session:
         return redirect(url_for("login"))
