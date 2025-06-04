@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, time
 from collections import defaultdict
 from backports.zoneinfo import ZoneInfo
 # from zoneinfo import ZoneInfo
-
+from werkzeug.datastructures import MultiDict
 
 # Funciones auxiliares
 
@@ -54,186 +54,6 @@ def get_payment_page_data(salon_id):
     methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
 
     return pagos_data, barbers, services, methods
-
-"""
-def get_cierre_semanal_data(salon_id):
-    MetodoPago1 = aliased(MetodoPago)
-    MetodoPago2 = aliased(MetodoPago)
-
-    pagos_query = (
-        Pago.query
-        .join(Pago.appointment)
-        .join(Appointment.barber)
-        .join(Appointment.service)
-        .join(MetodoPago1, Pago.payment_method1_id == MetodoPago1.id)
-        .outerjoin(MetodoPago2, Pago.payment_method2_id == MetodoPago2.id)
-        .filter(Pago.peluqueria_id == salon_id)
-        .order_by(Pago.date.desc())
-        .add_entity(MetodoPago1)
-        .add_entity(MetodoPago2)
-        .all()
-    )
-
-    pagos_por_semana = defaultdict(list)
-
-    for pago, method1, method2 in pagos_query:
-        appointment = pago.appointment
-        barber = appointment.barber
-        service = appointment.service
-
-        valor_servicio = float(service.precio)
-        porcentaje_empleado = barber.porcentaje
-        pago_empleado = valor_servicio * (porcentaje_empleado / 100)
-        propina = float(pago.amount_tip or 0)
-        pago_empleado_con_propina = pago_empleado + propina
-        pago_propietario = valor_servicio - pago_empleado
-
-        fecha_pago = pago.date.date()
-        cierre_semana = fecha_pago + timedelta(days=(6 - fecha_pago.weekday()))
-
-        pagos_por_semana[cierre_semana].append({
-            "fecha": fecha_pago,
-            "empleado": barber.name,
-            "servicio": service.name,
-            "valor_servicio": valor_servicio,
-            "porcentaje_empleado": porcentaje_empleado,
-            "pago_empleado": pago_empleado_con_propina,
-            "pago_propietario": pago_propietario,
-            "metodo_pago1": method1.nombre if method1 else None,
-            "monto1": float(pago.amount_method1),
-            "metodo_pago2": method2.nombre if method2 else None,
-            "monto2": float(pago.amount_method2 or 0),
-            "propina": propina,
-        })
-
-    cierre_ordenado = []
-
-    for fecha_cierre, pagos in sorted(pagos_por_semana.items(), reverse=True):
-        total_general = 0
-        total_propietario = 0
-        total_empleados = defaultdict(lambda: {"monto": 0, "cortes": 0})
-        total_metodos_pago = defaultdict(float)
-
-        for p in pagos:
-            total_general += p["valor_servicio"] + p["propina"]
-            total_propietario += p["pago_propietario"]
-
-            total_empleados[p["empleado"]]["monto"] += p["pago_empleado"]
-            total_empleados[p["empleado"]]["cortes"] += 1
-
-            if p["metodo_pago1"]:
-                total_metodos_pago[p["metodo_pago1"]] += p["monto1"]
-            if p["metodo_pago2"]:
-                total_metodos_pago[p["metodo_pago2"]] += p["monto2"]
-
-        fecha_inicio = fecha_cierre - timedelta(days=6)
-        
-        cierre_ordenado.append({
-            "fecha_inicio": fecha_inicio,
-            "fecha_cierre": fecha_cierre,
-            "pagos": pagos,
-            "totales": {
-                "monto_total": total_general,
-                "propietario_total": total_propietario,
-                "empleados": dict(total_empleados),
-                "metodos_pago": dict(total_metodos_pago),
-            }
-        })
-
-    return cierre_ordenado
-
-def get_cierre_entre_fechas_data(salon_id, fecha_inicio_str, fecha_final_str):
-    MetodoPago1 = aliased(MetodoPago)
-    MetodoPago2 = aliased(MetodoPago)
-
-    # Convertir strings a objetos datetime.date
-    fecha_inicio = datetime.combine(datetime.strptime(fecha_inicio_str, "%Y-%m-%d"), time.min)  # 00:00:00
-    fecha_final = datetime.combine(datetime.strptime(fecha_final_str, "%Y-%m-%d"), time.max)    # 23:59:59.999999
-
-    pagos_query = (
-        Pago.query
-        .join(Pago.appointment)
-        .join(Appointment.barber)
-        .join(Appointment.service)
-        .join(MetodoPago1, Pago.payment_method1_id == MetodoPago1.id)
-        .outerjoin(MetodoPago2, Pago.payment_method2_id == MetodoPago2.id)
-        .filter(
-            Pago.peluqueria_id == salon_id,
-            Pago.date >= fecha_inicio,
-            Pago.date <= fecha_final
-        )
-        .order_by(Pago.date.desc())
-        .add_entity(MetodoPago1)
-        .add_entity(MetodoPago2)
-        .all()
-    )
-
-    pagos_por_semana = defaultdict(list)
-
-    for pago, method1, method2 in pagos_query:
-        appointment = pago.appointment
-        barber = appointment.barber
-        service = appointment.service
-
-        valor_servicio = float(service.precio)
-        porcentaje_empleado = barber.porcentaje
-        pago_empleado = valor_servicio * (porcentaje_empleado / 100)
-        propina = float(pago.amount_tip or 0)
-        pago_empleado_con_propina = pago_empleado + propina
-        pago_propietario = valor_servicio - pago_empleado
-
-        fecha_pago = pago.date.date()
-        cierre_semana = fecha_pago + timedelta(days=(6 - fecha_pago.weekday()))
-
-        pagos_por_semana[cierre_semana].append({
-            "fecha": fecha_pago,
-            "empleado": barber.name,
-            "servicio": service.name,
-            "valor_servicio": valor_servicio,
-            "porcentaje_empleado": porcentaje_empleado,
-            "pago_empleado": pago_empleado_con_propina,
-            "pago_propietario": pago_propietario,
-            "metodo_pago1": method1.nombre if method1 else None,
-            "monto1": float(pago.amount_method1),
-            "metodo_pago2": method2.nombre if method2 else None,
-            "monto2": float(pago.amount_method2 or 0),
-            "propina": propina,
-        })
-
-    cierre_ordenado = []
-
-    for fecha_cierre, pagos in sorted(pagos_por_semana.items(), reverse=True):
-        total_general = 0
-        total_propietario = 0
-        total_empleados = defaultdict(lambda: {"monto": 0, "cortes": 0})
-        total_metodos_pago = defaultdict(float)
-
-        for p in pagos:
-            total_general += p["valor_servicio"] + p["propina"]
-            total_propietario += p["pago_propietario"]
-
-            total_empleados[p["empleado"]]["monto"] += p["pago_empleado"]
-            total_empleados[p["empleado"]]["cortes"] += 1
-
-            if p["metodo_pago1"]:
-                total_metodos_pago[p["metodo_pago1"]] += p["monto1"]
-            if p["metodo_pago2"]:
-                total_metodos_pago[p["metodo_pago2"]] += p["monto2"]
-
-        cierre_ordenado.append({
-            "fecha_inicio": fecha_inicio,
-            "fecha_cierre": fecha_final,
-            "pagos": pagos,
-            "totales": {
-                "monto_total": total_general,
-                "propietario_total": total_propietario,
-                "empleados": dict(total_empleados),
-                "metodos_pago": dict(total_metodos_pago),
-            }
-        })
-
-    return cierre_ordenado
-"""
 
 def calcular_pagos_entre_fechas(start_date, end_date):
 
@@ -556,6 +376,49 @@ def delete_service(id):
     else:
         return redirect(url_for("login"))
 
+@app.route('/update_service/<int:id>', methods=['POST'])             ### PROBAR ###
+def update_service(id):
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    # Buscar el servicio original
+    original = Servicio.query.get_or_404(id)
+
+    # Desactivar el servicio actual
+    original.active = False
+
+    # Obtener los nuevos valores del formulario
+    name = request.form.get('name')
+    try:
+        precio = float(request.form.get('precio', 0))
+    except ValueError:
+        precio = 0
+
+    try:
+        precio_amigo = float(request.form.get('precio_amigo', 0) or 0)
+    except ValueError:
+        precio_amigo = 0
+
+    try:
+        precio_descuento = float(request.form.get('precio_descuento', 0) or 0)
+    except ValueError:
+        precio_descuento = 0
+
+    # Crear nuevo servicio con mismos valores
+    nuevo = Servicio(
+        name=name,
+        precio=precio,
+        precio_amigo=precio_amigo,
+        precio_descuento=precio_descuento,
+        peluqueria_id=original.peluqueria_id,
+        active=True
+    )
+
+    db.session.add(nuevo)
+    db.session.commit()
+
+    return redirect(url_for('list_services'))
+
 
 ### Productos ###
 
@@ -648,7 +511,7 @@ def delete_payment_method(id):
 def list_memberships():
     if "user" in session:
         salon_id = session.get('salon_id')
-        tipos = TipoMembresia.query.filter_by(peluqueria_id=salon_id).all()
+        tipos = TipoMembresia.query.filter_by(active=True, peluqueria_id=salon_id).all()
         return render_template('memberships.html', tipos_membresia=tipos)
     else:
         return redirect(url_for("login"))
@@ -683,24 +546,33 @@ def delete_membership_type(id):
     else:
         return redirect(url_for("login"))
 
-"""
-    @app.route('/membresia/descontar/<int:id>', methods=['POST'])
-    def descontar_membresia(id):
-        salon_id = session.get('salon_id')
+@app.route('/update_membership_type/<int:id>', methods=['POST'])
+def update_membership_type(id):
+    if "user" not in session:
+        return redirect(url_for("login"))
 
-        # Buscar la membresía por ID y peluquería
-        membresia = Membresia.query.filter_by(id=id, peluqueria_id=salon_id).first()
+    original = TipoMembresia.query.get_or_404(id)
 
-        if membresia:
-            if membresia.cantidad > 0:
-                membresia.cantidad -= 1
-                db.session.commit()
-                return redirect(url_for('some_view_name'))  # Cambiá esto según a dónde querés redirigir
-            else:
-                return "La membresía ya no tiene usos disponibles.", 400
-        else:
-            return "Membresía no encontrada o no pertenece al salón", 404
-"""
+    # Desactivar la membresía actual
+    original.active = False
+
+    # Crear la nueva membresía con los nuevos datos
+    nombre = request.form['nombre']
+    precio = float(request.form['precio'])
+    usos = int(request.form['usos'])
+    salon_id = original.peluqueria_id
+
+    nueva = TipoMembresia(
+        peluqueria_id=salon_id,
+        nombre=nombre,
+        precio=precio,
+        usos=usos,
+        active=True 
+    )
+
+    db.session.add(nueva)
+    db.session.commit()
+    return redirect(url_for('list_memberships'))
 
 
 ### Membresias ###
