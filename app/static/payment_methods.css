@@ -94,3 +94,183 @@ h2 {
   font-size: 2rem;
   margin-bottom: 2rem;
 }
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+form {
+  margin-bottom: 2rem;
+  background: white;
+  padding: 2rem;
+  border-radius: 5px;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  height: 38px;
+  font-size: 16px;
+  margin: 0;
+}
+
+button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+}
+
+button:hover {
+  background-color: #218838;
+}
+
+.barber-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+  background: white;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.barber-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+  font-family: Arial, sans-serif;
+}
+
+.barber-item:last-child {
+  border-bottom: none;
+}
+
+.delete-button {
+  color: #dc3545;
+  text-decoration: none;
+  font-size: 18px;
+  transition: color 0.2s ease;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  width: auto;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  color: #a71d2a;
+}
+
+.edit-icon {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 18px;
+  transition: color 0.2s ease;
+}
+
+.edit-icon:hover {
+  color: #0056b3;
+}
+
+.separator {
+  color: #999;
+  font-weight: normal;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Modal */
+.modal-cantidad {
+  display: none;
+  position: fixed;
+  z-index: 10;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 5px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.modal-content .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.close-modal {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close-modal:hover {
+  color: #333;
+}
+
+.edit-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.edit-button:hover {
+  background-color: #218838;
+}

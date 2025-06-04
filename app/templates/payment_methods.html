@@ -20,10 +20,52 @@
     {% for method in methods %}
       <li class="barber-item">
         <span>{{ method.nombre }}</span>
-        <a href="{{ url_for('delete_payment_method', id=method.id) }}" class="delete-button" title="Eliminar">
-          <i class="fas fa-trash-alt"></i>
-        </a>
+        <div class="action-buttons">
+          <a href="#" class="edit-icon" title="Editar" onclick="openModal('{{ method.id }}'); return false;">
+            <i class="fas fa-pen"></i>
+          </a>
+          <span class="separator">|</span>
+          <a href="{{ url_for('delete_payment_method', id=method.id) }}" class="delete-button" title="Eliminar">
+            <i class="fas fa-trash-alt"></i>
+          </a>
+        </div>
       </li>
+
+      <!-- Modal edición -->
+      <div id="modal-{{ method.id }}" class="modal-cantidad">
+        <div class="modal-content">
+          <h3>Editar método de pago</h3>
+          <span class="close-modal" onclick="closeModal(this.dataset.id)" data-id="{{ method.id }}">&times;</span>
+          <form method="POST" action="{{ url_for('update_payment_method', id=method.id) }}">
+            <div class="form-group">
+              <label for="nombre-{{ method.id }}">Nuevo nombre:</label>
+              <input type="text" name="nombre" id="nombre-{{ method.id }}" value="{{ method.nombre }}" required>
+            </div>
+            <button type="submit" class="edit-button">
+              <i class="fas fa-check"></i> Confirmar
+            </button>
+          </form>
+        </div>
+      </div>
     {% endfor %}
   </ul>
+
+  <script>
+    function openModal(id) {
+      document.getElementById('modal-' + id).style.display = 'flex';
+    }
+
+    function closeModal(id) {
+      document.getElementById('modal-' + id).style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+      const modals = document.querySelectorAll(".modal-cantidad");
+      modals.forEach(modal => {
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+      });
+    }
+  </script>
 {% endblock %}

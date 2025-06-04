@@ -530,6 +530,16 @@ def delete_payment_method(id):
     else:
         return redirect(url_for("login"))
 
+@app.route('/admin/payment_methods/update/<int:id>', methods=['POST'])
+def update_payment_method(id):
+    if "user" in session:
+        method = MetodoPago.query.get_or_404(id)
+        method.nombre = request.form['nombre']
+        db.session.commit()
+        return redirect(url_for('list_payment_methods'))
+    else:
+        return redirect(url_for("login"))
+
 
 ### Tipos de Membresias ###
 
