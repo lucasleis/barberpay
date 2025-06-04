@@ -5,8 +5,12 @@
         - Se agregan valores para:
             - Descuentos
             - Amigos
+        - permitir modificar valores y nombres
 
     - Productos:
+        - ver como pone cuando es para familiar. que no se cobra pero se paga al peluquero
+        - settear % que les queda a los barberos
+        - permitir modificar valores y nombres
 
     - Metodos de Pago:
 
@@ -27,7 +31,7 @@
     - Manejar errores de que no haya peluqueria, empleado, corte, etc
     - se estan mostrando los pagos restando en la tabla. revisar que es lo mejor cuando este la tabla de cierres
     - Arreglar propinas. se ve mal
-    
+
 - Testear:
     - Tiempos de carga
     - Vision mobile

@@ -5,13 +5,13 @@
 
 <h3>Cierres</h3>
 
-<form method="get" action="{{ url_for('cierre_entre_dias') }}" class="form-fechas">
+<form method="get" action="{{ url_for('cierre_entre_dias', salon_id=1) }}" class="form-fechas">
   <label for="fechaInicio">Seleccionar fecha:</label>
   <span class="rango-fechas">
     Desde
-    <input type="date" name="fechaInicio" id="fechaInicio" value="{{ request.args.get('fechaInicio', '') }}">
+    <input type="date" name="fechaInicio" id="fechaInicio" value="{{ request.args.get('fechaInicio', fechaInicio) }}">
     hasta
-    <input type="date" name="fechaFinal" id="fechaFinal" value="{{ request.args.get('fechaFinal', '') }}">
+    <input type="date" name="fechaFinal" id="fechaFinal" value="{{ request.args.get('fechaFinal', fechaFinal) }}">
   </span>
 
   <button type="submit" class="boton-cierre">Ver cierre</button>

@@ -237,9 +237,9 @@ def get_cierre_entre_fechas_data(salon_id, fecha_inicio_str, fecha_final_str):
 
 def calcular_pagos_entre_fechas(start_date, end_date):
 
-    data = request.get_json()
-    start_date = datetime.fromisoformat(data['start_date'])
-    end_date = datetime.fromisoformat(data['end_date'])
+    # data = request.get_json()
+    # start_date = datetime.fromisoformat(start_date)
+    # end_date = datetime.fromisoformat(end_date)
 
     pagos = Pago.query.options(
         joinedload(Pago.appointment).joinedload(Appointment.productos_turno).joinedload(AppointmentTurno.producto),
@@ -977,42 +977,6 @@ def delete_payment(pago_id):
 
 
 ### Cierres ###
-"""
-@app.route("/cierre_semanal")
-def cierre_semanal():
-    session['salon_id'] = 1
-    raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
-
-    try:
-        salon_id = int(str(raw_salon_id).strip("{} "))
-    except (ValueError, TypeError):
-        flash("ID de peluquería inválido.", "danger")
-        return redirect(url_for("index"))
-
-    semanas_cierre = get_cierre_semanal_data(salon_id)
-    return render_template("cierre_semanal.html", semanas=semanas_cierre)
-
-@app.route("/cierres")
-def cierre_entre_dias():
-    session['salon_id'] = 1
-    raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
-
-    try:
-        salon_id = int(str(raw_salon_id).strip("{} "))
-    except (ValueError, TypeError):
-        flash("ID de peluquería inválido.", "danger")
-        return redirect(url_for("index"))
-
-    fecha_inicio = request.args.get("fechaInicio")
-    fecha_final = request.args.get("fechaFinal")
-
-    if fecha_inicio and fecha_final:
-        semanas = get_cierre_entre_fechas_data(salon_id, fecha_inicio, fecha_final)
-    else:
-        semanas = get_cierre_semanal_data(salon_id)
-
-    return render_template("cierre_entre_dias.html", semanas=semanas)  
-"""
 
 @app.route('/pagos_entre_fechas', methods=['POST'])
 def pagos_entre_fechas():
@@ -1024,6 +988,21 @@ def pagos_entre_fechas():
 
 @app.route('/cierres/<int:salon_id>', methods=['GET'])
 def cierre_entre_dias(salon_id):
-    # En este ejemplo, semanas es vacío hasta que el usuario consulte fechas
-    semanas = []
-    return render_template('cierres.html', semanas=semanas, salon_id=salon_id)
+    today = datetime.today()
+
+    # Calcular el último domingo (inicio de semana)
+    last_sunday = today - timedelta(days=today.weekday() + 1 if today.weekday() != 6 else 0)
+    last_sunday = last_sunday.replace(hour=0, minute=0, second=0, microsecond=0)
+    next_sunday = last_sunday + timedelta(days=7)
+
+    # Estas dos variables se usan para precargar el formulario
+    fechaInicio = last_sunday.strftime('%Y-%m-%d')
+    fechaFinal = next_sunday.strftime('%Y-%m-%d')
+
+    return render_template(
+        'cierres.html',
+        fechaInicio=fechaInicio,
+        fechaFinal=fechaFinal,
+        salon_id=salon_id
+    )
+

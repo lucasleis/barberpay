@@ -8,9 +8,9 @@
   <label for="fechaInicio">Seleccionar fecha:</label>
   <span class="rango-fechas">
     Desde
-    <input type="date" name="fechaInicio" id="fechaInicio">
+    <input type="date" name="fechaInicio" id="fechaInicio" value="{{ request.args.get('fechaInicio', fechaInicio) }}">
     hasta
-    <input type="date" name="fechaFinal" id="fechaFinal">
+    <input type="date" name="fechaFinal" id="fechaFinal" value="{{ request.args.get('fechaFinal', fechaFinal) }}">
   </span>
 
   <button type="submit" class="boton-cierre">Ver cierre</button>
@@ -110,6 +110,11 @@
 
     contenedor.innerHTML = html;
   }
+
+  // Simular el envío del formulario al cargar la página
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('form-fechas').dispatchEvent(new Event('submit'));
+  });
 </script>
 
 {% endblock %}
