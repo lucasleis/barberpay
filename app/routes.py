@@ -72,7 +72,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
     
     total_general = 0
     total_propietario = 0
-    total_por_empleado = defaultdict(lambda: {"monto": 0, "propinas": 0, "cortes": 0})
+    total_por_empleado = defaultdict(lambda: {"monto": 0, "cortes": 0, "monto_cortes":0, "productos":0, "monto_productos":0, "propinas": 0})
     total_por_metodo_pago = defaultdict(float)
     monto_servicio = Decimal('0')
     pago_empleado = Decimal('0')
@@ -98,9 +98,6 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             "pago_empleado": 0,
             "pago_propietario": 0,
         }
-
-        total_pago = pago_dict["monto"] + pago_dict["propina"]
-        total_general += total_pago
 
         empleado = None
         porcentaje = 0
@@ -134,8 +131,10 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                     "pago_propietario": float(monto_servicio - pago_empleado_servicio)
                 })
                 total_por_empleado[empleado.name]["monto"] += float(pago_empleado_servicio)
+                total_por_empleado[empleado.name]["monto_cortes"] += float(pago_empleado_servicio)
                 total_por_empleado[empleado.name]["cortes"] += 1
                 total_propietario += float(monto_servicio - pago_empleado_servicio)
+                total_general += float(monto_servicio)
 
         if pago.appointment and pago.appointment.productos_turno:
             for pt in pago.appointment.productos_turno:
@@ -155,7 +154,10 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                         "pago_propietario": float(Decimal(monto_producto) - Decimal(pago_empleado_producto))
                     })
                     total_por_empleado[empleado.name]["monto"] += float(pago_empleado_producto)
+                    total_por_empleado[empleado.name]["monto_productos"] += float(pago_empleado_producto)
+                    total_por_empleado[empleado.name]["productos"] += 1
                     total_propietario += float(monto_producto - pago_empleado_producto)
+                    total_general += float(monto_producto)
 
         if pago.appointment and pago.appointment.service and pago.appointment.productos_turno:
             pago_dict.update({
@@ -168,8 +170,13 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 "pago_empleado": float(pago_empleado_servicio) + float(pago_empleado_producto),
                 "pago_propietario": float(Decimal(monto_servicio) - Decimal(pago_empleado_servicio)) + float(Decimal(monto_producto) - Decimal(pago_empleado_producto))
             })
-            # total_por_empleado[empleado.name]["monto"] += float(pago_empleado_producto)
-            # total_propietario += float(monto_producto - pago_empleado_producto)
+            total_por_empleado[empleado.name]["monto"] += float(pago_empleado_servicio)+ float(pago_empleado_producto)
+            total_por_empleado[empleado.name]["monto_cortes"] += float(pago_empleado_servicio)
+            total_por_empleado[empleado.name]["monto_productos"] += float(pago_empleado_producto)
+            total_por_empleado[empleado.name]["cortes"] += 1
+            total_por_empleado[empleado.name]["productos"] += 1
+            total_propietario += float(monto_servicio - pago_empleado_servicio) +float(monto_producto - pago_empleado_producto)
+            total_general += float(monto_servicio) + float(monto_producto)
 
         if pago.membresia_comprada:
             empleado = pago.appointment.barber
@@ -183,6 +190,8 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 "pago_propietario": monto,
             })
             total_propietario += monto
+            total_general += monto
+
 
         elif pago.appointment and pago.appointment.membresia:
             tipo = pago.appointment.membresia.tipo_membresia
@@ -199,10 +208,13 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 "pago_propietario": 0,
             })
             total_por_empleado[empleado.name]["monto"] += float(pago_empleado)
+            total_por_empleado[empleado.name]["monto_cortes"] += float(pago_empleado)
             total_por_empleado[empleado.name]["cortes"] += 1
+            total_propietario -= float(pago_empleado)
 
         if pago.amount_tip and empleado:
             total_por_empleado[empleado.name]["propinas"] += pago.amount_tip
+            total_general += pago.amount_tip
 
         if pago.method1:
             total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0

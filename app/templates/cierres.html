@@ -59,9 +59,21 @@
 
       <h6>Totales por empleado:</h6>
       <ul>
-        ${Object.entries(data.totales.empleados).map(([nombre, datos]) =>
-          `<li><strong>${nombre}</strong>: $${parseInt(datos.monto)} (${datos.cortes} cortes)</li>`).join('')
-        }
+        ${Object.entries(data.totales.empleados).map(([nombre, datos]) => {
+          const totalConPropinas = parseFloat(datos.monto) + parseFloat(datos.propinas || 0);
+          const montoCortes = parseFloat(datos.monto_cortes || 0);
+          const montoProductos = parseFloat(datos.monto_productos || 0);
+          const cortes = parseInt(datos.cortes || 0);
+          const productos = parseInt(datos.productos || 0);
+          const propinas = parseFloat(datos.propinas || 0);
+        
+          return `<li>
+            <strong>${nombre}</strong>: $${totalConPropinas.toFixed(0)}<br>
+            &nbsp;&nbsp;• Cortes: $${montoCortes.toFixed(0)} (${cortes})<br>
+            &nbsp;&nbsp;• Productos: $${montoProductos.toFixed(0)} (${productos})<br>
+            &nbsp;&nbsp;• Propinas: $${propinas.toFixed(0)}
+          </li>`;
+        }).join('')}
       </ul>
 
       <h6>Totales por método de pago:</h6>
