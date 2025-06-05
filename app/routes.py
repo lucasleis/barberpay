@@ -76,6 +76,8 @@ def calcular_pagos_entre_fechas(start_date, end_date):
     total_por_metodo_pago = defaultdict(float)
     monto_servicio = Decimal('0')
     pago_empleado = Decimal('0')
+    pago_empleado_servicio = Decimal('0')
+    pago_empleado_producto = Decimal('0')
 
     lista_pagos = []
 
@@ -102,7 +104,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
 
         empleado = None
         porcentaje = 0
-
+  
         if pago.appointment and pago.appointment.service:
             servicio = pago.appointment.service
             tipo_precio = pago.appointment.tipo_precio_servicio
@@ -116,47 +118,65 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 monto_servicio = 0
 
             empleado = pago.appointment.barber
-            porcentaje = empleado.porcentaje
-            pago_empleado = (monto_servicio * porcentaje) / 100
+            porcentaje_servicio = empleado.porcentaje
+            pago_empleado_servicio = (monto_servicio * porcentaje_servicio) / 100
 
             monto_servicio = Decimal(monto_servicio)
-            pago_empleado = Decimal(pago_empleado)
+            pago_empleado_servicio = Decimal(pago_empleado_servicio)
 
-            pago_dict.update({
-                "empleado": empleado.name,
-                "porcentaje_empleado": porcentaje,
-                "servicio": servicio.name,
-                "valor_servicio": monto_servicio,
-                "pago_empleado": pago_empleado,
-                "pago_propietario": float(monto_servicio - pago_empleado)
-            })
-            total_por_empleado[empleado.name]["monto"] += float(pago_empleado)
-            total_por_empleado[empleado.name]["cortes"] += 1
-            total_propietario += float(monto_servicio - pago_empleado)
+            if not pago.appointment.productos_turno:
+                pago_dict.update({
+                    "empleado": empleado.name,
+                    "porcentaje_empleado": porcentaje_servicio,
+                    "servicio": servicio.name,
+                    "valor_servicio": monto_servicio,
+                    "pago_empleado": pago_empleado_servicio,
+                    "pago_propietario": float(monto_servicio - pago_empleado_servicio)
+                })
+                total_por_empleado[empleado.name]["monto"] += float(pago_empleado_servicio)
+                total_por_empleado[empleado.name]["cortes"] += 1
+                total_propietario += float(monto_servicio - pago_empleado_servicio)
 
         if pago.appointment and pago.appointment.productos_turno:
             for pt in pago.appointment.productos_turno:
                 producto = pt.producto
                 monto_producto = pt.precio_unitario * pt.cantidad
-                porcentaje = 30  # fijo
+                porcentaje_producto = 30  # fijo
                 empleado = pago.appointment.barber
-                pago_empleado = (monto_producto * porcentaje) / 100
-                pago_dict.update({
-                    "empleado": empleado.name,
-                    "porcentaje_empleado": porcentaje,
-                    "producto": producto.name,
-                    "valor_producto": monto_producto,
-                    "pago_empleado": float(pago_empleado),
-                    "pago_propietario": float(monto_servicio - Decimal(pago_empleado))
-               })
-                total_por_empleado[empleado.name]["monto"] += float(pago_empleado)
-                total_propietario += float(monto_producto - pago_empleado)
+                pago_empleado_producto = (monto_producto * porcentaje_producto) / 100
 
+                if not pago.appointment.service:
+                    pago_dict.update({
+                        "empleado": empleado.name,
+                        "porcentaje_empleado": porcentaje_producto,
+                        "producto": producto.name,
+                        "valor_producto": monto_producto,
+                        "pago_empleado": float(pago_empleado_producto),
+                        "pago_propietario": float(Decimal(monto_producto) - Decimal(pago_empleado_producto))
+                    })
+                    total_por_empleado[empleado.name]["monto"] += float(pago_empleado_producto)
+                    total_propietario += float(monto_producto - pago_empleado_producto)
+
+        if pago.appointment and pago.appointment.service and pago.appointment.productos_turno:
+            pago_dict.update({
+                "empleado": empleado.name,
+                "porcentaje_empleado": str(porcentaje_servicio) + "% - " + str(porcentaje_producto),
+                "servicio": servicio.name,
+                "valor_servicio": monto_servicio,
+                "producto": producto.name,
+                "valor_producto": monto_producto,
+                "pago_empleado": float(pago_empleado_servicio) + float(pago_empleado_producto),
+                "pago_propietario": float(Decimal(monto_servicio) - Decimal(pago_empleado_servicio)) + float(Decimal(monto_producto) - Decimal(pago_empleado_producto))
+            })
+            # total_por_empleado[empleado.name]["monto"] += float(pago_empleado_producto)
+            # total_propietario += float(monto_producto - pago_empleado_producto)
 
         if pago.membresia_comprada:
+            empleado = pago.appointment.barber
             tipo = pago.membresia_comprada.tipo_membresia
             monto = float(tipo.precio)
             pago_dict.update({
+                "empleado": empleado.name,
                 "membresia": tipo.nombre,
                 "valor_membresia": monto,
                 "pago_empleado": 0,

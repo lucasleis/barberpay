@@ -91,12 +91,12 @@
               <td>${p.fecha}</td>
               <td>${p.empleado}</td>
               <td>${p.porcentaje_empleado}%</td>
-              <td>${p.servicio}</td>
-              <td>$${parseInt(p.valor_servicio)}</td>
-              <td>${p.producto || ''}</td>
-              <td>$${parseInt(p.valor_producto)}</td>
-              <td>${p.membresia || ''}</td>
-              <td>$${parseInt(p.valor_membresia)}</td>
+              <td>${p.servicio || '-'}</td>
+              <td>${p.valor_servicio === 0 ? '-' : '$' + parseInt(p.valor_servicio)}</td>
+              <td>${p.producto || '-'}</td>
+              <td>${p.valor_producto === 0 ? '-' : '$' + parseInt(p.valor_producto)}</td>
+              <td>${p.membresia || '-'}</td>
+              <td>${p.valor_membresia === 0 ? '-' : '$' + parseInt(p.valor_membresia)}</td>
               <td>${p.metodo_pago.join(', ')}</td>
               <td>$${parseInt(p.monto)}</td>
               <td>$${parseInt(p.propina)}</td>
