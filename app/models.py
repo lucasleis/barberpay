@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from backports.zoneinfo import ZoneInfo
 # from zoneinfo import ZoneInfo
+from sqlalchemy import CheckConstraint
 
 db = SQLAlchemy()
 
@@ -60,7 +61,12 @@ class Producto(db.Model):
     precio = db.Column(db.Float, nullable=False)
     cantidad = db.Column(db.Integer, nullable=False)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
+    comision_empleado = db.Column(db.Float, nullable=False, default=1.0)
     active = db.Column(db.Boolean, default=True)
+
+    __table_args__ = (
+        CheckConstraint('comision_empleado >= 1 AND comision_empleado <= 100', name='check_comision_empleado_range'),
+    )
 
 
 class TipoMembresia(db.Model):

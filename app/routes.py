@@ -2,12 +2,15 @@ from flask import current_app as app, render_template, request, redirect, url_fo
 from . import db
 from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno
 from .auth import login_required
+from sqlalchemy import desc
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
 from collections import defaultdict
 from backports.zoneinfo import ZoneInfo
 # from zoneinfo import ZoneInfo
 from werkzeug.datastructures import MultiDict
+from decimal import Decimal
+
 
 # Funciones auxiliares
 
@@ -57,10 +60,6 @@ def get_payment_page_data(salon_id):
 
 def calcular_pagos_entre_fechas(start_date, end_date):
 
-    # data = request.get_json()
-    # start_date = datetime.fromisoformat(start_date)
-    # end_date = datetime.fromisoformat(end_date)
-
     pagos = Pago.query.options(
         joinedload(Pago.appointment).joinedload(Appointment.productos_turno).joinedload(AppointmentTurno.producto),
         joinedload(Pago.appointment).joinedload(Appointment.barber),
@@ -69,18 +68,20 @@ def calcular_pagos_entre_fechas(start_date, end_date):
         joinedload(Pago.appointment).joinedload(Appointment.membresia).joinedload(Membresia.tipo_membresia),
         joinedload(Pago.method1),
         joinedload(Pago.method2)
-    ).filter(Pago.date >= start_date, Pago.date <= end_date).all()
-
+    ).filter(Pago.date >= start_date, Pago.date <= end_date).order_by(desc(Pago.date)).all()
+    
     total_general = 0
     total_propietario = 0
     total_por_empleado = defaultdict(lambda: {"monto": 0, "propinas": 0, "cortes": 0})
     total_por_metodo_pago = defaultdict(float)
+    monto_servicio = Decimal('0')
+    pago_empleado = Decimal('0')
 
     lista_pagos = []
 
     for pago in pagos:
         pago_dict = {
-            "fecha": pago.date.strftime('%Y-%m-%d'),
+            "fecha": pago.date.strftime('%d-%m'),
             "empleado": "",
             "porcentaje_empleado": 0,
             "servicio": "",
@@ -117,13 +118,17 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             empleado = pago.appointment.barber
             porcentaje = empleado.porcentaje
             pago_empleado = (monto_servicio * porcentaje) / 100
+
+            monto_servicio = Decimal(monto_servicio)
+            pago_empleado = Decimal(pago_empleado)
+
             pago_dict.update({
                 "empleado": empleado.name,
                 "porcentaje_empleado": porcentaje,
                 "servicio": servicio.name,
                 "valor_servicio": monto_servicio,
                 "pago_empleado": pago_empleado,
-                "pago_propietario": monto_servicio - pago_empleado,
+                "pago_propietario": float(monto_servicio - pago_empleado)
             })
             total_por_empleado[empleado.name]["monto"] += float(pago_empleado)
             total_por_empleado[empleado.name]["cortes"] += 1
@@ -142,7 +147,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                     "producto": producto.name,
                     "valor_producto": monto_producto,
                     "pago_empleado": float(pago_empleado),
-                    "pago_propietario": float(monto_servicio - pago_empleado),
+                    "pago_propietario": float(monto_servicio - Decimal(pago_empleado))
                })
                 total_por_empleado[empleado.name]["monto"] += float(pago_empleado)
                 total_propietario += float(monto_producto - pago_empleado)
@@ -409,8 +414,6 @@ def update_service(id):
 
     # Buscar el servicio original
     original = Servicio.query.get_or_404(id)
-
-    # Desactivar el servicio actual
     original.active = False
 
     # Obtener los nuevos valores del formulario
@@ -459,31 +462,61 @@ def list_products():
 
 @app.route('/admin/products/add', methods=['POST'])
 def add_product():
-    if "user" in session:
-        name = request.form['name']
-        precio = float(request.form['precio'])
-        salon_id = session.get('salon_id')
-        cantidad = int(request.form['cantidad'])
-        db.session.add(Producto(name=name, precio=precio, peluqueria_id=salon_id,cantidad=cantidad))
-        db.session.commit()
-        return redirect(url_for('list_products'))
-    else:
+    if "user" not in session:
         return redirect(url_for("login"))
     
-@app.route('/products/update_quantity/<int:id>', methods=['POST'])
+    name = request.form['name']
+    precio = float(request.form['precio'])
+    salon_id = session.get('salon_id')
+    cantidad = int(request.form['cantidad'])
+    comision = float(request.form['comision']) 
+    
+    # Validar comisión esté entre 1 y 100 (por seguridad)
+    if not (1 <= comision <= 100):
+        flash("La comisión debe estar entre 1 y 100")
+        return redirect(url_for('list_products'))
+
+    nuevo_producto = Producto(
+        name=name,
+        precio=precio,
+        peluqueria_id=salon_id,
+        cantidad=cantidad,
+        comision_empleado=comision
+    )
+    db.session.add(nuevo_producto)
+    db.session.commit()
+    return redirect(url_for('list_products'))
+    
+@app.route('/admin/products/update_quantity/<int:id>', methods=['POST'])
 def update_product_quantity(id):
-    cantidad_extra = int(request.form['cantidad'])  # Cantidad a sumar
+    if "user" not in session:
+        return redirect(url_for("login"))
+
     salon_id = session.get('salon_id')
 
     # Buscar el producto por ID y peluquería
     product = Producto.query.filter_by(id=id, peluqueria_id=salon_id).first()
 
-    if product:
-        product.cantidad = cantidad_extra
+    if not product:
+        return "Producto no encontrado o no pertenece al salón", 404
+
+    try:
+        product.name = request.form['nombre'].strip()
+        product.precio = float(request.form['precio'])
+        product.cantidad = int(request.form['cantidad'])
+        product.comision_empleado = float(request.form['comision'])
+
+        # Validación extra por seguridad
+        if not (1 <= product.comision_empleado <= 100):
+            return "Comisión fuera de rango permitido (1-100%)", 400
+
         db.session.commit()
         return redirect(url_for('list_products'))
-    else:
-        return "Producto no encontrado o no pertenece al salón", 404
+
+    except Exception as e:
+        db.session.rollback()
+        return f"Error al actualizar el producto: {str(e)}", 400
+
 
 @app.route('/admin/products/delete/<int:id>')
 def delete_product(id):
@@ -889,8 +922,8 @@ def delete_payment(pago_id):
 @app.route('/pagos_entre_fechas', methods=['POST'])
 def pagos_entre_fechas():
     data = request.get_json()
-    start_date = datetime.fromisoformat(data['start_date'])
-    end_date = datetime.fromisoformat(data['end_date'])
+    start_date = datetime.fromisoformat(data['start_date']).replace(hour=0, minute=0, second=0, microsecond=0)
+    end_date = datetime.fromisoformat(data['end_date']).replace(hour=23, minute=59, second=59, microsecond=999999)
     resultado = calcular_pagos_entre_fechas(start_date, end_date)
     return jsonify(resultado)
 

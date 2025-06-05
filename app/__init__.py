@@ -86,6 +86,7 @@ def ensure_database_and_tables():
             name VARCHAR(100) NOT NULL,
             precio NUMERIC(10,2) NOT NULL,
             cantidad INTEGER,
+            comision_empleado NUMERIC(5,2) DEFAULT 1.0 CHECK (comision_empleado >= 1 AND comision_empleado <= 100),
             active BOOLEAN DEFAULT TRUE
         );
                 

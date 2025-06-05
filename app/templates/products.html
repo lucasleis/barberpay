@@ -26,13 +26,18 @@
       <input type="number" name="precio" id="precio" step="1" placeholder="Precio ($)" required>
     </div>
 
+    <div class="form-group">
+      <label for="comision">Comisión empleado (%):</label>
+      <input type="number" name="comision" id="comision" step="1" min="0" max="100" placeholder="Ej. 10" required>
+    </div>
+
     <button type="submit">Agregar Producto</button>
   </form>
 
   <ul class="barber-list">
     {% for product in products %}
     <li class="barber-item">
-      <span>{{ product.name }} - ${{ "%.2f"|format(product.precio)|int }} | Cantidad: {{ product.cantidad }} </span>
+      <span>  {{ product.name }} - ${{ "%.2f"|format(product.precio)|int }} | Cantidad: {{ product.cantidad }} | Comisión: {{ product.comision_empleado|int }}% </span>
     
       <div class="action-buttons">
         <a href="#" class="edit-icon" title="Editar cantidad" onclick="openCantidadModal('{{ product.id }}'); return false;">
@@ -48,17 +53,34 @@
     <!-- Modal para editar cantidad -->
     <div id="modal-{{ product.id }}" class="modal-cantidad">
       <div class="modal-content">
-        <h3>Modificar cantidad</h3>
+        <h3>Modificar Producto</h3>
         <span class="close-modal" onclick="closeCantidadModal(this.dataset.id)" data-id="{{ product.id }}">&times;</span>
         <form method="POST" action="{{ url_for('update_product_quantity', id=product.id) }}">
           <div class="form-group">
-            <label for="cantidad-{{ product.id }}">Nueva cantidad:</label>
-            <input type="number" name="cantidad" id="cantidad-{{ product.id }}" min="1" placeholder="Cantidad" required class="cantidad-input">
+            <label for="name-{{ product.id }}">Nuevo nombre:</label>
+            <input type="text" name="nombre" id="name-{{ product.id }}" placeholder="Nombre" required class="cantidad-input" value="{{ product.name }}">
           </div>
+        
+          <div class="form-group">
+            <label for="precio-{{ product.id }}">Nuevo precio:</label>
+            <input type="number" name="precio" id="precio-{{ product.id }}" step="0.01" min="0" placeholder="Precio" required class="cantidad-input" value="{{ product.precio|int  }}">
+          </div>
+        
+          <div class="form-group">
+            <label for="cantidad-{{ product.id }}">Nueva cantidad:</label>
+            <input type="number" name="cantidad" id="cantidad-{{ product.id }}" min="1" placeholder="Cantidad" required class="cantidad-input" value="{{ product.cantidad|int  }}">
+          </div>
+        
+          <div class="form-group">
+            <label for="comision-{{ product.id }}">Comisión empleado (%):</label>
+            <input type="number" name="comision" id="comision-{{ product.id }}" step="1" min="1" max="100" placeholder="Ej. 10" required value="{{ product.comision_empleado|int  }}">
+          </div>
+        
           <button type="submit" class="edit-button">
             <i class="fas fa-check"></i> Confirmar
           </button>
         </form>
+        
       </div>
     </div>
     {% endfor %}
