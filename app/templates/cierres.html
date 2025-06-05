@@ -97,7 +97,7 @@
               <td>${p.valor_producto === 0 ? '-' : '$' + parseInt(p.valor_producto)}</td>
               <td>${p.membresia || '-'}</td>
               <td>${p.valor_membresia === 0 ? '-' : '$' + parseInt(p.valor_membresia)}</td>
-              <td>${p.metodo_pago.join(', ')}</td>
+              <td>${p.metodo_pago.join(' - ')}</td>
               <td>$${parseInt(p.monto)}</td>
               <td>$${parseInt(p.propina)}</td>
               <td>$${parseInt(p.pago_empleado)}</td>

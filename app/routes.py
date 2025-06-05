@@ -141,7 +141,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             for pt in pago.appointment.productos_turno:
                 producto = pt.producto
                 monto_producto = pt.precio_unitario * pt.cantidad
-                porcentaje_producto = 30  # fijo
+                porcentaje_producto = float(producto.comision_empleado)
                 empleado = pago.appointment.barber
                 pago_empleado_producto = (monto_producto * porcentaje_producto) / 100
 
@@ -160,7 +160,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
         if pago.appointment and pago.appointment.service and pago.appointment.productos_turno:
             pago_dict.update({
                 "empleado": empleado.name,
-                "porcentaje_empleado": str(porcentaje_servicio) + "% - " + str(porcentaje_producto),
+                "porcentaje_empleado": str(porcentaje_servicio) + "% - " + str(int(porcentaje_producto)),
                 "servicio": servicio.name,
                 "valor_servicio": monto_servicio,
                 "producto": producto.name,
