@@ -4,6 +4,7 @@
 
     - Servicios: 
         - hacer que si no hay servicio con precio amigo o descuento tire error
+        - si selecciona precio amigo, ocultar meotodos de pago
 
     - Productos:
 
@@ -24,6 +25,7 @@
     - se estan mostrando los pagos restando en la tabla. revisar que es lo mejor cuando este la tabla de cierres
     - Arreglar propinas. se ve mal
     - probar multiples metodos de pago y cierres
+    - que los pop up de updates sean iguales 
 
 - Testear:
     - Tiempos de carga

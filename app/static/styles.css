@@ -143,17 +143,31 @@ select {
     margin-bottom: 2rem;
 }
 
-.propina-row input[type="number"] {
-    flex: 1;
-    margin: 0;
-    width: 50%;
-}
-
+.propina-row input[type="number"],
+.propina-row input[type="text"],
 .propina-row .btn-primary {
     flex: 1;
     margin: 0;
+    width: calc(33.333% - 0.667rem); /* Equal width minus gap spacing */
+    height: 38px;
+}
+
+.propina-row .btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     white-space: nowrap;
-    width: 50%;
+    font-size: 1rem;
+    padding: 0 1rem;
+}
+
+/* Remove previous conflicting styles */
+.propina-row input[type="number"] {
+    width: calc(33.333% - 0.667rem);
+}
+
+.propina-row .btn-primary {
+    width: calc(33.333% - 0.667rem);
 }
 
 /* Ajuste general para inputs numéricos */
