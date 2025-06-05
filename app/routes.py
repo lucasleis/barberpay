@@ -107,10 +107,13 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             tipo_precio = pago.appointment.tipo_precio_servicio
             if tipo_precio == 'comun':
                 monto_servicio = servicio.precio
+                servicio_name = servicio.name
             elif tipo_precio == 'amigo':
                 monto_servicio = servicio.precio_amigo
+                servicio_name = servicio.name + " Amigo"
             elif tipo_precio == 'descuento':
                 monto_servicio = servicio.precio_descuento
+                servicio_name = servicio.name + " Descuento"
             else:
                 monto_servicio = 0
 
@@ -125,16 +128,30 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 pago_dict.update({
                     "empleado": empleado.name,
                     "porcentaje_empleado": porcentaje_servicio,
-                    "servicio": servicio.name,
+                    "servicio": servicio_name,
                     "valor_servicio": monto_servicio,
                     "pago_empleado": pago_empleado_servicio,
-                    "pago_propietario": float(monto_servicio - pago_empleado_servicio)
+                    "monto": 0,
+                    "pago_propietario": 0
                 })
+
+                if tipo_precio != 'amigo':
+                    total_propietario += float(monto_servicio - pago_empleado_servicio)
+                    total_general += float(monto_servicio)
+
+                    pago_dict.update({
+                        "empleado": empleado.name,
+                        "porcentaje_empleado": porcentaje_servicio,
+                        "servicio": servicio_name,
+                        "valor_servicio": monto_servicio,
+                        "monto": (pago.amount_method1 or 0) + (pago.amount_method2 or 0),
+                        "pago_empleado": pago_empleado_servicio,
+                        "pago_propietario": float(monto_servicio - pago_empleado_servicio)
+                    })
+
                 total_por_empleado[empleado.name]["monto"] += float(pago_empleado_servicio)
                 total_por_empleado[empleado.name]["monto_cortes"] += float(pago_empleado_servicio)
                 total_por_empleado[empleado.name]["cortes"] += 1
-                total_propietario += float(monto_servicio - pago_empleado_servicio)
-                total_general += float(monto_servicio)
 
         if pago.appointment and pago.appointment.productos_turno:
             for pt in pago.appointment.productos_turno:
@@ -155,7 +172,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                     })
                     total_por_empleado[empleado.name]["monto"] += float(pago_empleado_producto)
                     total_por_empleado[empleado.name]["monto_productos"] += float(pago_empleado_producto)
-                    total_por_empleado[empleado.name]["productos"] += 1
+                    total_por_empleado[empleado.name]["productos"] += float(pt.cantidad)
                     total_propietario += float(monto_producto - pago_empleado_producto)
                     total_general += float(monto_producto)
 
@@ -174,7 +191,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             total_por_empleado[empleado.name]["monto_cortes"] += float(pago_empleado_servicio)
             total_por_empleado[empleado.name]["monto_productos"] += float(pago_empleado_producto)
             total_por_empleado[empleado.name]["cortes"] += 1
-            total_por_empleado[empleado.name]["productos"] += 1
+            total_por_empleado[empleado.name]["productos"] += float(pt.cantidad)
             total_propietario += float(monto_servicio - pago_empleado_servicio) +float(monto_producto - pago_empleado_producto)
             total_general += float(monto_servicio) + float(monto_producto)
 
@@ -191,7 +208,6 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             })
             total_propietario += monto
             total_general += monto
-
 
         elif pago.appointment and pago.appointment.membresia:
             tipo = pago.appointment.membresia.tipo_membresia
@@ -217,8 +233,17 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             total_general += pago.amount_tip
 
         if pago.method1:
-            total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
-            pago_dict["metodo_pago"].append(pago.method1.nombre)
+            if pago.appointment and pago.appointment.service:
+                tipo_precio = pago.appointment.tipo_precio_servicio
+                if tipo_precio == 'amigo':
+                    total_por_metodo_pago[pago.method1.nombre] += 0
+                    pago_dict["metodo_pago"].append("-")
+                else: 
+                    total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
+                    pago_dict["metodo_pago"].append(pago.method1.nombre)
+            else:
+                total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
+                pago_dict["metodo_pago"].append(pago.method1.nombre)
         if pago.method2:
             total_por_metodo_pago[pago.method2.nombre] += pago.amount_method2 or 0
             pago_dict["metodo_pago"].append(pago.method2.nombre)

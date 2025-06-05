@@ -3,22 +3,15 @@
     - Empleados:
 
     - Servicios: 
-        - Se agregan valores para:
-            - Descuentos
-            - Amigos
+        - hacer que si no hay servicio con precio amigo o descuento tire error
 
     - Productos:
-        - ver como pone cuando es para familiar. que no se cobra pero se paga al peluquero
-        - settear % que les queda a los barberos
 
     - Metodos de Pago:
 
     - Membresia:
-        - Al usar membresia no se puede poner propina
 
     - Cierre:
-        - Arreglar cuentas (Totales por método de pago)
-        - Desglosar total por empleado
 
 - Errores:
     - Que todos tengan el mismo formato 
@@ -30,6 +23,7 @@
     - Manejar errores de que no haya peluqueria, empleado, corte, etc
     - se estan mostrando los pagos restando en la tabla. revisar que es lo mejor cuando este la tabla de cierres
     - Arreglar propinas. se ve mal
+    - probar multiples metodos de pago y cierres
 
 - Testear:
     - Tiempos de carga
