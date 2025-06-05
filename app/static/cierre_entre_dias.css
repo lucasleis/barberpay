@@ -48,45 +48,54 @@
 }
   
 
-  .form-fechas {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    flex-wrap: wrap;
-    gap: 12px;
-  }
+.form-fechas {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
 
-  .rango-fechas {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    font-weight: 500;
-  }
+.form-fechas label {
+  margin: 0;
+  font-weight: 500;
+  white-space: nowrap;
+}
 
-  .rango-fechas input[type="date"] {
-    padding: 6px 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 14px;
-  }
+.rango-fechas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-  .boton-cierre {
-    margin-left: auto;
-    padding: 6px 16px;
-    border: none;
-    background-color: #28a745;
-    color: white;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
+.rango-fechas input[type="date"] {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  height: 36px;
+}
 
-  .boton-cierre:hover {
-    background-color: #218838;
-  }
+.boton-cierre {
+  padding: 6px 16px;
+  border: none;
+  background-color: #28a745;
+  color: white;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.boton-cierre:hover {
+  background-color: #218838;
+}
