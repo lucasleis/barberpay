@@ -69,7 +69,7 @@
     <!-- Modal para editar precios -->
     <div id="modal-{{ service.id }}" class="modal-cantidad">
       <div class="modal-content">
-        <h3>Editar precios</h3>
+        <h3>Editar Precios</h3>
         <span class="close-modal" onclick="closePrecioModal(this.dataset.id)" data-id="{{ service.id }}">&times;</span>
         <form method="POST" action="{{ url_for('update_service', id=service.id) }}">
           <div class="form-group">
@@ -112,18 +112,28 @@
     }
 
     function openPrecioModal(id) {
-      document.getElementById('modal-' + id).style.display = 'flex';
+      const modal = document.getElementById('modal-' + id);
+      modal.style.display = 'flex';
+      // Trigger reflow to ensure the transition works
+      modal.offsetHeight;
+      modal.classList.add('active');
     }
 
     function closePrecioModal(id) {
-      document.getElementById('modal-' + id).style.display = 'none';
+      const modal = document.getElementById('modal-' + id);
+      modal.classList.remove('active');
+      // Wait for the animation to finish before hiding the modal
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 300);
     }
 
     window.onclick = function(event) {
       const modals = document.querySelectorAll(".modal-cantidad");
       modals.forEach(modal => {
         if (event.target === modal) {
-          modal.style.display = "none";
+          const id = modal.id.replace('modal-', '');
+          closePrecioModal(id);
         }
       });
     }

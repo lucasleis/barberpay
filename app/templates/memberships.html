@@ -45,7 +45,7 @@
       <!-- Modal para editar membresía -->
       <div id="modal-{{ tipo.id }}" class="modal-cantidad">
         <div class="modal-content">
-          <h3>Modificar membresía</h3>
+          <h3>Editar Membresía</h3>
           <span class="close-modal" onclick="closeCantidadModal(this.dataset.id)" data-id="{{ tipo.id }}">&times;</span>
           <form method="POST" action="{{ url_for('update_membership_type', id=tipo.id) }}">
             <div class="form-group">
@@ -73,23 +73,31 @@
 
 
   <script>
-
     function openCantidadModal(id) {
-      document.getElementById('modal-' + id).style.display = 'flex';
+      const modal = document.getElementById('modal-' + id);
+      modal.style.display = 'flex';
+      // Trigger reflow to ensure the transition works
+      modal.offsetHeight;
+      modal.classList.add('active');
     }
 
     function closeCantidadModal(id) {
-      document.getElementById('modal-' + id).style.display = 'none';
+      const modal = document.getElementById('modal-' + id);
+      modal.classList.remove('active');
+      // Wait for the animation to finish before hiding the modal
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 300);
     }
 
     window.onclick = function(event) {
       const modals = document.querySelectorAll(".modal-cantidad");
       modals.forEach(modal => {
         if (event.target === modal) {
-          modal.style.display = "none";
+          const id = modal.id.replace('modal-', '');
+          closeCantidadModal(id);
         }
       });
     }
-
   </script>
 {% endblock %}
