@@ -4,7 +4,6 @@
 
     - Servicios: 
         - hacer que si no hay servicio con precio amigo o descuento tire error
-        - si selecciona precio amigo, ocultar meotodos de pago
 
     - Productos:
 

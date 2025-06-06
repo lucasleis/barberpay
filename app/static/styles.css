@@ -481,3 +481,8 @@ input:disabled {
 #membresiaMethodGroup {
     z-index: 2;
 }
+
+.centrado {
+  text-align: center;
+  align-items: center;
+}

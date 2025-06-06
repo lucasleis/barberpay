@@ -408,9 +408,16 @@
       }
     }
 
-    // Mostrar en input
+    // Obtener el valor de la propina
+    const tipInput = document.getElementById('tip');
+    const tipAmount = parseFloat(tipInput.value) || 0;
+
+    // Sumar la propina al total
+    const totalConPropina = precioTotal + tipAmount;
+
+    // Mostrar en input sin decimales
     const totalPagoInput = document.getElementById('totalPago');
-    totalPagoInput.value = `$${Math.round(precioTotal)}`;
+    totalPagoInput.value = `$${Math.round(totalConPropina)}`;
   }
 
 
@@ -577,12 +584,12 @@
     }
 
     // Validar que el total pagado sea correcto
-    console.log("totalPagado: ",totalPagado)
-    console.log("totalEsperado: ",totalEsperado)
-    console.log("propina: ",propina)
-    console.log("totalEsperado + propina: ",totalEsperado+propina)
-    console.log("totalPagado - (totalEsperado + propina): ",totalPagado - totalEsperado + propina)
-    if (Math.abs(totalPagado - (totalEsperado + propina)) > 0.01) {
+    // console.log("totalPagado: ",totalPagado)
+    // console.log("totalEsperado: ",totalEsperado)
+    // console.log("propina: ",propina)
+    // console.log("totalEsperado + propina: ",totalEsperado+propina)
+    // console.log("totalPagado - totalEsperado - propina: ",totalPagado - totalEsperado + propina)
+    if (Math.abs(totalPagado - totalEsperado - propina) > 0.01) {
       montoInputs.forEach(input => input.classList.add('input-error'));
       montoError.style.display = 'block';
       return false;
@@ -827,6 +834,9 @@
     setupMembresiaCheckboxToggle();
     updatePriceTotal();
   });
+
+  // Agregar event listener para el input de propina
+  document.getElementById('tip').addEventListener('input', updatePriceTotal);
 
 </script>
 

@@ -72,7 +72,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
     
     total_general = 0
     total_propietario = 0
-    total_por_empleado = defaultdict(lambda: {"monto": 0, "cortes": 0, "monto_cortes":0, "productos":0, "monto_productos":0, "propinas": 0})
+    total_por_empleado = defaultdict(lambda: {"monto": 0, "monto_metodo1": 0, "monto_metodo2": 0, "cortes": 0, "monto_cortes":0, "productos":0, "monto_productos":0, "propinas": 0})
     total_por_metodo_pago = defaultdict(float)
     monto_servicio = Decimal('0')
     pago_empleado = Decimal('0')
@@ -235,17 +235,20 @@ def calcular_pagos_entre_fechas(start_date, end_date):
         if pago.method1:
             if pago.appointment and pago.appointment.service:
                 tipo_precio = pago.appointment.tipo_precio_servicio
+                monto_metodo1 = pago.amount_method1 or 0
                 if tipo_precio == 'amigo':
-                    total_por_metodo_pago[pago.method1.nombre] += 0
+                    monto_metodo1 = 0
+                    total_por_metodo_pago[pago.method1.nombre] += monto_metodo1
                     pago_dict["metodo_pago"].append("-")
                 else: 
-                    total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
+                    total_por_metodo_pago[pago.method1.nombre] += monto_metodo1
                     pago_dict["metodo_pago"].append(pago.method1.nombre)
             else:
-                total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
+                total_por_metodo_pago[pago.method1.nombre] += monto_metodo1
                 pago_dict["metodo_pago"].append(pago.method1.nombre)
         if pago.method2:
-            total_por_metodo_pago[pago.method2.nombre] += pago.amount_method2 or 0
+            monto_metodo2 = pago.amount_method2 or 0
+            total_por_metodo_pago[pago.method2.nombre] += monto_metodo2
             pago_dict["metodo_pago"].append(pago.method2.nombre)
 
         lista_pagos.append(pago_dict)
