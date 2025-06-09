@@ -430,11 +430,12 @@ def add_service():
         name = request.form.get('name')
         precio = float(request.form.get('precio', 0))
 
-        try:
-            precio_amigo = float(request.form.get('precio_amigo', 0) or 0)
-        except ValueError:
-            precio_amigo = 0
-
+        """
+            try:
+                precio_amigo = float(request.form.get('precio_amigo', 0) or 0)
+            except ValueError:
+                precio_amigo = 0
+        """
         try:
             precio_descuento = float(request.form.get('precio_descuento', 0) or 0)
         except ValueError:
@@ -445,7 +446,7 @@ def add_service():
         db.session.add(Servicio(
             name=name,
             precio=precio,
-            precio_amigo=precio_amigo,
+            precio_amigo=0,
             precio_descuento=precio_descuento,
             peluqueria_id=salon_id
         ))

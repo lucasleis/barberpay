@@ -4,6 +4,7 @@
 
     - Servicios: 
         - hacer que si no hay servicio con precio amigo o descuento tire error
+        - arreglar precio amigo y descuento. esta rara la funcionalidad de poner precio y demas
 
     - Productos:
 

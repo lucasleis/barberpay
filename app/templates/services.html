@@ -29,15 +29,17 @@
       </div>
     </div>
     
-    <div class="form-group toggle-container">
-      <div class="toggle-section">
-        <input type="checkbox" name="amigo" id="amigoCheckbox" value="true" class="toggle-checkbox" onchange="toggleAmigoField()">
-        <label for="amigoCheckbox" class="toggle-button">Amigo</label>
+    <!--
+      <div class="form-group toggle-container">
+        <div class="toggle-section">
+          <input type="checkbox" name="amigo" id="amigoCheckbox" value="true" class="toggle-checkbox" onchange="toggleAmigoField()">
+          <label for="amigoCheckbox" class="toggle-button">Amigo</label>
+        </div>
+        <div class="input-wrapper">
+          <input type="number" name="precio_amigo" id="amigoField" step="1" placeholder="Monto amigo ($)" class="input-condicional" style="display: none;">
+        </div>
       </div>
-      <div class="input-wrapper">
-        <input type="number" name="precio_amigo" id="amigoField" step="1" placeholder="Monto amigo ($)" class="input-condicional" style="display: none;">
-      </div>
-    </div>
+    -->
 
     <button type="submit">Agregar Servicio</button>
   </form>
@@ -46,12 +48,12 @@
     {% for service in services %}
     <li class="barber-item">
       <span>
-        {{ service.name }} - ${{ "%.2f"|format(service.precio) }}
-        {% if service.precio_amigo and service.precio_amigo > 0 %}
-          | Precio Amigo: ${{ "%.2f"|format(service.precio_amigo) }}
-        {% endif %}
+        {{ service.name }} - ${{ "%d"|format(service.precio) }}
         {% if service.precio_descuento and service.precio_descuento > 0 %}
-          | Precio Descuento: ${{ "%.2f"|format(service.precio_descuento) }}
+          | Precio Descuento: ${{ "%d"|format(service.precio_descuento) }}
+        {% endif %}
+        {% if service.precio_amigo and service.precio_amigo > 0 %}
+          | Precio Amigo: ${{ "%d"|format(service.precio_amigo) }}
         {% endif %}
       </span>
   
@@ -60,7 +62,7 @@
           <i class="fas fa-pen"></i>
         </a>
         <span class="separator">|</span>
-        <a href="{{ url_for('delete_service', id=service.id) }}" class="delete-button" title="Eliminar">
+        <a href="{{ url_for('delete_service', id=service.id) }}" class="delete-button" title="Eliminar Servicio">
           <i class="fas fa-trash-alt"></i>
         </a>
       </div>
@@ -73,19 +75,21 @@
         <span class="close-modal" onclick="closePrecioModal(this.dataset.id)" data-id="{{ service.id }}">&times;</span>
         <form method="POST" action="{{ url_for('update_service', id=service.id) }}">
           <div class="form-group">
-            <label for="nombre-{{ service.id }}">Nuevo nombre:</label>
+            <label for="nombre-{{ service.id }}">Nuevo Nombre:</label>
             <input type="text" name="name" id="nombre-{{ service.id }}" value="{{ service.name }}" required>
           </div>
           <div class="form-group">
             <label for="precio-{{ service.id }}">Nuevo Precio:</label>
             <input type="number" name="precio" id="precio-{{ service.id }}" step="1" value="{{ service.precio|int }}" required class="cantidad-input">
           </div>
+          <!-- 
+            <div class="form-group">
+              <label for="precio_amigo-{{ service.id }}">Nuevo Precio Amigo:</label>
+              <input type="number" name="precio_amigo" id="precio_amigo-{{ service.id }}" step="1" value="{{ service.precio_amigo|int }}" class="cantidad-input">
+            </div>
+          -->
           <div class="form-group">
-            <label for="precio_amigo-{{ service.id }}">Nuevo Precio amigo:</label>
-            <input type="number" name="precio_amigo" id="precio_amigo-{{ service.id }}" step="1" value="{{ service.precio_amigo|int }}" class="cantidad-input">
-          </div>
-          <div class="form-group">
-            <label for="precio_descuento-{{ service.id }}">Nuevo Precio descuento:</label>
+            <label for="precio_descuento-{{ service.id }}">Nuevo Precio Descuento:</label>
             <input type="number" name="precio_descuento" id="precio_descuento-{{ service.id }}" step="1" value="{{ service.precio_descuento|int }}" class="cantidad-input">
           </div>
           <button type="submit" class="edit-button">

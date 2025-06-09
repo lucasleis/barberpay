@@ -377,6 +377,13 @@
     }
   }
 
+  function resetTip() {
+    const tipInput = document.getElementById('tip');
+    tipInput.value = 0;
+    updatePriceTotal(); // Actualiza el total sin la propina
+  }
+
+  /*
   // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
   function updatePriceTotal() {
     let precioTotal = 0;
@@ -422,13 +429,6 @@
     totalPagoInput.value = `$${Math.round(totalConPropina)}`;
   }
 
-
-  function resetTip() {
-    const tipInput = document.getElementById('tip');
-    tipInput.value = 0;
-    updatePriceTotal(); // Actualiza el total sin la propina
-  }
-
   // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
   function updatePrice() {
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
@@ -444,7 +444,63 @@
     servicePrice.value = `$${precioFloat}`;
     amountSimple.value = precioFloat;
   }
+  */
 
+  
+  function obtenerPrecioServicioSeleccionado() {
+    const selected = serviceSelect.options[serviceSelect.selectedIndex];
+    if (!selected) return 0;
+
+    if (precioDescuentoCheckbox.checked) {
+      return parseFloat(selected.getAttribute('data-precio-descuento')) || 0;
+    } else if (precioAmigoCheckbox.checked) {
+      return parseFloat(selected.getAttribute('data-precio-amigo')) || 0;
+    }
+
+    return parseFloat(selected.getAttribute('data-precio')) || 0;
+  }
+
+  function updatePrice() {
+    const precio = obtenerPrecioServicioSeleccionado();
+    const precioRedondeado = Math.round(precio);
+
+    servicePrice.value = `$${precioRedondeado}`;
+    amountSimple.value = precioRedondeado;
+  }
+
+  function updatePriceTotal() {
+
+    const precio = obtenerPrecioServicioSeleccionado();
+    const precioRedondeado = Math.round(precio);
+
+    servicePrice.value = `$${precioRedondeado}`;
+    amountSimple.value = precioRedondeado;
+
+    let precioTotal = 0;
+
+    const servicioActivo = servicioToggle.checked;
+    const productoActivo = productoToggle.checked;
+    const membresiaActivo = membresiaToggle.checked;
+
+    if (membresiaActivo) {
+      precioTotal = obtenerPrecioMembresia();
+    } else {
+      if (servicioActivo) {
+        precioTotal += obtenerPrecioServicioSeleccionado();
+      }
+
+      if (productoActivo) {
+        const productosData = obtenerProductosSeleccionados();
+        precioTotal += productosData.total;
+      }
+    }
+
+    const tipAmount = parseFloat(document.getElementById('tip').value) || 0;
+    const totalConPropina = precioTotal + tipAmount;
+
+    document.getElementById('totalPago').value = `$${Math.round(totalConPropina)}`;
+  }
+  
 
   updatePrice();                                            // Se llama una vez al cargar la página para mostrar el precio inicial
   serviceSelect.addEventListener('change', updatePrice);    // Actualiza el precio cada vez que se cambia el servicio seleccionado
@@ -843,11 +899,24 @@
     updatePriceTotal();
   }
 
+  function setupPrecioCheckboxListeners() {
+    precioAmigoCheckbox.addEventListener('change', () => {
+      if (precioAmigoCheckbox.checked) precioDescuentoCheckbox.checked = false;
+      updatePriceTotal();
+    });
+
+    precioDescuentoCheckbox.addEventListener('change', () => {
+      if (precioDescuentoCheckbox.checked) precioAmigoCheckbox.checked = false;
+      updatePriceTotal();
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     initServicesSection();
     initProductSection();
     initMembresiaSection();
     setupMembresiaCheckboxToggle();
+    setupPrecioCheckboxListeners(); 
     updatePriceTotal();
   });
 
