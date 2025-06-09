@@ -351,6 +351,8 @@
     if (membresiaToggle.checked) {
       initMembresiaSection();
     }
+    
+    resetTip();
     updatePriceTotal();
   }
 
@@ -420,6 +422,12 @@
     totalPagoInput.value = `$${Math.round(totalConPropina)}`;
   }
 
+
+  function resetTip() {
+    const tipInput = document.getElementById('tip');
+    tipInput.value = 0;
+    updatePriceTotal(); // Actualiza el total sin la propina
+  }
 
   // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
   function updatePrice() {
@@ -718,6 +726,8 @@
         }
       }
     });
+
+    updatePriceTotal();
   }
 
   function initServicesSection() {
@@ -736,6 +746,8 @@
     });
 
     document.addEventListener('DOMContentLoaded', updatePrice);
+
+    updatePriceTotal();
   }
 
   // Init toggle producto
@@ -804,6 +816,8 @@
     document.querySelectorAll('.productRow').forEach(row => {
       updatePrice(row);
     });
+
+    updatePriceTotal();
   }
 
   // Init toggle servicio
@@ -825,6 +839,8 @@
 
     // Forzar actualización inicial
     updateMembresiaPrice();
+
+    updatePriceTotal();
   }
 
   document.addEventListener('DOMContentLoaded', function () {
