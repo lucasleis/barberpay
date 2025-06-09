@@ -4,7 +4,6 @@
 
     - Servicios: 
         - hacer que si no hay servicio con precio amigo o descuento tire error
-        - arreglar precio amigo y descuento. esta rara la funcionalidad de poner precio y demas
 
     - Productos:
 
@@ -23,7 +22,8 @@
     - En color y mechas, los empleados se quedan con el 50%
     - Manejar errores de que no haya peluqueria, empleado, corte, etc
     - se estan mostrando los pagos restando en la tabla. revisar que es lo mejor cuando este la tabla de cierres
-    - probar multiples metodos de pago y cierres
+    
+    - preguntar como quiere los cierres cuando se paga precio amigo. se descuenta del propietario? 
 
 - Testear:
     - Tiempos de carga
@@ -88,3 +88,36 @@ Mechas
         - 1 metodo de pago
         - 2 metodos de pago
         - membresia (no va en primer deploy)
+
+
+
+
+
+pruebas de calculos:
+
+monto_servicio 10.000
+descu 8.000
+
+porcentaje_servicio = 50
+
+pago_empleado_servicio = (monto_servicio * porcentaje_servicio) / 100
+pago_empleado_servicio = (   $10.000)    *      50            ) / 100
+pago_empleado_servicio =  5.000
+
+pago_propietario_servicio = float(monto_servicio - pago_empleado_servicio)
+pago_propietario_servicio = float(  10.000       -  	     5000 	  )
+pago_propietario_servicio = 5.000
+
+if amigo 
+	monto_servicio = 0
+	pago_propietario_servicio = 0
+
+if descuento
+	monto_servicio = 8.000
+	diferencia_servicio = pago_propietario_servicio - float(servicio.precio - servicio.precio_descuento)
+	diferencia_servicio = 5.000 			 - float(   10.000 	  - 		8.000        )
+	diferencia_servicio = 5.000 - 2.000
+	diferencia_servicio = 3.000
+	
+        pago_propietario_servicio = diferencia_servicio
+

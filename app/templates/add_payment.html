@@ -384,69 +384,69 @@
   }
 
   /*
-  // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
-  function updatePriceTotal() {
-    let precioTotal = 0;
+    // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
+    function updatePriceTotal() {
+      let precioTotal = 0;
 
-    const servicioActivo = servicioToggle.checked;
-    const productoActivo = productoToggle.checked;
-    const membresiaActivo = membresiaToggle.checked;
+      const servicioActivo = servicioToggle.checked;
+      const productoActivo = productoToggle.checked;
+      const membresiaActivo = membresiaToggle.checked;
 
-    // 1. Si está activada membresía, usar su precio y nada más
-    if (membresiaActivo) {
-      precioTotal = obtenerPrecioMembresia();
-    } else {
-      // 2. Si hay servicio, sumar su precio (considerando amigo/desc)
-      if (servicioActivo) {
-        const selected = serviceSelect.options[serviceSelect.selectedIndex];
-        let precio = selected.getAttribute('data-precio');
+      // 1. Si está activada membresía, usar su precio y nada más
+      if (membresiaActivo) {
+        precioTotal = obtenerPrecioMembresia();
+      } else {
+        // 2. Si hay servicio, sumar su precio (considerando amigo/desc)
+        if (servicioActivo) {
+          const selected = serviceSelect.options[serviceSelect.selectedIndex];
+          let precio = selected.getAttribute('data-precio');
 
-        if (precioAmigoCheckbox.checked) {
-          precio = selected.getAttribute('data-precio-amigo');
-        } else if (precioDescuentoCheckbox.checked) {
-          precio = selected.getAttribute('data-precio-descuento');
+          if (precioAmigoCheckbox.checked) {
+            precio = selected.getAttribute('data-precio-amigo');
+          } else if (precioDescuentoCheckbox.checked) {
+            precio = selected.getAttribute('data-precio-descuento');
+          }
+
+          precioTotal += parseFloat(precio) || 0;
         }
 
-        precioTotal += parseFloat(precio) || 0;
+        // 3. Si hay productos, sumar sus precios
+        if (productoActivo) {
+          const productosData = obtenerProductosSeleccionados();
+          precioTotal += productosData.total;
+        }
       }
 
-      // 3. Si hay productos, sumar sus precios
-      if (productoActivo) {
-        const productosData = obtenerProductosSeleccionados();
-        precioTotal += productosData.total;
+      // Obtener el valor de la propina
+      const tipInput = document.getElementById('tip');
+      const tipAmount = parseFloat(tipInput.value) || 0;
+
+      // Sumar la propina al total
+      const totalConPropina = precioTotal + tipAmount;
+
+      // Mostrar en input sin decimales
+      const totalPagoInput = document.getElementById('totalPago');
+      totalPagoInput.value = `$${Math.round(totalConPropina)}`;
+    }
+
+    // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
+    function updatePrice() {
+      const selected = serviceSelect.options[serviceSelect.selectedIndex];
+      let precio = selected.getAttribute('data-precio');
+
+      if (precioAmigoCheckbox.checked) {
+        precio = selected.getAttribute('data-precio-amigo');
+      } else if (precioDescuentoCheckbox.checked) {
+        precio = selected.getAttribute('data-precio-descuento');
       }
+
+      const precioFloat = Math.round(parseFloat(precio).toFixed(2));
+      servicePrice.value = `$${precioFloat}`;
+      amountSimple.value = precioFloat;
     }
-
-    // Obtener el valor de la propina
-    const tipInput = document.getElementById('tip');
-    const tipAmount = parseFloat(tipInput.value) || 0;
-
-    // Sumar la propina al total
-    const totalConPropina = precioTotal + tipAmount;
-
-    // Mostrar en input sin decimales
-    const totalPagoInput = document.getElementById('totalPago');
-    totalPagoInput.value = `$${Math.round(totalConPropina)}`;
-  }
-
-  // Función que actualiza el precio del servicio seleccionado y lo asigna al input de solo lectura
-  function updatePrice() {
-    const selected = serviceSelect.options[serviceSelect.selectedIndex];
-    let precio = selected.getAttribute('data-precio');
-
-    if (precioAmigoCheckbox.checked) {
-      precio = selected.getAttribute('data-precio-amigo');
-    } else if (precioDescuentoCheckbox.checked) {
-      precio = selected.getAttribute('data-precio-descuento');
-    }
-
-    const precioFloat = Math.round(parseFloat(precio).toFixed(2));
-    servicePrice.value = `$${precioFloat}`;
-    amountSimple.value = precioFloat;
-  }
   */
 
-  
+  // Funciones que actualizan el precio del servicio seleccionado y lo asigna al input de solo lectura y a propina
   function obtenerPrecioServicioSeleccionado() {
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
     if (!selected) return 0;
@@ -556,9 +556,9 @@
   }
 
   function obtenerPrecioServicio() {
-    const select = document.getElementById('serviceSelect');
-    const selected = select.options[select.selectedIndex];
-    return parseFloat(selected.getAttribute('data-precio')) || 0;
+    const precio = obtenerPrecioServicioSeleccionado();
+    const precioRedondeado = Math.round(precio);
+    return parseFloat(precioRedondeado) ;
   }
 
   function obtenerPrecioMembresia() {

@@ -103,28 +103,49 @@ def calcular_pagos_entre_fechas(start_date, end_date):
         porcentaje = 0
   
         if pago.appointment and pago.appointment.service:
+            pago_propietario_servicio = 0
+
             servicio = pago.appointment.service
             tipo_precio = pago.appointment.tipo_precio_servicio
+
+            empleado = pago.appointment.barber
+            
+            monto_servicio = servicio.precio
+            porcentaje_servicio = empleado.porcentaje
+            pago_empleado_servicio = (monto_servicio * porcentaje_servicio) / 100
+            pago_propietario_servicio = float(monto_servicio - pago_empleado_servicio)
+
             if tipo_precio == 'comun':
-                monto_servicio = servicio.precio
+                # monto_servicio = servicio.precio
                 servicio_name = servicio.name
             elif tipo_precio == 'amigo':
                 monto_servicio = servicio.precio_amigo
                 servicio_name = servicio.name + " Amigo"
+                pago_propietario_servicio = 0
             elif tipo_precio == 'descuento':
                 monto_servicio = servicio.precio_descuento
                 servicio_name = servicio.name + " Descuento"
+                diferencia_servicio = pago_propietario_servicio - (float(servicio.precio) - float(servicio.precio_descuento))
+                pago_propietario_servicio = float(diferencia_servicio)
             else:
                 monto_servicio = 0
 
-            empleado = pago.appointment.barber
-            porcentaje_servicio = empleado.porcentaje
-            pago_empleado_servicio = (monto_servicio * porcentaje_servicio) / 100
+            # monto_servicio = Decimal(monto_servicio)
+            # pago_empleado_servicio = Decimal(pago_empleado_servicio)
 
-            monto_servicio = Decimal(monto_servicio)
-            pago_empleado_servicio = Decimal(pago_empleado_servicio)
+            if not pago.appointment.productos_turno:        # se pasa servicio y no hay producto
 
-            if not pago.appointment.productos_turno:
+                pago_dict.update({
+                    "empleado": empleado.name,
+                    "porcentaje_empleado": porcentaje_servicio,
+                    "servicio": servicio_name,
+                    "valor_servicio": monto_servicio,
+                    "monto": (pago.amount_method1 or 0) + (pago.amount_method2 or 0),
+                    "pago_empleado": pago_empleado_servicio,
+                    "pago_propietario": pago_propietario_servicio
+                })
+            
+                """
                 pago_dict.update({
                     "empleado": empleado.name,
                     "porcentaje_empleado": porcentaje_servicio,
@@ -135,6 +156,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                     "pago_propietario": 0
                 })
 
+                
                 if tipo_precio != 'amigo':
                     total_propietario += float(monto_servicio - pago_empleado_servicio)
                     total_general += float(monto_servicio)
@@ -148,10 +170,20 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                         "pago_empleado": pago_empleado_servicio,
                         "pago_propietario": float(monto_servicio - pago_empleado_servicio)
                     })
+                """
 
                 total_por_empleado[empleado.name]["monto"] += float(pago_empleado_servicio)
                 total_por_empleado[empleado.name]["monto_cortes"] += float(pago_empleado_servicio)
                 total_por_empleado[empleado.name]["cortes"] += 1
+
+                if tipo_precio == 'amigo':
+                    # print("total_por_empleado[empleado.name]['monto']: ",total_por_empleado[empleado.name]["monto"])
+                    # total_por_empleado[empleado.name]["monto"] -= pago_empleado_servicio
+                    total_propietario -= pago_empleado_servicio
+                    print("total_por_empleado[empleado.name]['monto']: ",total_por_empleado[empleado.name]["monto"])
+
+                total_propietario += float(pago_propietario_servicio)
+                total_general += float(monto_servicio)
 
         if pago.appointment and pago.appointment.productos_turno:
             for pt in pago.appointment.productos_turno:
@@ -232,22 +264,29 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             total_por_empleado[empleado.name]["propinas"] += pago.amount_tip
             total_general += pago.amount_tip
 
+        metodos_pago_str = ""
+
         if pago.method1:
             if pago.appointment and pago.appointment.service:
                 tipo_precio = pago.appointment.tipo_precio_servicio
-                monto_metodo1 = pago.amount_method1 or 0
+                # monto_metodo1 = pago.amount_method1 or 0
                 if tipo_precio == 'amigo':
                     total_por_metodo_pago[pago.method1.nombre] += 0
                     pago_dict["metodo_pago"].append("-")
+                    metodos_pago_str = "$0"
                 else: 
                     total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
                     pago_dict["metodo_pago"].append(pago.method1.nombre)
+                    metodos_pago_str = "$"+str(int(pago.amount_method1))
             else:
                 total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
                 pago_dict["metodo_pago"].append(pago.method1.nombre)
+                metodos_pago_str = "$"+str(int(pago.amount_method1))
         if pago.method2:
-            total_por_metodo_pago[pago.method2.nombre] += pago.amount_method1 or 0
+            total_por_metodo_pago[pago.method2.nombre] += pago.amount_method2 or 0
             pago_dict["metodo_pago"].append(pago.method2.nombre)
+            metodos_pago_str += " - $"+str(int(pago.amount_method2))
+        pago_dict["metodos_pago_str"] = metodos_pago_str
 
         lista_pagos.append(pago_dict)
 
@@ -258,6 +297,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             "propietario_total": total_propietario,
             "empleados": total_por_empleado,
             "metodos_pago": total_por_metodo_pago,
+            "forma_metodos_pagos": "",
         }
     }
 
