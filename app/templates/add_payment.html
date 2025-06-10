@@ -400,6 +400,14 @@
 
   // Funciones que actualizan el precio del servicio seleccionado y lo asigna al input de solo lectura y a propina
   function obtenerPrecioServicioSeleccionado() {
+    const usaMembresia = document.getElementById('membresiaCheckbox')?.checked || false;
+    const membresiaActivo = membresiaToggle.checked;
+
+    // Si está usando un corte de membresía, el precio es 0
+    if (membresiaActivo && usaMembresia) {
+      return 0;
+    }
+
     const selected = serviceSelect.options[serviceSelect.selectedIndex];
     if (!selected) return 0;
 
@@ -421,17 +429,21 @@
   }
 
   function updatePriceTotal() {
-
-    updatePrice()
-
     let precioTotal = 0;
 
     const servicioActivo = servicioToggle.checked;
     const productoActivo = productoToggle.checked;
     const membresiaActivo = membresiaToggle.checked;
+    const usaMembresia = document.getElementById('membresiaCheckbox')?.checked || false;
 
     if (membresiaActivo) {
-      precioTotal = obtenerPrecioMembresia();
+      if (usaMembresia) {
+        // Si está usando un corte de membresía, el precio es 0
+        precioTotal = 0;
+      } else {
+        // Si está comprando una membresía nueva
+        precioTotal = obtenerPrecioMembresia();
+      }
     } else {
       if (servicioActivo) {
         precioTotal += obtenerPrecioServicioSeleccionado();
@@ -443,6 +455,8 @@
       }
     }
 
+    updatePrice(); // Aseguramos que el precio del servicio esté actualizado
+    
     const tipAmount = parseFloat(document.getElementById('tip').value) || 0;
     const totalConPropina = precioTotal + tipAmount;
 
@@ -450,11 +464,11 @@
   }
   
 
-  updatePrice();                                               // Se llama una vez al cargar la página para mostrar el precio inicial
+  // updatePrice();                                               // Se llama una vez al cargar la página para mostrar el precio inicial
   // serviceSelect.addEventListener('change', updatePrice);    // Actualiza el precio cada vez que se cambia el servicio seleccionado
   // precioAmigoCheckbox.addEventListener('change', updatePrice);
   // precioDescuentoCheckbox.addEventListener('change', updatePrice);
-  updatePriceTotal();
+  // updatePriceTotal();
 
 
   // Oculta alertas automáticamente después de 15 segundos
@@ -700,6 +714,39 @@
   }
 
   // Muestra/oculta los métodos de pago según si está marcada la membresía
+  function initMembresiaSection() {
+    const membresiaSelect = document.getElementById('membresiaSelect');
+    const priceInput = document.getElementById('membreciaPrice');
+    const checkbox_use_member = document.getElementById('membresiaCheckbox');
+
+    function updateMembresiaPrice() {
+      const selectedOption = membresiaSelect.options[membresiaSelect.selectedIndex];
+      const precio = selectedOption.getAttribute('data-precio');
+      
+      if (checkbox_use_member && checkbox_use_member.checked) {
+        // Si está usando un corte de membresía, mostrar precio en 0
+        priceInput.value = '$0';
+      } else {
+        // Si está comprando una membresía nueva, mostrar precio normal
+        priceInput.value = precio ? `$${parseFloat(precio).toFixed(0)}` : '';
+      }
+      updatePriceTotal();
+    }
+
+    if (!membresiaSelect.dataset.listenerAdded) {
+      membresiaSelect.addEventListener('change', updateMembresiaPrice);
+      membresiaSelect.dataset.listenerAdded = "true";
+    }
+
+    if (checkbox_use_member && !checkbox_use_member.dataset.listenerAdded) {
+      checkbox_use_member.addEventListener('change', updateMembresiaPrice);
+      checkbox_use_member.dataset.listenerAdded = "true";
+    }
+
+    // Forzar actualización inicial
+    updateMembresiaPrice();
+  }
+
   function setupMembresiaCheckboxToggle() {
     const checkbox_use_member = document.getElementById('membresiaCheckbox');
     const membershipDiv = document.getElementById('membresiaMethodGroup');
@@ -710,6 +757,19 @@
     if (!checkbox_use_member || !membershipDiv || !multiPaymentToggle || !singleMethodGroup) {
       console.warn("❌ Uno o más elementos no se encontraron.");
       return;
+    }
+
+    function actualizarPrecioServicio() {
+      const servicePriceInput = document.getElementById('servicePrice');
+      if (!servicePriceInput) return;
+
+      if (checkbox_use_member.checked) {
+        servicePriceInput.value = '$0';
+        if (amountSimple) amountSimple.value = 0;
+      } else {
+        updatePrice();
+      }
+      updatePriceTotal();
     }
 
     checkbox_use_member.addEventListener('change', function () {
@@ -723,16 +783,32 @@
         multiPaymentToggle.closest('label').style.display = 'inline-block';
         singleMethodGroup.style.display = 'block';
         
-        if (multiPaymentToggle.checked){
+        if (multiPaymentToggle.checked) {
           multiMethodGroup.style.display = 'block';
           singleGroup.style.display = 'none';
-          // singleMethodGroup.style.display = 'none'; 
         }
       }
+      actualizarPrecioServicio();
     });
 
-    updatePriceTotal();
+    // Asegurarse de que el precio esté correcto al cargar
+    actualizarPrecioServicio();
   }
+
+  // Asegurarse de que el precio se actualice cuando cambia el servicio seleccionado
+  serviceSelect.addEventListener('change', function() {
+    const checkbox_use_member = document.getElementById('membresiaCheckbox');
+    if (checkbox_use_member && checkbox_use_member.checked) {
+      const servicePriceInput = document.getElementById('servicePrice');
+      if (servicePriceInput) {
+        servicePriceInput.value = '$0';
+        if (amountSimple) amountSimple.value = 0;
+      }
+    } else {
+      updatePrice();
+    }
+    updatePriceTotal();
+  });
 
   function initServicesSection() {
     // Cuando se selecciona "precio amigo", desmarca "precio descuento"
@@ -828,47 +904,11 @@
     updatePriceTotal();
   }
 
-  // Init toggle servicio
-  function initMembresiaSection() {
-    const membresiaSelect = document.getElementById('membresiaSelect');
-    const priceInput = document.getElementById('membreciaPrice');
-
-    function updateMembresiaPrice() {
-      const selectedOption = membresiaSelect.options[membresiaSelect.selectedIndex];
-      const precio = selectedOption.getAttribute('data-precio');
-      priceInput.value = precio ? `$${parseFloat(precio).toFixed(0)}` : '';
-      updatePriceTotal();
-    }
-
-    if (!membresiaSelect.dataset.listenerAdded) {
-      membresiaSelect.addEventListener('change', updateMembresiaPrice);
-      membresiaSelect.dataset.listenerAdded = "true";
-    }
-
-    // Forzar actualización inicial
-    updateMembresiaPrice();
-
-    updatePriceTotal();
-  }
-
-  function setupPrecioCheckboxListeners() {
-    precioAmigoCheckbox.addEventListener('change', () => {
-      if (precioAmigoCheckbox.checked) precioDescuentoCheckbox.checked = false;
-      updatePriceTotal();
-    });
-
-    precioDescuentoCheckbox.addEventListener('change', () => {
-      if (precioDescuentoCheckbox.checked) precioAmigoCheckbox.checked = false;
-      updatePriceTotal();
-    });
-  }
-
   document.addEventListener('DOMContentLoaded', function () {
     initServicesSection();
     initProductSection();
     initMembresiaSection();
     setupMembresiaCheckboxToggle();
-    setupPrecioCheckboxListeners(); 
     updatePriceTotal();
   });
 
