@@ -680,40 +680,40 @@
 
     // Validar toggles
     if (!servicioActivo && !productoActivo && !membresiaActivo) {
-        mostrarErrorToggle(true);
-        return;
+      mostrarErrorToggle(true);
+      return;
     }
     mostrarErrorToggle(false);
 
     if (servicioActivo || productoActivo) {
-        const servicePrecio = servicioActivo ? obtenerPrecioServicio() : 0;
-        const productosData = productoActivo ? obtenerProductosSeleccionados() : { total: 0, items: [] };
+      const servicePrecio = servicioActivo ? obtenerPrecioServicio() : 0;
+      const productosData = productoActivo ? obtenerProductosSeleccionados() : { total: 0, items: [] };
 
-        if (productoActivo && productosData.items.length === 0) {
-            alert('Debe seleccionar al menos un producto con cantidad válida');
-            return;
-        }
+      if (productoActivo && productosData.items.length === 0) {
+        alert('Debe seleccionar al menos un producto con cantidad válida');
+        return;
+      }
 
-        agregarInputsOcultos(productosData.items);
+      agregarInputsOcultos(productosData.items);
 
-        const totalEsperado = servicePrecio + productosData.total;
+      const totalEsperado = servicePrecio + productosData.total;
 
-        if (togglemultiPayment.checked && !validarMultiplesMetodos(totalEsperado)) {
-            return;
-        }
+      if (togglemultiPayment.checked && !validarMultiplesMetodos(totalEsperado)) {
+        return;
+      }
     }
 
     if (membresiaActivo) {
-        const usa_membresia = document.getElementById('membresiaCheckbox');
+      const usa_membresia = document.getElementById('membresiaCheckbox');
         
-        if (!usa_membresia.checked) {
-            const precioActual = obtenerPrecioMembresia();
-            const totalEsperado = precioActual;
+      if (!usa_membresia.checked) {
+        const precioActual = obtenerPrecioMembresia();
+        const totalEsperado = precioActual;
 
-            if (togglemultiPayment.checked && !validarMultiplesMetodos(totalEsperado)) {
-                return;
-            }
+        if (togglemultiPayment.checked && !validarMultiplesMetodos(totalEsperado)) {
+          return;
         }
+      }
     }
 
     // Si llega aca, todo es válido

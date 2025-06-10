@@ -6,8 +6,8 @@ from sqlalchemy import desc
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
 from collections import defaultdict
-from backports.zoneinfo import ZoneInfo
-# from zoneinfo import ZoneInfo
+# from backports.zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
 from werkzeug.datastructures import MultiDict
 from decimal import Decimal
 
@@ -813,6 +813,17 @@ def add_payment():
                 appointment.service_id = service_id
 
                 if request.form.get('precioDescuentoCheckbox') == 'on':
+                    # Obtén el objeto Servicio según el servicio seleccionado en el formulario
+                    servicio = Servicio.query.get(service_id)
+                    if not servicio:
+                        flash('Servicio no encontrado.', 'error')
+                        return redirect(url_for('add_payment'))
+
+                    # Valida que exista un precio de descuento
+                    if servicio.precio_descuento == 0:
+                        flash('Este servicio no tiene precio de descuento disponible.', 'danger')
+                        return redirect(url_for('add_payment'))
+
                     appointment.tipo_precio_servicio = "descuento"
                 elif request.form.get('precioAmigoCheckbox') == 'on':
                     appointment.tipo_precio_servicio = "amigo"
