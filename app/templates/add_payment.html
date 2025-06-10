@@ -243,7 +243,18 @@
           -
         {% endif %}
       </td>
-      <td>{{ pago.appointment.membresia.id if pago.appointment.membresia else '-' }}</td>
+      <!-- <td>{{ pago.appointment.membresia.id if pago.appointment.membresia else '-' }}</td>-->
+      <td>
+        {% if pago.appointment.membresia %}
+          {% if pago.amount_method1 == 0 %}
+            {{ pago.appointment.membresia.id }} (uso) 
+          {% else %}
+            {{ pago.appointment.membresia.id }}
+          {% endif %}
+        {% else %}
+          -
+        {% endif %}
+      </td>
       <td> <!-- Métodos de pago -->
         {% if pago.method2 %}
           {{ pago.method1.nombre }} - {{ pago.method2.nombre }}
