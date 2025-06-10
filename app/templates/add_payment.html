@@ -329,19 +329,39 @@
   // Función para mostrar/ocultar secciones según el toggle (servicio/producto)
   function updateToggleSections(e = null) {
     const source = e?.target?.id || null;
+    const membresiaCheckbox = document.getElementById('membresiaCheckbox');
+    const multiPaymentToggle = document.getElementById('multiPaymentToggle');
+
+    // Si algún toggle está seleccionado, ocultar el mensaje de error
+    if (servicioToggle.checked || productoToggle.checked || membresiaToggle.checked) {
+      mostrarErrorToggle(false);
+    }
 
     if (source === 'toggleMembresia' && membresiaToggle.checked) {
       // Si el usuario activó membresía, desactiva los otros
-      // console.log("Activando membresía");
       servicioToggle.checked = false;
       productoToggle.checked = false;
+      // Desmarcar el checkbox de usa membresía si estaba marcado
+      if (membresiaCheckbox) {
+        membresiaCheckbox.checked = false;
+        // Disparar el evento change para actualizar la UI
+        membresiaCheckbox.dispatchEvent(new Event('change'));
+      }
     }
 
     if ((source === 'toggleServicio' && servicioToggle.checked) || 
         (source === 'toggleProducto' && productoToggle.checked)) {
       // Si el usuario activó servicio o producto, desactiva membresía
-      // console.log("Activando servicio o producto");
       membresiaToggle.checked = false;
+      // Si el checkbox de usa membresía estaba marcado, habilitar múltiples métodos
+      if (membresiaCheckbox && membresiaCheckbox.checked) {
+        membresiaCheckbox.checked = false;
+        if (multiPaymentToggle) {
+          multiPaymentToggle.disabled = false;
+        }
+        // Disparar el evento change para actualizar la UI
+        membresiaCheckbox.dispatchEvent(new Event('change'));
+      }
     }
 
     // Mostrar u ocultar secciones 
@@ -349,7 +369,6 @@
     productSection.style.display = productoToggle.checked ? 'block' : 'none';
     membresiaSection.style.display = membresiaToggle.checked ? 'block' : 'none';
     membresiaLabel.style.display = membresiaToggle.checked ? 'block' : 'none';
-
 
     if (productoToggle.checked) {
       const productSelect = document.querySelector('.productSelect');
@@ -753,6 +772,7 @@
     const multiPaymentToggle = document.getElementById('multiPaymentToggle');
     const singleMethodGroup = document.getElementById('singleMethodGroup');
     const multiMethodGroup = document.getElementById('multiMethodGroup');
+    const membresiaSection = document.getElementById('membresiaSection');
 
     if (!checkbox_use_member || !membershipDiv || !multiPaymentToggle || !singleMethodGroup) {
       console.warn("❌ Uno o más elementos no se encontraron.");
@@ -775,13 +795,16 @@
     checkbox_use_member.addEventListener('change', function () {
       if (checkbox_use_member.checked) {
         membershipDiv.style.display = 'block';
-        multiPaymentToggle.closest('label').style.display = 'none';
+        multiPaymentToggle.disabled = true; // Deshabilitar el checkbox de múltiples métodos
+        multiPaymentToggle.checked = false; // Desmarcar el checkbox de múltiples métodos
         singleMethodGroup.style.display = 'none';
         multiMethodGroup.style.display = 'none';
+        membresiaSection.style.display = 'none';
       } else {
         membershipDiv.style.display = 'none';
-        multiPaymentToggle.closest('label').style.display = 'inline-block';
+        multiPaymentToggle.disabled = false; // Habilitar el checkbox de múltiples métodos
         singleMethodGroup.style.display = 'block';
+        membresiaSection.style.display = 'block';
         
         if (multiPaymentToggle.checked) {
           multiMethodGroup.style.display = 'block';
