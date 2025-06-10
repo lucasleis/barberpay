@@ -180,7 +180,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                     # print("total_por_empleado[empleado.name]['monto']: ",total_por_empleado[empleado.name]["monto"])
                     # total_por_empleado[empleado.name]["monto"] -= pago_empleado_servicio
                     total_propietario -= pago_empleado_servicio
-                    print("total_por_empleado[empleado.name]['monto']: ",total_por_empleado[empleado.name]["monto"])
+                    # print("total_por_empleado[empleado.name]['monto']: ",total_por_empleado[empleado.name]["monto"])
 
                 total_propietario += float(pago_propietario_servicio)
                 total_general += float(monto_servicio)
