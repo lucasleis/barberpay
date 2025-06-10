@@ -363,10 +363,11 @@
 
   // Actualiza dinámicamente las opciones de cantidad según el producto seleccionado
   function updateCantidadOptions(selectElement) {
+    const row = selectElement.closest('.productRow');
     const selectedOption = selectElement.options[selectElement.selectedIndex];
     const cantidadDisponible = parseInt(selectedOption.dataset.cantidad || 0);
 
-    const cantidadSelect = document.querySelector('.productCant');
+    const cantidadSelect = row.querySelector('.productCant');
     cantidadSelect.innerHTML = ''; // Limpiar opciones previas
 
     for (let i = 1; i <= cantidadDisponible; i++) {
@@ -375,6 +376,9 @@
       option.textContent = i;
       cantidadSelect.appendChild(option);
     }
+
+    // Actualizar el precio después de cambiar las opciones de cantidad
+    updatePrice(row);
   }
 
   function resetTip() {
