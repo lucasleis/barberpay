@@ -4,12 +4,15 @@
 
     - Servicios: 
         - hacer que si no hay servicio con precio amigo o descuento tire error
+        - (listo) vale x corte  (confirmar con el que esta bien)
 
     - Productos:
+        - (listo) insertar cantidades a mano y no por un select
 
     - Metodos de Pago:
 
     - Membresia:
+        - quiere que el usa membresia este en el toggle de servicios
 
     - Cierre:
 
@@ -17,10 +20,18 @@
     - Que todos tengan el mismo formato 
 
 
-- Pagos:
+- Pagos: (listo)
     - En venta de producto, los empleados se quedan con el 15%
     - En color y mechas, los empleados se quedan con el 50%
     - Manejar errores de que no haya peluqueria, empleado, corte, etc
+
+
+- Cierres:
+    - Total por metodo de pago primero
+    - Total por empleado para la derecha
+    - no tan a lo alto, sino a lo ancho
+    - y que todo sea mas visible
+    - abajo de todo general y propietario
 
 
 - Testear:

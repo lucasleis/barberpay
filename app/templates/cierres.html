@@ -53,12 +53,25 @@
 
     // Renderiza el resumen de cierres (puedes mejorar el diseño)
     let html = `
-      <h5>Resumen de pagos</h5>
-      <p><strong>Total general:</strong> $${parseInt(data.totales.monto_total)}</p>
-      <p><strong>Total propietario:</strong> $${parseInt(data.totales.propietario_total)}</p>
+      <h4><strong>Resumen de pagos: </strong></h4>
 
-      <h6>Totales por empleado:</h6>
-      <ul>
+      <h6 class="titulo-con-linea"><strong> - Totales por método de pago:</strong></h6>
+      <p class="metodos-pago">
+        ${Object.entries(data.totales.metodos_pago).map(([m, v]) =>
+          `<strong>${m}</strong>: $${parseInt(v).toLocaleString('es-AR')}`
+        ).join(' | ')}
+      </p>
+      <div class="linea-inferior"></div>
+
+
+      <h6 class="titulo-con-linea"><strong> - Totales por empleado:</strong></h6>
+      <div class="empleados-grid">
+        <div class="empleado-header">Empleado</div>
+        <div class="empleado-header">Total</div>
+        <div class="empleado-header">Cortes</div>
+        <div class="empleado-header">Productos</div>
+        <div class="empleado-header">Propinas</div>
+
         ${Object.entries(data.totales.empleados).map(([nombre, datos]) => {
           const totalConPropinas = parseFloat(datos.monto) + parseFloat(datos.propinas || 0);
           const montoCortes = parseFloat(datos.monto_cortes || 0);
@@ -66,35 +79,50 @@
           const cortes = parseInt(datos.cortes || 0);
           const productos = parseInt(datos.productos || 0);
           const propinas = parseFloat(datos.propinas || 0);
-        
-          return `<li>
-            <strong>${nombre}</strong>: $${totalConPropinas.toFixed(0)}<br>
-            &nbsp;&nbsp;• Cortes: $${montoCortes.toFixed(0)} (${cortes})<br>
-            &nbsp;&nbsp;• Productos: $${montoProductos.toFixed(0)} (${productos})<br>
-            &nbsp;&nbsp;• Propinas: $${propinas.toFixed(0)}
-          </li>`;
-        }).join('')}
-      </ul>
 
-      <h6>Totales por método de pago:</h6>
-      <ul>
-        ${Object.entries(data.totales.metodos_pago).map(([m, v]) =>
-          `<li>${m}: $${parseInt(v)}</li>`).join('')
-        }
-      </ul>
+          return `
+            <div class="empleado-celda">${nombre}</div>
+            <div class="empleado-celda">$${totalConPropinas.toLocaleString('es-AR')}</div>
+            <div class="empleado-celda">$${montoCortes.toLocaleString('es-AR')} (${cortes})</div>
+            <div class="empleado-celda">$${montoProductos.toLocaleString('es-AR')} (${productos})</div>
+            <div class="empleado-celda">$${propinas.toLocaleString('es-AR')}</div>
+          `;
+        }).join('')}
+      </div>
+      <div class="linea-inferior"></div>
+
+
+      <p><strong>Total propietario:</strong> $${parseInt(data.totales.propietario_total).toLocaleString('es-AR')}</p>
+      <div class="linea-inferior"></div>
+
+      <p><strong>Total general:</strong> $${parseInt(data.totales.monto_total).toLocaleString('es-AR')}</p>
+      <div class="linea-inferior"></div>
+
     `;
+
+
 
     // Tabla de pagos
     html += `
+
+      <h4><strong>Pagos entre Fechas: </strong></h4>
       <table class="table table-striped table-bordered text-center" style="margin-top: 1rem;">
         <thead>
           <tr>
-            <th>Fecha</th><th>Empleado</th><th>% Empleado</th>
-            <th>Servicio</th><th>Valor Servicio</th>
-            <th>Producto</th><th>Valor Producto</th>
-            <th>Membresia</th><th>Valor Membresia</th>
-            <th>M. de Pago</th><th>Monto</th><th>Propina</th>
-            <th>$ Empleado</th><th>$ Propietario</th>
+            <th>Fecha</th>
+            <th>Empleado</th>
+            <th>% Empleado</th>
+            <th>Servicio</th>
+            <th>Valor Servicio</th>
+            <th>Producto</th>
+            <th>Valor Producto</th>
+            <th>Membresia</th>
+            <th>Valor Membresia</th>
+            <th>M. de Pago</th>
+            <th>Monto</th>
+            <th>Propina</th>
+            <th>$ Empleado</th>
+            <th>$ Propietario</th>
           </tr>
         </thead>
         <tbody>
@@ -104,16 +132,16 @@
               <td>${p.empleado}</td>
               <td>${p.porcentaje_empleado}%</td>
               <td>${p.servicio || '-'}</td>
-              <td>${p.valor_servicio === 0 ? '-' : '$' + parseInt(p.valor_servicio)}</td>
+              <td>${p.valor_servicio === 0 ? '-' : '$' + parseInt(p.valor_servicio).toLocaleString('es-AR')}</td>
               <td>${p.producto || '-'}</td>
-              <td>${p.valor_producto === 0 ? '-' : '$' + parseInt(p.valor_producto)}</td>
+              <td>${p.valor_producto === 0 ? '-' : '$' + parseInt(p.valor_producto).toLocaleString('es-AR')}</td>
               <td>${p.membresia || '-'}</td>
-              <td>${p.valor_membresia === 0 ? '-' : '$' + parseInt(p.valor_membresia)}</td>
+              <td>${p.valor_membresia === 0 ? '-' : '$' + parseInt(p.valor_membresia).toLocaleString('es-AR')}</td>
               <td>${p.metodo_pago.join(' - ')}</td>
               <td>${p.metodos_pago_str}</td>
-              <td>$${parseInt(p.propina)}</td>
-              <td>$${parseInt(p.pago_empleado)}</td>
-              <td>$${parseInt(p.pago_propietario)}</td>
+              <td>$${parseInt(p.propina).toLocaleString('es-AR')}</td>
+              <td>$${parseInt(p.pago_empleado).toLocaleString('es-AR')}</td>
+              <td>$${parseInt(p.pago_propietario).toLocaleString('es-AR')}</td>
             </tr>
           `).join('')}
         </tbody>

@@ -13,12 +13,13 @@
       <label for="name">Producto:</label>
       <div class="nombre-cantidad">
         <input type="text" name="name" id="name" placeholder="Nombre del producto" required>
-        <select id="productCant" name="cantidad">
-          {% for i in range(1, 11) %}
-            <option value="{{ i }}">{{ i }}</option>
-          {% endfor %}
-        </select>
+        <!-- <select id="productCant" name="cantidad"> {% for i in range(1, 11) %} <option value="{{ i }}">{{ i }}</option> {% endfor %} </select> -->
       </div>
+    </div>
+
+    <div class="form-group">
+      <label for="precio">Cantidad:</label>
+      <input type="number" id="productCant" name="cantidad" min="1" max="1001" step="1" value="10" />
     </div>
 
     <div class="form-group">

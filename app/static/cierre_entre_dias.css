@@ -16,6 +16,7 @@
 
 .semana-cierre h6 {
   margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
   font-weight: 600;
   color: #444;
 }
@@ -98,4 +99,74 @@
 
 .boton-cierre:hover {
   background-color: #218838;
+}
+
+
+.empleados-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  gap: 0;
+  margin-bottom: 2rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.empleado-header {
+  font-weight: bold;
+  background: black;
+  color: white;
+  padding: 0.6rem;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+}
+
+.empleado-celda {
+  padding: 0.6rem;
+  text-align: center;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #eee;
+  background-color: #fdfdfd;
+}
+
+/* Quitar borde derecho en última columna */
+.empleado-header:nth-child(5n),
+.empleado-celda:nth-child(5n) {
+  border-right: none;
+}
+
+/* Alternancia de color por fila de empleados */
+.empleado-celda:nth-child(10n+1),
+.empleado-celda:nth-child(10n+2),
+.empleado-celda:nth-child(10n+3),
+.empleado-celda:nth-child(10n+4),
+.empleado-celda:nth-child(10n+5) {
+  background-color: #f7f9fc;
+}
+
+.empleado-celda:nth-child(10n+6),
+.empleado-celda:nth-child(10n+7),
+.empleado-celda:nth-child(10n+8),
+.empleado-celda:nth-child(10n+9),
+.empleado-celda:nth-child(10n+10) {
+  background-color: #ffffff;
+}
+
+
+
+
+.semana-cierre p {
+  margin-bottom: 0.5rem;
+}
+
+.metodos-pago {
+  font-weight: 500;
+  margin-left: 0.25rem;
+  color: #333;
+}
+
+.linea-inferior {
+  border-bottom: 1px solid #ccc;
+  margin: 0.5rem 0 1rem 0;
 }

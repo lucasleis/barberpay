@@ -6,8 +6,8 @@ from sqlalchemy import desc
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
 from collections import defaultdict
-# from backports.zoneinfo import ZoneInfo
-from zoneinfo import ZoneInfo
+from backports.zoneinfo import ZoneInfo
+# from zoneinfo import ZoneInfo
 from werkzeug.datastructures import MultiDict
 from decimal import Decimal
 
@@ -277,15 +277,20 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 else: 
                     total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
                     pago_dict["metodo_pago"].append(pago.method1.nombre)
-                    metodos_pago_str = "$"+str(int(pago.amount_method1))
+                    # metodos_pago_str = "$"+str(int(pago.amount_method1))
+                    metodos_pago_str = "$" + "{:,.0f}".format(pago.amount_method1).replace(",", ".")
             else:
                 total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
                 pago_dict["metodo_pago"].append(pago.method1.nombre)
-                metodos_pago_str = "$"+str(int(pago.amount_method1))
+                # metodos_pago_str = "$"+str(int(pago.amount_method1))
+                metodos_pago_str = "$" + "{:,.0f}".format(pago.amount_method1).replace(",", ".")
+
         if pago.method2:
             total_por_metodo_pago[pago.method2.nombre] += pago.amount_method2 or 0
             pago_dict["metodo_pago"].append(pago.method2.nombre)
-            metodos_pago_str += " - $"+str(int(pago.amount_method2))
+            # metodos_pago_str += " - $"+str(int(pago.amount_method2))
+            metodos_pago_str += " - $" + "{:,.0f}".format(pago.amount_method2).replace(",", ".")
+
         pago_dict["metodos_pago_str"] = metodos_pago_str
 
         lista_pagos.append(pago_dict)
