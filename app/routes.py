@@ -807,23 +807,39 @@ def add_payment():
                     raise ValueError("Debe seleccionarse un servicio.")
                 appointment.service_id = service_id
 
-                if request.form.get('precioDescuentoCheckbox') == 'on':
-                    # Obtén el objeto Servicio según el servicio seleccionado en el formulario
-                    servicio = Servicio.query.get(service_id)
-                    if not servicio:
-                        flash('Servicio no encontrado.', 'error')
-                        return redirect(url_for('add_payment'))
+                check_membresia = request.form.get('membresiaCheckbox') 
+                if check_membresia == 'on':
+                    num_membresia = request.form.get('check_membresia') 
+                    membresia = Membresia.query.get(num_membresia)
+                    if not membresia:
+                        raise ValueError("Membresía no encontrada.")
 
-                    # Valida que exista un precio de descuento
-                    if servicio.precio_descuento == 0:
-                        flash('Este servicio no tiene precio de descuento disponible.', 'danger')
-                        return redirect(url_for('add_payment'))
+                    if membresia.usos_disponibles <= 0:
+                        raise ValueError("No hay usos disponibles para descontar en esta membresía.")
 
-                    appointment.tipo_precio_servicio = "descuento"
-                elif request.form.get('precioAmigoCheckbox') == 'on':
-                    appointment.tipo_precio_servicio = "amigo"
+                    membresia.usos_disponibles -= 1
+                    db.session.add(membresia)
+                    appointment.membresia_id = membresia.id
+                    flash(f"Membresía #{membresia.id}: Quedan {membresia.usos_disponibles} usos disponibles.", "success")
+
                 else:
-                    appointment.tipo_precio_servicio = "comun"
+                    if request.form.get('precioDescuentoCheckbox') == 'on':
+                        # Obtén el objeto Servicio según el servicio seleccionado en el formulario
+                        servicio = Servicio.query.get(service_id)
+                        if not servicio:
+                            flash('Servicio no encontrado.', 'error')
+                            return redirect(url_for('add_payment'))
+
+                        # Valida que exista un precio de descuento
+                        if servicio.precio_descuento == 0:
+                            flash('Este servicio no tiene precio de descuento disponible.', 'danger')
+                            return redirect(url_for('add_payment'))
+
+                        appointment.tipo_precio_servicio = "descuento"
+                    elif request.form.get('precioAmigoCheckbox') == 'on':
+                        appointment.tipo_precio_servicio = "amigo"
+                    else:
+                        appointment.tipo_precio_servicio = "comun"
 
             total_producto = 0.0
             if toggle_producto:
@@ -855,33 +871,35 @@ def add_payment():
                 if not membresia_id:
                     raise ValueError("Debe seleccionarse un servicio.")
 
-                check_membresia = request.form.get('membresiaCheckbox') 
-                if check_membresia == 'on':
-                    num_membresia = request.form.get('check_membresia') 
-                    membresia = Membresia.query.get(num_membresia)
-                    if not membresia:
-                        raise ValueError("Membresía no encontrada.")
+                """
+                    check_membresia = request.form.get('membresiaCheckbox') 
+                    if check_membresia == 'on':
+                        num_membresia = request.form.get('check_membresia') 
+                        membresia = Membresia.query.get(num_membresia)
+                        if not membresia:
+                            raise ValueError("Membresía no encontrada.")
 
-                    if membresia.usos_disponibles <= 0:
-                        raise ValueError("No hay usos disponibles para descontar en esta membresía.")
+                        if membresia.usos_disponibles <= 0:
+                            raise ValueError("No hay usos disponibles para descontar en esta membresía.")
 
-                    membresia.usos_disponibles -= 1
-                    db.session.add(membresia)
-                    appointment.membresia_id = membresia.id
-                    flash(f"Membresía #{membresia.id}: Quedan {membresia.usos_disponibles} usos disponibles.", "success")
+                        membresia.usos_disponibles -= 1
+                        db.session.add(membresia)
+                        appointment.membresia_id = membresia.id
+                        flash(f"Membresía #{membresia.id}: Quedan {membresia.usos_disponibles} usos disponibles.", "success")
                 else:
-                    tipo = TipoMembresia.query.get(membresia_id)
-                    if not tipo:
-                        raise ValueError("Tipo de membresía no encontrado.")
+                """
+                tipo = TipoMembresia.query.get(membresia_id)
+                if not tipo:
+                    raise ValueError("Tipo de membresía no encontrado.")
 
-                    membresia_real = Membresia(
-                        tipo_membresia_id=tipo.id,
-                        usos_disponibles=tipo.usos,
-                        peluqueria_id=salon_id,
-                    )
-                    db.session.add(membresia_real)
-                    db.session.flush()
-                    appointment.membresia_id = membresia_real.id
+                membresia_real = Membresia(
+                    tipo_membresia_id=tipo.id,
+                    usos_disponibles=tipo.usos,
+                    peluqueria_id=salon_id,
+                )
+                db.session.add(membresia_real)
+                db.session.flush()
+                appointment.membresia_id = membresia_real.id
 
             db.session.add(appointment)
             db.session.commit()
