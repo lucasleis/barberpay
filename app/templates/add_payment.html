@@ -73,7 +73,7 @@
           </option>
         {% endfor %}
       </select>
-      <input type="text" id="servicePrice" name="servicePrice" readonly placeholder="$" style="width: 100px;">
+      <input type="text" id="servicePrice" name="servicePrice" readonly placeholder="$" value="${{ '{:,.0f}'.format(precio|default(0)).replace(',', '.') }}" style="width: 100px;">
     </div>
   </div>
 
@@ -91,9 +91,8 @@
             {% endif %}
           {% endfor %}
         </select>
-        <select class="productCant" name="product_quantity[]">
-          <!-- Se llena dinámicamente con JS -->
-        </select>
+        <select class="productCant" name="product_quantity[]"> <!-- Se llena dinámicamente con JS  --> </select> 
+
         <input type="text" class="productPrice" disabled placeholder="$">
         <button type="button" class="addProductBtn btn-primary">+</button>
         <button type="button" class="removeProductBtn btn-primary">−</button>
@@ -215,7 +214,7 @@
       <td>  <!-- Tipo de servicio -->
         {% if pago.appointment.service %}
           {% if pago.appointment.tipo_precio_servicio == 'amigo' %}
-            {{ pago.appointment.service.name }} Amigo
+            <!-- {{ pago.appointment.service.name }} --> Vale por Corte
           {% elif pago.appointment.tipo_precio_servicio == 'descuento' %}
             {{ pago.appointment.service.name }} Descuento
           {% else %}
@@ -225,7 +224,7 @@
           -
         {% endif %}
       </td>
-      <td>  <!-- Procuto + Cantidad-->
+      <td>  <!-- Producto + Cantidad-->
         {% if pago.appointment.productos_turno %}
           {% set productos = {} %}
           {% for pt in pago.appointment.productos_turno %}
@@ -272,17 +271,17 @@
         {% if pago.appointment and pago.appointment.tipo_precio_servicio == 'amigo' %}
           $0
         {% elif pago.method2 %}
-          ${{ (pago.amount_method1 or 0)|int }} - ${{ (pago.amount_method2 or 0)|int }}
+          ${{ "{:,.0f}".format(pago.amount_method1 or 0).replace(",", ".") }} - ${{ "{:,.0f}".format(pago.amount_method2 or 0).replace(",", ".") }}
         {% else %}
-          ${{ ((pago.amount_method1 or 0) - (pago.amount_tip or 0))|int }}
+          ${{ "{:,.0f}".format((pago.amount_method1 or 0) - (pago.amount_tip or 0)).replace(",", ".") }}
         {% endif %}
       </td>      
-      <td>${{ pago.amount_tip|int }}</td> 
+      <td>${{ "{:,.0f}".format(pago.amount_tip)|replace(",", ".") }}</td>
       <td>
         {% if pago.appointment and pago.appointment.tipo_precio_servicio == 'amigo' %}
           $0
         {% else %}
-          ${{ (pago.amount_method1 or 0)|int + (pago.amount_method2 or 0)|int }}
+          ${{ "{:,.0f}".format((pago.amount_method1 or 0) + (pago.amount_method2 or 0)) | replace(",", ".") }}
         {% endif %}
       </td>      
       <td class="borrar-pago">
@@ -400,7 +399,9 @@
     const cantidadSelect = row.querySelector('.productCant');
     cantidadSelect.innerHTML = ''; // Limpiar opciones previas
 
-    for (let i = 1; i <= cantidadDisponible; i++) {
+    const maxCantidad = Math.min(10, cantidadDisponible);
+
+    for (let i = 1; i <= maxCantidad; i++) {
       const option = document.createElement('option');
       option.value = i;
       option.textContent = i;
@@ -443,8 +444,13 @@
     const precio = obtenerPrecioServicioSeleccionado();
     const precioRedondeado = Math.round(precio);
 
-    servicePrice.value = `$${precioRedondeado}`;
-    amountSimple.value = precioRedondeado;
+    // Formatear con separador de miles y símbolo $
+    // const precioFormateado = `$${precioRedondeado.toLocaleString('es-ES')}`;
+    const precioFormateado = formatearMoneda(precio);
+
+    // Asignar valores al input visible y al oculto
+    servicePrice.value = precioFormateado;
+    amountSimple.value = precioRedondeado; // Este mantiene el valor numérico sin formato
   }
 
   function updatePriceTotal() {
@@ -479,15 +485,8 @@
     const tipAmount = parseFloat(document.getElementById('tip').value) || 0;
     const totalConPropina = precioTotal + tipAmount;
 
-    document.getElementById('totalPago').value = `$${Math.round(totalConPropina)}`;
+    document.getElementById('totalPago').value = formatearMoneda(totalConPropina);
   }
-  
-
-  // updatePrice();                                               // Se llama una vez al cargar la página para mostrar el precio inicial
-  // serviceSelect.addEventListener('change', updatePrice);    // Actualiza el precio cada vez que se cambia el servicio seleccionado
-  // precioAmigoCheckbox.addEventListener('change', updatePrice);
-  // precioDescuentoCheckbox.addEventListener('change', updatePrice);
-  // updatePriceTotal();
 
 
   // Oculta alertas automáticamente después de 15 segundos
@@ -538,13 +537,15 @@
 
   function obtenerPrecioServicio() {
     const precio = obtenerPrecioServicioSeleccionado();
-    const precioRedondeado = Math.round(precio);
-    return parseFloat(precioRedondeado) ;
+    // const precioRedondeado = Math.round(precio);
+    // return parseFloat(precioRedondeado) ;
+    return formatearMoneda(precio);
   }
 
   function obtenerPrecioMembresia() {
     const input = document.getElementById('membreciaPrice');
-    const valor = input.value.replace('$', '').trim();
+    // const valor = input.value.replace('$', '').trim();
+    const valor = input.value.replace(/\./g, '').replace('$', '').trim();
     return parseFloat(valor) || 0;
   }
 
@@ -721,6 +722,10 @@
   // Inicial
   updateToggleSections();   // Inicializa visibilidad de secciones al cargar el script
 
+  function formatearMoneda(valor) {
+    const numero = Math.round(Number(valor));
+    return `$${numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+  }
  
   function mostrarError(campo, mensaje) {
     campo.classList.add('input-error');
@@ -747,7 +752,8 @@
         priceInput.value = '$0';
       } else {
         // Si está comprando una membresía nueva, mostrar precio normal
-        priceInput.value = precio ? `$${parseFloat(precio).toFixed(0)}` : '';
+        // priceInput.value = precio ? `$${parseFloat(precio).toFixed(0)}` : '';
+        priceInput.value = precio ? `$${parseFloat(precio).toFixed(0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}` : '';
       }
       updatePriceTotal();
     }
@@ -865,7 +871,8 @@
       const precio = parseFloat(row.querySelector('.productSelect').selectedOptions[0].dataset.precio || 0);
       const cantidad = parseInt(row.querySelector('.productCant').value || 1);
       const total = precio * cantidad;
-      row.querySelector('.productPrice').value = `$${Math.round(total)}`;
+      // row.querySelector('.productPrice').value = `$${Math.round(total)}`;
+      row.querySelector('.productPrice').value = formatearMoneda(total);
       updatePriceTotal();
     }
 

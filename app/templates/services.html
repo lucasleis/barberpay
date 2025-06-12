@@ -48,12 +48,15 @@
     {% for service in services %}
     <li class="barber-item">
       <span>
-        {{ service.name }} - ${{ "%d"|format(service.precio) }}
+        {{ service.name }} - <span class="precio-formatear">{{ service.precio }}</span>
+          <!-- ${{ "%d"|format(service.precio) }} -->
         {% if service.precio_descuento and service.precio_descuento > 0 %}
-          | Precio Descuento: ${{ "%d"|format(service.precio_descuento) }}
+          <!-- | Precio Descuento: ${{ "%d"|format(service.precio_descuento) }} -->
+          | Precio Descuento: <span class="precio-formatear">{{ service.precio_descuento }}</span>
         {% endif %}
         {% if service.precio_amigo and service.precio_amigo > 0 %}
-          | Precio Amigo: ${{ "%d"|format(service.precio_amigo) }}
+          <!-- | Precio Amigo: ${{ "%d"|format(service.precio_amigo) }} -->
+          | Precio Amigo: <span class="precio-formatear">{{ service.precio_amigo }}</span>
         {% endif %}
       </span>
   
@@ -103,6 +106,15 @@
   </ul>
 
   <script>
+
+    function formatearMoneda(valor, conSimbolo = false) {
+      const numero = parseFloat(valor);
+      if (isNaN(numero)) return '';
+
+      const formateado = numero.toLocaleString('es-CL');
+      return conSimbolo ? `$${formateado}` : formateado;
+    }
+
     function toggleDescuentoField() {
       const check = document.getElementById('descuentoCheckbox');
       const field = document.getElementById('descuentoField');
@@ -141,5 +153,13 @@
         }
       });
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('.precio-formatear').forEach(el => {
+        const valor = el.textContent.trim();
+        el.textContent = formatearMoneda(valor, true);
+      });
+    });
+
   </script>
 {% endblock %}

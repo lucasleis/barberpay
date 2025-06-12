@@ -120,7 +120,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 servicio_name = servicio.name
             elif tipo_precio == 'amigo':
                 monto_servicio = servicio.precio_amigo
-                servicio_name = servicio.name + " Amigo"
+                servicio_name = "Vale por Corte"
                 pago_propietario_servicio = 0
             elif tipo_precio == 'descuento':
                 monto_servicio = servicio.precio_descuento
@@ -144,33 +144,6 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                     "pago_empleado": pago_empleado_servicio,
                     "pago_propietario": pago_propietario_servicio
                 })
-            
-                """
-                pago_dict.update({
-                    "empleado": empleado.name,
-                    "porcentaje_empleado": porcentaje_servicio,
-                    "servicio": servicio_name,
-                    "valor_servicio": monto_servicio,
-                    "pago_empleado": pago_empleado_servicio,
-                    "monto": 0,
-                    "pago_propietario": 0
-                })
-
-                
-                if tipo_precio != 'amigo':
-                    total_propietario += float(monto_servicio - pago_empleado_servicio)
-                    total_general += float(monto_servicio)
-
-                    pago_dict.update({
-                        "empleado": empleado.name,
-                        "porcentaje_empleado": porcentaje_servicio,
-                        "servicio": servicio_name,
-                        "valor_servicio": monto_servicio,
-                        "monto": (pago.amount_method1 or 0) + (pago.amount_method2 or 0),
-                        "pago_empleado": pago_empleado_servicio,
-                        "pago_propietario": float(monto_servicio - pago_empleado_servicio)
-                    })
-                """
 
                 total_por_empleado[empleado.name]["monto"] += float(pago_empleado_servicio)
                 total_por_empleado[empleado.name]["monto_cortes"] += float(pago_empleado_servicio)
@@ -353,6 +326,23 @@ def calcular_total_real(toggle_servicio, toggle_producto, service_id=None, produ
         total += calcular_total_producto(product_id, product_cantidad)
     
     return total
+
+
+@app.template_filter('moneda')
+def moneda(valor):
+    try:
+        valor_int = int(round(float(valor)))
+        return f"${valor_int:,}".replace(",", ".")
+    except (ValueError, TypeError):
+        return "$0"
+
+@app.template_filter('miles')
+def miles(valor):
+    try:
+        valor_int = int(round(float(valor)))
+        return f"{valor_int:,}".replace(",", ".")
+    except (ValueError, TypeError):
+        return "0"
 
 
 @app.route('/')
@@ -914,7 +904,8 @@ def add_payment():
                 # total_real += service.precio if service else 0  
                 precio = request.form.get('servicePrice')
                 precio = precio.split("$")
-                service_price = int(precio[1] or 0)
+                service_price = int(precio[1].replace('.', '') or 0)
+                #service_price = int(precio[1] or 0)
                 total_real += service_price
 
             if toggle_producto:

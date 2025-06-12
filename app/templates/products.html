@@ -38,8 +38,15 @@
   <ul class="barber-list">
     {% for product in products %}
     <li class="barber-item">
-      <span>  {{ product.name }} - ${{ "%.2f"|format(product.precio)|int }} | Cantidad: {{ product.cantidad }} | Comisión: {{ product.comision_empleado|int }}% </span>
-    
+      <!-- <span>  {{ product.name }} - ${{ "%.2f"|format(product.precio)|int }} | Cantidad: {{ product.cantidad }} | Comisión: {{ product.comision_empleado|int }}% </span> -->
+      <span>
+        {{ product.name }} - 
+        <span class="precio-formatear">{{ product.precio|int }}</span>
+        | Cantidad: {{ product.cantidad }}
+        <!-- | Comisión: {{ product.comision_empleado|int }}% --> 
+      </span>
+      
+
       <div class="action-buttons">
         <a href="#" class="edit-icon" title="Editar cantidad" onclick="openCantidadModal('{{ product.id }}'); return false;">
           <i class="fas fa-pen"></i>
@@ -88,6 +95,15 @@
   </ul>
 
   <script>
+
+    function formatearMoneda(valor, conSimbolo = false) {
+      const numero = parseFloat(valor);
+      if (isNaN(numero)) return '';
+
+      const formateado = numero.toLocaleString('es-CL');
+      return conSimbolo ? `$${formateado}` : formateado;
+    }
+
     function openCantidadModal(id) {
       const modal = document.getElementById('modal-' + id);
       modal.style.display = 'flex';
@@ -115,5 +131,13 @@
         }
       });
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('.precio-formatear').forEach(el => {
+        const valor = el.textContent.trim();
+        el.textContent = formatearMoneda(valor, true);
+      });
+    });
+
   </script>
 {% endblock %}

@@ -3,11 +3,12 @@
     - Empleados:
 
     - Servicios: 
-        - hacer que si no hay servicio con precio amigo o descuento tire error
+        - (listo) hacer que si no hay servicio con precio descuento tire error
         - (listo) vale x corte  (confirmar con el que esta bien)
 
     - Productos:
         - (listo) insertar cantidades a mano y no por un select
+        - (listo) limitar la cantidad mostrada en el select de pagos 
 
     - Metodos de Pago:
 
