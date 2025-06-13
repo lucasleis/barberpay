@@ -53,14 +53,16 @@
 
   <!-- Selector de servicio -->
   <div id="servicioSection" class="form-group">
-    <div style="display: flex; align-items: center; justify-content: space-between;">
+    <div class="form-row-flex">
       <label for="service_id">Servicio y precio:</label>
-      <label class="checkbox-label">
-        <input type="checkbox" id="precioDescuentoCheckbox" name="precioDescuentoCheckbox"> ¿Precio Descuento?
-      </label>
-      <label class="checkbox-label">
-        <input type="checkbox" id="precioAmigoCheckbox" name="precioAmigoCheckbox"> ¿Vale por Corte?
-      </label>
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="precioDescuentoCheckbox" name="precioDescuentoCheckbox"> ¿Precio Descuento?
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="precioAmigoCheckbox" name="precioAmigoCheckbox"> ¿Vale por Corte?
+        </label>
+      </div>
     </div>
     <div style="display: flex; gap: 1rem;">
       <select name="service_id" id="serviceSelect" required>
@@ -117,14 +119,16 @@
 
   <!-- Metodo de Pago -->
   <div class="form-group payment-methods">
-    <div style="display: flex; align-items: center; justify-content: space-between;">
+    <div class="form-row-flex">
       <label for="method">Método de pago:</label>
-      <label id="membresiaLabel" name="membresiaLabel" class="checkbox-label" style="display: none;">
-        <input type="checkbox" id="membresiaCheckbox" name="membresiaCheckbox"> ¿Usa Membresía?
-      </label>
-      <label class="checkbox-label">
-        <input type="checkbox" id="multiPaymentToggle" name="togglemultiPayment"> ¿Usa múltiples métodos?
-      </label>
+      <div class="checkbox-group">
+        <label id="membresiaLabel" name="membresiaLabel" class="checkbox-label" style="display: none;">
+          <input type="checkbox" id="membresiaCheckbox" name="membresiaCheckbox"> ¿Usa Membresía?
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="multiPaymentToggle" name="togglemultiPayment"> ¿Usa múltiples métodos?
+        </label>
+      </div>
     </div>
 
     <div class="payment-method-container">
