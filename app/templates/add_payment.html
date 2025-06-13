@@ -301,7 +301,8 @@
 <script>
   const serviceSelect = document.getElementById('serviceSelect');
   const servicePrice = document.getElementById('servicePrice');
-  const togglemultiPayment = document.getElementById('multiPaymentToggle');
+  const togglemultiPayment = document.getElementById('multiPaymentToggle');   // cambiar al nombre de abajo
+  const multiPaymentToggle = document.getElementById('multiPaymentToggle');
   const productToggle = document.getElementById('productToggle');
   const singleGroup = document.getElementById('singleMethodGroup');
   const multiGroup = document.getElementById('multiMethodGroup');
@@ -323,6 +324,7 @@
   const priceInput = document.getElementById('membreciaPrice');
 
   const membresiaLabel = document.getElementById('membresiaLabel');
+  const membershipDiv = document.getElementById('membresiaMethodGroup');
 
   // checkboxs 
   const precioAmigoCheckbox = document.getElementById('precioAmigoCheckbox');
@@ -334,7 +336,6 @@
   function updateToggleSections(e = null) {
     const source = e?.target?.id || null;
     const membresiaCheckbox = document.getElementById('membresiaCheckbox');
-    const multiPaymentToggle = document.getElementById('multiPaymentToggle');
 
     // Si algún toggle está seleccionado, ocultar el mensaje de error
     if (servicioToggle.checked || productoToggle.checked || membresiaToggle.checked) {
@@ -348,6 +349,8 @@
       // Desmarcar el checkbox de usa membresía si estaba marcado
       if (membresiaCheckbox) {
         membresiaCheckbox.checked = false;
+        multiMethodGroup.style.display = 'none';
+      
         // Disparar el evento change para actualizar la UI
         membresiaCheckbox.dispatchEvent(new Event('change'));
       }
@@ -369,7 +372,7 @@
     }
 
     // Mostrar u ocultar secciones 
-    // servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
+    servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
     productSection.style.display = productoToggle.checked ? 'block' : 'none';
     membresiaSection.style.display = membresiaToggle.checked ? 'block' : 'none';
     membresiaLabel.style.display = membresiaToggle.checked ? 'none' : 'block';
@@ -515,6 +518,16 @@
   // Evento para alternar entre modo de pago simple y múltiple
   togglemultiPayment.addEventListener('change', function () {
     const paymentMethodsGroup = document.querySelector('.form-group.payment-methods');
+
+    // Al entrar a esta función, desactivar la membresía si estaba activa
+    if (checkbox_use_member.checked) {
+      checkbox_use_member.checked = false;
+      membershipDiv.style.display = 'none';
+      servicioSection.style.display = 'block';
+      updatePriceTotal();
+
+      // checkbox_use_member.dispatchEvent(new Event('change'));
+    }
     
     if (this.checked) {
       // Si se activa el pago múltiple, ocultar el modo simple y mostrar campos adicionales
@@ -786,7 +799,6 @@
   }
 
   function setupMembresiaCheckboxToggle() {
-    const membershipDiv = document.getElementById('membresiaMethodGroup');
     const multiPaymentToggle = document.getElementById('multiPaymentToggle');
     const singleMethodGroup = document.getElementById('singleMethodGroup');
     const multiMethodGroup = document.getElementById('multiMethodGroup');
@@ -835,15 +847,27 @@
     */
    
     checkbox_use_member.addEventListener('change', function () {
+
+      if (togglemultiPayment.checked){
+        togglemultiPayment.checked = false; 
+      }
+
       if (checkbox_use_member.checked) {
+
         servicioSection.style.display = 'none';
         membershipDiv.style.display = 'block';
         singleMethodGroup.style.display = 'none';
+        multiMethodGroup.style.display = 'none';
 
       } else {
         servicioSection.style.display = 'block';
         membershipDiv.style.display = 'none';
         singleMethodGroup.style.display = 'block';
+
+        if (multiPaymentToggle.checked) {
+          multiMethodGroup.style.display = 'block';
+          singleGroup.style.display = 'none';
+        }
 
       }
       actualizarPrecioServicio();
@@ -870,6 +894,7 @@
     updatePriceTotal();
   });
 
+  // init toggle servicios
   function initServicesSection() {
     // Cuando se selecciona "precio amigo", desmarca "precio descuento"
     precioAmigoCheckbox.addEventListener('change', function () {
