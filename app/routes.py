@@ -158,9 +158,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 total_propietario += float(pago_propietario_servicio)
                 total_general += float(monto_servicio)
 
-        print("pago.appointment.productos_turno: ",pago.appointment.productos_turno)
         if pago.appointment and pago.appointment.productos_turno:
-            print("222")
             for pt in pago.appointment.productos_turno:
                 producto = pt.producto
                 monto_producto = pt.precio_unitario * pt.cantidad
@@ -184,7 +182,6 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                     total_general += float(monto_producto)
 
         if pago.appointment and pago.appointment.service and pago.appointment.productos_turno:
-            print("333")
             pago_dict.update({
                 "empleado": empleado.name,
                 "porcentaje_empleado": str(porcentaje_servicio) + "% - " + str(int(porcentaje_producto)),
@@ -204,7 +201,6 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             total_general += float(monto_servicio) + float(monto_producto)
 
         if pago.membresia_comprada:
-            print("444")
             empleado = pago.appointment.barber
             tipo = pago.membresia_comprada.tipo_membresia
             monto = float(tipo.precio)
@@ -219,7 +215,6 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             total_general += monto
 
         elif pago.appointment and pago.appointment.membresia:
-            print("555")
             tipo = pago.appointment.membresia.tipo_membresia
             empleado = pago.appointment.barber
             porcentaje = empleado.porcentaje
