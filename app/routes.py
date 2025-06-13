@@ -6,8 +6,8 @@ from sqlalchemy import desc
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
 from collections import defaultdict
-from backports.zoneinfo import ZoneInfo
-# from zoneinfo import ZoneInfo
+# from backports.zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
 from werkzeug.datastructures import MultiDict
 from decimal import Decimal
 
@@ -158,7 +158,9 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 total_propietario += float(pago_propietario_servicio)
                 total_general += float(monto_servicio)
 
+        print("pago.appointment.productos_turno: ",pago.appointment.productos_turno)
         if pago.appointment and pago.appointment.productos_turno:
+            print("222")
             for pt in pago.appointment.productos_turno:
                 producto = pt.producto
                 monto_producto = pt.precio_unitario * pt.cantidad
@@ -182,6 +184,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                     total_general += float(monto_producto)
 
         if pago.appointment and pago.appointment.service and pago.appointment.productos_turno:
+            print("333")
             pago_dict.update({
                 "empleado": empleado.name,
                 "porcentaje_empleado": str(porcentaje_servicio) + "% - " + str(int(porcentaje_producto)),
@@ -201,6 +204,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             total_general += float(monto_servicio) + float(monto_producto)
 
         if pago.membresia_comprada:
+            print("444")
             empleado = pago.appointment.barber
             tipo = pago.membresia_comprada.tipo_membresia
             monto = float(tipo.precio)
@@ -215,18 +219,23 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             total_general += monto
 
         elif pago.appointment and pago.appointment.membresia:
+            print("555")
             tipo = pago.appointment.membresia.tipo_membresia
             empleado = pago.appointment.barber
             porcentaje = empleado.porcentaje
             monto = float(tipo.precio) / tipo.usos
             pago_empleado = (monto * porcentaje) / 100
+            pago_propietario = 0
+            if pago.appointment.productos_turno:
+                pago_empleado += float(pago_empleado_producto)
+                pago_propietario = float(Decimal(monto_producto) - Decimal(pago_empleado_producto))
             pago_dict.update({
                 "empleado": empleado.name,
                 "porcentaje_empleado": porcentaje,
                 "membresia": tipo.nombre + " (uso)",
                 "valor_membresia": monto,
                 "pago_empleado": pago_empleado,
-                "pago_propietario": 0,
+                "pago_propietario": pago_propietario,
             })
             total_por_empleado[empleado.name]["monto"] += float(pago_empleado)
             total_por_empleado[empleado.name]["monto_cortes"] += float(pago_empleado)
@@ -279,23 +288,24 @@ def calcular_pagos_entre_fechas(start_date, end_date):
         }
     }
 
-
+"""
 def calcular_total_servicio(service_id):
-    """Calcula el total para un servicio"""
+    ""Calcula el total para un servicio""
     if not service_id:
         return 0.0
     service = Servicio.query.get(service_id)
     return service.precio if service else 0.0
 
 def calcular_total_producto(product_id, cantidad):
-    """Calcula el total para un producto"""
+    ""Calcula el total para un producto""
     if not product_id or not cantidad:
         return 0.0
     product = Producto.query.get(product_id)
     return (product.precio * cantidad) if product else 0.0
 
+
 def calcular_total_pagado(request_form, toggle_servicio, toggle_producto, product_precio=0, product_cantidad=0):
-    """Calcula el total pagado según el método de pago y los toggles"""
+    ""Calcula el total pagado según el método de pago y los toggles""
     tip = float(request_form.get('tip') or 0.0)
     multipagos = 'togglemultiPayment' in request_form
     
@@ -316,7 +326,7 @@ def calcular_total_pagado(request_form, toggle_servicio, toggle_producto, produc
     return 0.0
 
 def calcular_total_real(toggle_servicio, toggle_producto, service_id=None, product_id=None, product_cantidad=0):
-    """Calcula el total real sumando servicio y/o producto"""
+    ""Calcula el total real sumando servicio y/o producto""
     total = 0.0
     
     if toggle_servicio:
@@ -326,7 +336,7 @@ def calcular_total_real(toggle_servicio, toggle_producto, service_id=None, produ
         total += calcular_total_producto(product_id, product_cantidad)
     
     return total
-
+"""
 
 @app.template_filter('moneda')
 def moneda(valor):
@@ -465,12 +475,6 @@ def add_service():
         name = request.form.get('name')
         precio = float(request.form.get('precio', 0))
 
-        """
-            try:
-                precio_amigo = float(request.form.get('precio_amigo', 0) or 0)
-            except ValueError:
-                precio_amigo = 0
-        """
         try:
             precio_descuento = float(request.form.get('precio_descuento', 0) or 0)
         except ValueError:
@@ -802,13 +806,15 @@ def add_payment():
             )
 
             if toggle_servicio:
-                service_id = request.form.get('service_id')
-                if not service_id:
-                    raise ValueError("Debe seleccionarse un servicio.")
-                appointment.service_id = service_id
 
                 check_membresia = request.form.get('membresiaCheckbox') 
                 if check_membresia == 'on':
+
+                    membresia_id = request.form.get('check_membresia')
+                    if not membresia_id:
+                        raise ValueError("Debe seleccionarse un servicio.")
+                    appointment.membresia_id = membresia_id
+                
                     num_membresia = request.form.get('check_membresia') 
                     membresia = Membresia.query.get(num_membresia)
                     if not membresia:
@@ -819,10 +825,14 @@ def add_payment():
 
                     membresia.usos_disponibles -= 1
                     db.session.add(membresia)
-                    appointment.membresia_id = membresia.id
                     flash(f"Membresía #{membresia.id}: Quedan {membresia.usos_disponibles} usos disponibles.", "success")
 
                 else:
+                    service_id = request.form.get('service_id')
+                    if not service_id:
+                        raise ValueError("Debe seleccionarse un servicio.")
+                    appointment.service_id = service_id
+                    
                     if request.form.get('precioDescuentoCheckbox') == 'on':
                         # Obtén el objeto Servicio según el servicio seleccionado en el formulario
                         servicio = Servicio.query.get(service_id)
@@ -871,23 +881,6 @@ def add_payment():
                 if not membresia_id:
                     raise ValueError("Debe seleccionarse un servicio.")
 
-                """
-                    check_membresia = request.form.get('membresiaCheckbox') 
-                    if check_membresia == 'on':
-                        num_membresia = request.form.get('check_membresia') 
-                        membresia = Membresia.query.get(num_membresia)
-                        if not membresia:
-                            raise ValueError("Membresía no encontrada.")
-
-                        if membresia.usos_disponibles <= 0:
-                            raise ValueError("No hay usos disponibles para descontar en esta membresía.")
-
-                        membresia.usos_disponibles -= 1
-                        db.session.add(membresia)
-                        appointment.membresia_id = membresia.id
-                        flash(f"Membresía #{membresia.id}: Quedan {membresia.usos_disponibles} usos disponibles.", "success")
-                else:
-                """
                 tipo = TipoMembresia.query.get(membresia_id)
                 if not tipo:
                     raise ValueError("Tipo de membresía no encontrado.")
@@ -918,13 +911,14 @@ def add_payment():
             total_pagado = 0.0
 
             if toggle_servicio:
-                # service = Servicio.query.get(service_id)
-                # total_real += service.precio if service else 0  
-                precio = request.form.get('servicePrice')
-                precio = precio.split("$")
-                service_price = int(precio[1].replace('.', '') or 0)
-                #service_price = int(precio[1] or 0)
-                total_real += service_price
+
+                if check_membresia == 'on':
+                    total_real = 0 
+                else:  
+                    precio = request.form.get('servicePrice')
+                    precio = precio.split("$")
+                    service_price = int(precio[1].replace('.', '') or 0)
+                    total_real += service_price
 
             if toggle_producto:
                 total_real += total_producto
@@ -932,9 +926,6 @@ def add_payment():
             if toggle_membresia:   
                 membresia = TipoMembresia.query.get(membresia_id)
                 total_real += float(membresia.precio) if membresia else 0
-
-                if check_membresia == 'on':
-                    total_real = 0 
 
             if multipagos:
                 total_real += tip

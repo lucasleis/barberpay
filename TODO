@@ -14,6 +14,7 @@
 
     - Membresia:
         - quiere que el usa membresia este en el toggle de servicios
+        - cuando se utiliza membresia y no se asigna id esta mal el error que muestra
 
     - Cierre:
 

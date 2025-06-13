@@ -245,7 +245,7 @@
       <!-- <td>{{ pago.appointment.membresia.id if pago.appointment.membresia else '-' }}</td>-->
       <td>
         {% if pago.appointment.membresia %}
-          {% if pago.amount_method1 == 0 %}
+          {% if not pago.membresia_comprada %}
             {{ pago.appointment.membresia.id }} (uso) 
           {% else %}
             {{ pago.appointment.membresia.id }}
@@ -365,7 +365,7 @@
     }
 
     // Mostrar u ocultar secciones 
-    servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
+    // servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
     productSection.style.display = productoToggle.checked ? 'block' : 'none';
     membresiaSection.style.display = membresiaToggle.checked ? 'block' : 'none';
     membresiaLabel.style.display = membresiaToggle.checked ? 'none' : 'block';
@@ -832,12 +832,12 @@
    
     checkbox_use_member.addEventListener('change', function () {
       if (checkbox_use_member.checked) {
-        // servicioSection.style.display = 'block';
+        servicioSection.style.display = 'none';
         membershipDiv.style.display = 'block';
         singleMethodGroup.style.display = 'none';
 
       } else {
-        // servicioSection.style.display = 'none';
+        servicioSection.style.display = 'block';
         membershipDiv.style.display = 'none';
         singleMethodGroup.style.display = 'block';
 
