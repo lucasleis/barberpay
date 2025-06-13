@@ -936,8 +936,8 @@ def add_payment():
                     total_real += tip
                     
             if abs(total_pagado - total_real) > 0.01:
-                flash(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).", "danger")
-                #raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
+                # flash(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).", "danger")
+                raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
 
 
             pago = Pago(

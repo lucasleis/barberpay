@@ -659,8 +659,8 @@
     // console.log("totalPagado: ",totalPagado)
     // console.log("totalEsperado: ",totalEsperado)
     // console.log("propina: ",propina)
-    // console.log("totalEsperado + propina: ",totalEsperado+propina)
-    // console.log("totalPagado - totalEsperado - propina: ",totalPagado - totalEsperado + propina)
+    // console.log("totalEsperado + propina: ",totalEsperado + propina)
+    // console.log("totalPagado - totalEsperado + propina: ",totalPagado - totalEsperado + propina)
     if (Math.abs(totalPagado - totalEsperado - propina) > 0.01) {
       montoInputs.forEach(input => input.classList.add('input-error'));
       montoError.style.display = 'block';
@@ -693,7 +693,7 @@
     }
     mostrarErrorToggle(false);
 
-    if (servicioActivo || productoActivo) {
+    if (servicioActivo || productoActivo) {   // arreglar 
       const servicePrecio = servicioActivo ? obtenerPrecioServicio() : 0;
       const productosData = productoActivo ? obtenerProductosSeleccionados() : { total: 0, items: [] };
 
@@ -704,7 +704,17 @@
 
       agregarInputsOcultos(productosData.items);
 
-      const totalEsperado = servicePrecio + productosData.total;
+      let servicePrecio_num = servicePrecio.replace('$', '').replace(/\./g, '');
+      servicePrecio_num = parseFloat(servicePrecio_num);
+
+      let productosData_num = String(productosData.total).replace('$', '').replace(/\./g, '');
+      productosData_num = parseFloat(productosData_num);
+
+      const totalEsperado = servicePrecio_num + productosData_num;
+
+      console.log("servicePrecio: ",servicePrecio_num)
+      console.log("productosData.total: ",productosData_num)
+      console.log("totalEsperado: ",totalEsperado)
 
       if (togglemultiPayment.checked && !validarMultiplesMetodos(totalEsperado)) {
         return;
