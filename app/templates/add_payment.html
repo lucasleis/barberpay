@@ -176,6 +176,10 @@
     <p id="montoError" class="text-danger mt-1" style="display: none;">
       La suma de los métodos de pago y la propina debe coincidir con el total a pagar
     </p>
+    <p id="mensaje_error_membresia" class="text-danger mt-1" style="display: none;">
+      Debe ingresar un número de membresía válido
+    </p>
+
   </div>
 
   <!-- Propina -->
@@ -700,6 +704,17 @@
       if (productoActivo && productosData.items.length === 0) {
         alert('Debe seleccionar al menos un producto con cantidad válida');
         return;
+      }
+
+      let membresiaValue = parseInt(document.getElementById("check_membresia").value);
+      let campo = document.getElementById("check_membresia");
+      let mensaje = document.getElementById("mensaje_error_membresia");
+
+      if (servicioActivo && checkbox_use_member) {
+          if (!membresiaValue) {
+              mostrarError(campo, mensaje);
+              return;
+          }
       }
 
       agregarInputsOcultos(productosData.items);
