@@ -57,10 +57,12 @@
       <label for="service_id">Servicio y precio:</label>
       <div class="checkbox-group">
         <label class="checkbox-label">
-          <input type="checkbox" id="precioDescuentoCheckbox" name="precioDescuentoCheckbox"> ¿Precio Descuento?
+          <input type="checkbox" id="precioDescuentoCheckbox" name="precioDescuentoCheckbox">
+          <span class="checkbox-text">¿Precio Descuento?</span>
         </label>
         <label class="checkbox-label">
-          <input type="checkbox" id="precioAmigoCheckbox" name="precioAmigoCheckbox"> ¿Vale por Corte?
+          <input type="checkbox" id="precioAmigoCheckbox" name="precioAmigoCheckbox">
+          <span class="checkbox-text">¿Vale por Corte?</span>
         </label>
       </div>
     </div>
@@ -122,12 +124,18 @@
     <div class="form-row-flex">
       <label for="method">Método de pago:</label>
       <div class="checkbox-group">
-        <label id="membresiaLabel" name="membresiaLabel" class="checkbox-label" style="display: none;">
-          <input type="checkbox" id="membresiaCheckbox" name="membresiaCheckbox"> ¿Usa Membresía?
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="multiPaymentToggle" name="togglemultiPayment"> ¿Usa múltiples métodos?
-        </label>
+        <div class="checkbox-left">
+          <label id="membresiaLabel" name="membresiaLabel" class="checkbox-label" style="display: none;">
+            <input type="checkbox" id="membresiaCheckbox" name="membresiaCheckbox">
+            <span class="checkbox-text">¿Usa Membresía?</span>
+          </label>
+        </div>
+        <div class="checkbox-right">
+          <label class="checkbox-label">
+            <input type="checkbox" id="multiPaymentToggle" name="togglemultiPayment">
+            <span class="checkbox-text">¿Usa múltiples métodos?</span>
+          </label>
+        </div>
       </div>
     </div>
 
