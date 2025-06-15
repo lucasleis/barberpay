@@ -229,6 +229,7 @@ input[readonly] {
   flex: 1;
   display: flex;
   justify-content: flex-start;
+  align-items: center;
 }
 
 .checkbox-right {
@@ -437,39 +438,13 @@ th.borrar-pago, td.borrar-pago {
     margin-bottom: 1rem;
 }
 
-.form-row-flex label {
-    margin: 0;
-    white-space: nowrap;
-    min-width: 150px; /* Ajustable según tu diseño */
-}
-
-.checkbox-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1.5rem;
-    flex: 1;
-}
-
-.checkbox-left,
-.checkbox-right {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-}
-
-.form-row-flex {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
 .form-row-flex > label {
     margin: 0;
     white-space: nowrap;
-    min-width: auto;
+    min-width: 150px; /* Ajustable según tu diseño */
+    display: flex;
+    align-items: center;
+    height: 38px;
 }
 
 .checkbox-group {
@@ -477,13 +452,13 @@ th.borrar-pago, td.borrar-pago {
     align-items: center;
     gap: 1.5rem;
     flex: 1;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .checkbox-left {
     flex: 1;
     display: flex;
-    justify-content: center; /* CENTRAR checkbox */
+    justify-content: center;
     align-items: center;
 }
 
@@ -491,7 +466,23 @@ th.borrar-pago, td.borrar-pago {
     margin-left: 1rem;
 }
 
+/* New rule for centering checkboxes in the payment methods section */
+.form-group.payment-methods .checkbox-group {
+    justify-content: space-between; /* To push left and right items apart */
+    flex: 1; /* Allow it to take available width */
+}
 
+/* "Usa Membresía?" checkbox (left side) */
+.form-group.payment-methods .checkbox-left {
+    margin-left: 30px; /* Adjust this value to fine-tune position */
+}
+
+/* "Usa múltiples métodos?" checkbox (right side) */
+.form-group.payment-methods .checkbox-right {
+    justify-content: flex-end; /* Align its content to the right */
+    flex: none; /* Prevent growing */
+    width: 180px; /* Give it a fixed width */
+}
 
 /* ------------------------ ESTILOS RESPONSIVE (MOBILE) ------------------------ */
 
