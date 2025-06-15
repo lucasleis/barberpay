@@ -714,6 +714,7 @@
 
     if (servicioActivo || productoActivo) {   // arreglar 
       const servicePrecio = servicioActivo ? obtenerPrecioServicio() : 0;
+      
       const productosData = productoActivo ? obtenerProductosSeleccionados() : { total: 0, items: [] };
 
       if (productoActivo && productosData.items.length === 0) {
@@ -725,16 +726,17 @@
       let campo = document.getElementById("check_membresia");
       let mensaje = document.getElementById("mensaje_error_membresia");
 
-      if (servicioActivo && checkbox_use_member) {
-          if (!membresiaValue) {
-              mostrarError(campo, mensaje);
-              return;
-          }
+      if (servicioActivo && checkbox_use_member.checked) {
+        console.log("checkbox_use_member:",checkbox_use_member.checked);
+        if (!membresiaValue) {
+          mostrarError(campo, mensaje);
+          return;
+        }
       }
 
       agregarInputsOcultos(productosData.items);
 
-      let servicePrecio_num = servicePrecio.replace('$', '').replace(/\./g, '');
+      let servicePrecio_num = servicePrecio.toString().replace('$', '').replace(/\./g, '');
       servicePrecio_num = parseFloat(servicePrecio_num);
 
       let productosData_num = String(productosData.total).replace('$', '').replace(/\./g, '');
@@ -742,9 +744,9 @@
 
       const totalEsperado = servicePrecio_num + productosData_num;
 
-      console.log("servicePrecio: ",servicePrecio_num)
-      console.log("productosData.total: ",productosData_num)
-      console.log("totalEsperado: ",totalEsperado)
+      // console.log("servicePrecio: ",servicePrecio_num)
+      // console.log("productosData.total: ",productosData_num)
+      // console.log("totalEsperado: ",totalEsperado)
 
       if (togglemultiPayment.checked && !validarMultiplesMetodos(totalEsperado)) {
         return;
@@ -862,30 +864,7 @@
       //updatePriceTotal();
     }
 
-    /*
-      checkbox_use_member.addEventListener('change', function () {
-        if (checkbox_use_member.checked) {
-          membershipDiv.style.display = 'block';
-          multiPaymentToggle.disabled = true; // Deshabilitar el checkbox de múltiples métodos
-          multiPaymentToggle.checked = false; // Desmarcar el checkbox de múltiples métodos
-          singleMethodGroup.style.display = 'none';
-          multiMethodGroup.style.display = 'none';
-          membresiaSection.style.display = 'none';
-        } else {
-          membershipDiv.style.display = 'none';
-          multiPaymentToggle.disabled = false; // Habilitar el checkbox de múltiples métodos
-          singleMethodGroup.style.display = 'block';
-          membresiaSection.style.display = 'block';
-          
-          if (multiPaymentToggle.checked) {
-            multiMethodGroup.style.display = 'block';
-            singleGroup.style.display = 'none';
-          }
-        }
-        actualizarPrecioServicio();
-      });
-    */
-   
+
     checkbox_use_member.addEventListener('change', function () {
 
       if (togglemultiPayment.checked){
@@ -913,7 +892,8 @@
       actualizarPrecioServicio();
       
     });
-    
+  
+
 
     // Asegurarse de que el precio esté correcto al cargar
     actualizarPrecioServicio();

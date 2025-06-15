@@ -441,7 +441,7 @@ th.borrar-pago, td.borrar-pago {
 .form-row-flex > label {
     margin: 0;
     white-space: nowrap;
-    min-width: 150px; /* Ajustable según tu diseño */
+    min-width: 150px; 
     display: flex;
     align-items: center;
     height: 38px;
@@ -468,20 +468,39 @@ th.borrar-pago, td.borrar-pago {
 
 /* New rule for centering checkboxes in the payment methods section */
 .form-group.payment-methods .checkbox-group {
-    justify-content: space-between; /* To push left and right items apart */
-    flex: 1; /* Allow it to take available width */
+    justify-content: space-between; 
+    flex: 1; 
 }
 
 /* "Usa Membresía?" checkbox (left side) */
 .form-group.payment-methods .checkbox-left {
-    margin-left: 30px; /* Adjust this value to fine-tune position */
+    margin-left: 30px; 
 }
 
 /* "Usa múltiples métodos?" checkbox (right side) */
 .form-group.payment-methods .checkbox-right {
-    justify-content: flex-end; /* Align its content to the right */
-    flex: none; /* Prevent growing */
-    width: 180px; /* Give it a fixed width */
+    justify-content: flex-end; 
+    flex: none; 
+    width: 180px; 
+}
+
+.centrado {
+    text-align: center;
+    font-size: 0.9rem
+}
+
+td.borrar-pago {
+    padding: 0.1; 
+}
+
+td.borrar-pago form {
+    margin: 0;
+    padding: 0;
+}
+
+td.borrar-pago button.btn-danger {
+    padding: 0.2rem 0.25rem; 
+    font-size: 1.2rem; 
 }
 
 /* ------------------------ ESTILOS RESPONSIVE (MOBILE) ------------------------ */
