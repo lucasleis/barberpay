@@ -1,3 +1,5 @@
+/* ------------------------ ESTILOS BASE (DESKTOP) ------------------------ */
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -13,8 +15,9 @@ header {
     text-align: center;
 }
 
-header h1 {
-    margin: 0 0 0.5rem 0;
+.logo {
+    max-width: 30%;
+    height: auto;
 }
 
 nav a {
@@ -64,13 +67,11 @@ button {
     background-color: #28a745;
     color: white;
     border: none;
-    padding: 0.6rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
     padding: 10px;
     font-size: 16px;
     border-radius: 4px;
     border: 1px solid #ccc;
+    cursor: pointer;
 }
 
 button:hover {
@@ -118,15 +119,6 @@ select {
     margin-bottom: 1rem;
 }
 
-.payment-method-group:last-child {
-    margin-bottom: 0;
-}
-
-.payment-method-group select,
-.payment-method-group input {
-    margin: 0;
-}
-
 .payment-method-group select {
     flex: 2;
 }
@@ -139,7 +131,6 @@ select {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-top: 0;
     margin-bottom: 2rem;
 }
 
@@ -148,7 +139,7 @@ select {
 .propina-row .btn-primary {
     flex: 1;
     margin: 0;
-    width: calc(33.333% - 0.667rem); /* Equal width minus gap spacing */
+    width: calc(33.333% - 0.667rem);
     height: 38px;
 }
 
@@ -156,23 +147,8 @@ select {
     display: flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap;
     font-size: 1rem;
     padding: 0 1rem;
-}
-
-/* Remove previous conflicting styles */
-.propina-row input[type="number"] {
-    width: calc(33.333% - 0.667rem);
-}
-
-.propina-row .btn-primary {
-    width: calc(33.333% - 0.667rem);
-}
-
-/* Ajuste general para inputs numéricos */
-input[type="number"] {
-    -moz-appearance: textfield;
 }
 
 input[type="number"]::-webkit-outer-spin-button,
@@ -181,7 +157,10 @@ input[type="number"]::-webkit-inner-spin-button {
     margin: 0;
 }
 
-/* Ajuste para inputs deshabilitados */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
 input:disabled,
 input[readonly] {
     background-color: #f8f9fa;
@@ -189,28 +168,28 @@ input[readonly] {
 }
 
 .alert {
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 5px;
-  font-weight: bold;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    font-weight: bold;
 }
 
 .alert-success {
-  background-color: #d4edda;
-  color: #155724;
+    background-color: #d4edda;
+    color: #155724;
 }
 
 .alert-danger {
-  background-color: #f8d7da;
-  color: #721c24;
+    background-color: #f8d7da;
+    color: #721c24;
 }
-
 
 .text-center th,
 .text-center td {
-  text-align: center;
-  vertical-align: middle;
+    text-align: center;
+    vertical-align: middle;
 }
+
 
 .checkbox-label {
   display: flex;
@@ -253,42 +232,44 @@ input[readonly] {
 }
 
 .checkbox-right {
-  display: flex;
-  justify-content: flex-end;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 
+
 .btn-check {
-  display: none;
+    display: none;
 }
 
 .btn {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  color: black;
-  background-color: white;
-  text-align: center;
-  border-radius: 4px;
-  cursor: pointer;
-  display: block;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    color: black;
+    background-color: white;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+    display: block;
 }
 
 .btn.full-width {
-  width: 100%;
+    width: 100%;
 }
 
 .btn-check:checked + .btn {
-  background-color: black;
-  color: white;
+    background-color: black;
+    color: white;
 }
 
 .table .btn-danger {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 0.4rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  transition: background-color 0.2s;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
 }
 
 .table .btn-danger:hover {
@@ -299,11 +280,8 @@ input[readonly] {
     margin: 0;
 }
 
-.table td {
+.table td, .table th {
     padding: 0.5rem;
-}
-
-.table th, .table td {
     vertical-align: middle;
 }
 
@@ -313,24 +291,22 @@ input[readonly] {
     line-height: 1;
 }
 
-/* Centrar botón dentro de la celda */
 td.borrar-pago {
     text-align: center;
     padding: 0.5rem;
-    background-color: transparent;
+    background-color: transparent !important;
 }
 
-/* Formulario sin márgenes ni relleno extra */
 td.borrar-pago form {
     margin: 0;
     display: inline-block;
 }
 
-/* Botón ícono más prolijo */
 .btn-danger {
     background-color: #dc3545;
     color: white;
-    border: none;
+    border: none !important;
+    box-shadow: none !important;
     padding: 0.3rem 0.5rem;
     border-radius: 4px;
     font-size: 1rem;
@@ -342,39 +318,8 @@ td.borrar-pago form {
     background-color: #c82333;
 }
 
-th.borrar-pago,
-td.borrar-pago {
+th.borrar-pago, td.borrar-pago {
     width: 80px;
-}
-
-/* Celda: sin fondo ni borde */
-td.borrar-pago {
-    text-align: center;
-    padding: 0.5rem;
-    background-color: transparent !important;
-}
-
-/* Formulario inline sin fondo ni borde */
-td.borrar-pago form {
-    display: inline-block;
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-}
-
-/* Botón: sin borde ni sombra */
-.btn-danger {
-    background-color: #dc3545;
-    color: white;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0.3rem 0.5rem;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
 }
 
 .btn-primary {
@@ -393,7 +338,6 @@ td.borrar-pago form {
     border-color: #218838;
 }
 
-/* Removing redundant styles */
 .addProductBtn, .removeProductBtn {
     margin: 0;
 }
@@ -425,28 +369,21 @@ td.borrar-pago form {
 
 .h2, h2 {
     text-align: center;
-    font-size: 2 rem;
+    font-size: 2rem;
 }
-
-/*
-.p, p {
-    text-align: center;
-}
-*/
 
 .iconBtn {
-  background: transparent;
-  border: none;
-  font-size: 1.2rem;
-  color: #28a745;
-  cursor: pointer;
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: #28a745;
+    cursor: pointer;
 }
 
 .iconBtn:hover {
-  color: #218838;
+    color: #218838;
 }
 
-/* Toggle container styles */
 #toggleContainer {
     display: flex;
     gap: 1rem;
@@ -457,103 +394,182 @@ td.borrar-pago form {
     flex: 1;
 }
 
-/* Disabled input styles */
-input:disabled {
-    background-color: #f8f9fa;
-    cursor: not-allowed;
-}
-
 .payment-method-container {
     position: relative;
     margin-bottom: 1rem;
-    min-height: 38px; /* Altura mínima para modo simple */
+    min-height: 38px;
     transition: min-height 0.3s ease;
 }
 
 .payment-method-container.multiple {
-    min-height: 90px; /* Altura para acomodar dos filas de inputs */
+    min-height: 90px;
 }
 
-#singleMethodGroup,
-#membresiaMethodGroup {
-    width: 100%;
-    height: 38px;
+.btn {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    color: black;
+    background-color: white;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+    display: block;
 }
 
-#multiMethodGroup {
-    width: 100%;
-}
-
-.payment-method-group {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
+.btn.full-width {
     width: 100%;
 }
 
-.payment-method-group:last-child {
-    margin-bottom: 0;
+.btn-check {
+    display: none;
 }
 
-.payment-method-group select,
-.payment-method-group input {
-    margin: 0;
-}
-
-.payment-method-group select {
-    flex: 2;
-}
-
-.payment-method-group input {
-    flex: 1;
-}
-
-/* Mantener el grupo de propina siempre visible */
-.form-group {
-    position: relative;
-    z-index: 1;
-}
-
-#membresiaMethodGroup {
-    z-index: 2;
-}
-
-.centrado {
-  text-align: center;
-  align-items: center;
+.btn-check:checked + .btn {
+    background-color: black;
+    color: white;
 }
 
 .form-row-flex {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* importante para forzar separación */
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-row-flex label {
+    margin: 0;
+    white-space: nowrap;
+    min-width: 150px; /* Ajustable según tu diseño */
+}
+
+.checkbox-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+}
+
+.checkbox-left,
+.checkbox-right {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.form-row-flex {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .form-row-flex > label {
-  flex: 1 1 200px;
-  min-width: 120px;
-  margin-bottom: 0;
+    margin: 0;
+    white-space: nowrap;
+    min-width: auto;
 }
 
-@media (max-width: 600px) {
-  .form-row-flex {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .checkbox-group {
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    margin-top: 0.5rem;
-    gap: 0.5rem;
-  }
-  .checkbox-left, .checkbox-right {
-    width: 100%;
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
     justify-content: flex-start;
-  }
-  .checkbox-text {
-    font-size: 0.9rem;
-  }
+}
+
+.checkbox-left {
+    flex: 1;
+    display: flex;
+    justify-content: center; /* CENTRAR checkbox */
+    align-items: center;
+}
+
+#method + .checkbox-left {
+    margin-left: 1rem;
+}
+
+
+
+/* ------------------------ ESTILOS RESPONSIVE (MOBILE) ------------------------ */
+
+@media (max-width: 768px) {
+
+    .logo {
+        max-width: 70%;
+    }
+
+    header {
+        padding: 0.5rem;
+    }
+
+    nav a {
+        /* display: block; */
+        /* margin: 0.5rem 0; */
+        font-size: 1rem;
+    }
+
+    main {
+        padding: 1rem;
+    }
+
+    form {
+        padding: 1rem;
+    }
+
+    .form-row-flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .checkbox-group {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 0.5rem;
+    }
+
+    .propina-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .propina-row input[type="number"],
+    .propina-row input[type="text"],
+    .propina-row .btn-primary {
+        width: 100%;
+    }
+
+    .productRow > div {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .productRow .productCant,
+    .productRow .productPrice,
+    .productRow .productSelect {
+        width: 100% !important;
+        flex: 1;
+    }
+
+    .table {
+        font-size: 0.9rem;
+    }
+
+    .table td, .table th {
+        padding: 0.3rem;
+    }
+
+    .checkbox-label {
+        justify-content: flex-start;
+    }
+
+    .h2, h2 {
+        text-align: center;
+        font-size: 1rem;
+    }
+
 }
