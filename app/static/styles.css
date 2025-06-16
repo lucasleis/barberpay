@@ -503,6 +503,7 @@ td.borrar-pago button.btn-danger {
     font-size: 1.2rem; 
 }
 
+
 /* ------------------------ ESTILOS RESPONSIVE (MOBILE) ------------------------ */
 
 @media (max-width: 768px) {
@@ -582,4 +583,41 @@ td.borrar-pago button.btn-danger {
         font-size: 1rem;
     }
 
+    /* Estilos específicos para los grupos de checkbox en mobile */
+    .checkbox-group.servicio-precio,
+    .checkbox-group.metodo-pago {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 0.5rem;
+    }
+
+    .checkbox-group.servicio-precio .checkbox-left,
+    .checkbox-group.servicio-precio .checkbox-right,
+    .checkbox-group.metodo-pago .checkbox-left,
+    .checkbox-group.metodo-pago .checkbox-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .checkbox-group.servicio-precio .checkbox-label,
+    .checkbox-group.metodo-pago .checkbox-label {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 0.4rem;
+    }
+
+    /* Ajuste específico para el grupo de método de pago */
+    .form-group.payment-methods .checkbox-group {
+        justify-content: flex-start;
+    }
+
+    .form-group.payment-methods .checkbox-left {
+        margin-left: 0;
+    }
+
+    .form-group.payment-methods .checkbox-right {
+        width: 100%;
+    }
 }
+
