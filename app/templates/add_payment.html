@@ -100,11 +100,14 @@
             {% endif %}
           {% endfor %}
         </select>
-        <select class="productCant" name="product_quantity[]"> <!-- Se llena dinámicamente con JS  --> </select> 
 
-        <input type="text" class="productPrice" disabled placeholder="$">
-        <button type="button" class="addProductBtn btn-primary">+</button>
-        <button type="button" class="removeProductBtn btn-primary">−</button>
+        <div class="productCant-container">
+          <select class="productCant" name="product_quantity[]"></select> 
+          <button type="button" class="addProductBtn btn-primary">+</button>
+          <button type="button" class="removeProductBtn btn-primary">−</button>
+
+          <input type="text" class="productPrice" disabled placeholder="$">
+        </div>
       </div>
     </div>
   </div>

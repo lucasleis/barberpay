@@ -9,6 +9,7 @@
     - Productos:
         - (listo) insertar cantidades a mano y no por un select
         - (listo) limitar la cantidad mostrada en el select de pagos 
+        - actualizar precio cuando se quita un producto
 
     - Metodos de Pago:
 

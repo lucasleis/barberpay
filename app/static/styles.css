@@ -503,6 +503,18 @@ td.borrar-pago button.btn-danger {
     font-size: 1.2rem; 
 }
 
+.productCant-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.addProductBtn,
+.removeProductBtn {
+    width: 38px;
+    padding: 0;
+}
+
 
 /* ------------------------ ESTILOS RESPONSIVE (MOBILE) ------------------------ */
 
@@ -621,5 +633,33 @@ td.borrar-pago button.btn-danger {
     .form-group.payment-methods .checkbox-right {
         width: 100%;
     }
+
+    
+    .productCant-container {
+        flex-direction: row; /* Changed from column to row for mobile */
+        flex-wrap: wrap; /* Allow items to wrap to the next line */
+        align-items: center; /* Vertically align items in the row */
+        width: 100%;
+        gap: 0.5rem; /* Maintain gap between items */
+    }
+
+    .productCant-container .productCant {
+        flex-grow: 1; /* Allow productCant to grow and take available space */
+        width: auto; /* Reset width to auto */
+        min-width: 100px; /* Ensure a minimum width for the select */
+    }
+
+    .addProductBtn,
+    .removeProductBtn {
+        width: 38px;
+        padding: 0;
+        flex-shrink: 0; /* Prevent buttons from shrinking */
+    }
+
+    .productCant-container .productPrice {
+        flex-basis: 100%; /* Force this element to take full width and move to a new line */
+        order: 1; /* Place it at the end of the flex items */
+    }
+
 }
 
