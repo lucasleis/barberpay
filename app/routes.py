@@ -1032,8 +1032,20 @@ def delete_payment(pago_id):
 @app.route('/pagos_entre_fechas', methods=['POST'])
 def pagos_entre_fechas():
     data = request.get_json()
-    start_date = datetime.fromisoformat(data['start_date']).replace(hour=0, minute=0, second=0, microsecond=0)
-    end_date = datetime.fromisoformat(data['end_date']).replace(hour=23, minute=59, second=59, microsecond=999999)
+
+    # Definir la zona horaria correcta
+    tz = ZoneInfo("America/Argentina/Buenos_Aires")
+    
+    # Parsear las fechas como naive
+    start_date_naive = datetime.fromisoformat(data['start_date'])
+    end_date_naive = datetime.fromisoformat(data['end_date'])
+    
+    # Asignarles la zona horaria correcta
+    start_date = start_date_naive.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=tz)
+    end_date = end_date_naive.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=tz)
+
+    # start_date = datetime.fromisoformat(data['start_date']).replace(hour=0, minute=0, second=0, microsecond=0)
+    # end_date = datetime.fromisoformat(data['end_date']).replace(hour=23, minute=59, second=59, microsecond=999999)
     resultado = calcular_pagos_entre_fechas(start_date, end_date)
     return jsonify(resultado)
 
