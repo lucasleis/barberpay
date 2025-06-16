@@ -567,7 +567,9 @@ td.borrar-pago button.btn-danger {
     }
 
     .table {
-        font-size: 0.9rem;
+            display: block;
+    overflow-x: auto;
+    white-space: nowrap;
     }
 
     .table td, .table th {
