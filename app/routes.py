@@ -197,7 +197,8 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             total_por_empleado[empleado.name]["monto_productos"] += float(pago_empleado_producto)
             total_por_empleado[empleado.name]["cortes"] += 1
             total_por_empleado[empleado.name]["productos"] += float(pt.cantidad)
-            total_propietario += float(monto_servicio - pago_empleado_servicio) +float(monto_producto - pago_empleado_producto)
+            # total_propietario += float(monto_servicio - pago_empleado_servicio) +float(monto_producto - pago_empleado_producto)
+            total_propietario += (float(monto_servicio) - float(pago_empleado_servicio)) + (float(monto_producto) - float(pago_empleado_producto))
             total_general += float(monto_servicio) + float(monto_producto)
 
         if pago.membresia_comprada:

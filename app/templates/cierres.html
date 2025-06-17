@@ -68,38 +68,34 @@
 
 
       <h6 class="titulo-con-linea"><strong> - Totales por empleado:</strong></h6>
-  <div class="empleado-scroll-wrap">
-    <div class="empleados-grid">
-      <div class="empleado-header">Empleado</div>
-      <div class="empleado-header">Total</div>
-      <div class="empleado-header">Cortes</div>
-      <div class="empleado-header">Productos</div>
-      <div class="empleado-header">Propinas</div>
+      <div class="empleado-scroll-wrap">
+        <div class="empleados-grid">
+          <div class="empleado-header">Empleado</div>
+          <div class="empleado-header">Total</div>
+          <div class="empleado-header">Cortes</div>
+          <div class="empleado-header">Productos</div>
+          <div class="empleado-header">Propinas</div>
 
-      ${Object.entries(data.totales.empleados).map(([nombre, datos]) => {
-        const totalConPropinas = parseFloat(datos.monto) + parseFloat(datos.propinas || 0);
-        const montoCortes = parseFloat(datos.monto_cortes || 0);
-        const montoProductos = parseFloat(datos.monto_productos || 0);
-        const cortes = parseInt(datos.cortes || 0);
-        const productos = parseInt(datos.productos || 0);
-        const propinas = parseFloat(datos.propinas || 0);
+          ${Object.entries(data.totales.empleados).map(([nombre, datos]) => {
+            const totalConPropinas = parseFloat(datos.monto) + parseFloat(datos.propinas || 0);
+            const montoCortes = parseFloat(datos.monto_cortes || 0);
+            const montoProductos = parseFloat(datos.monto_productos || 0);
+            const cortes = parseInt(datos.cortes || 0);
+            const productos = parseInt(datos.productos || 0);
+            const propinas = parseFloat(datos.propinas || 0);
 
-        return `
-          <div class="empleado-celda">${nombre}</div>
-          <div class="empleado-celda">$${totalConPropinas.toLocaleString('es-AR')}</div>
-          <div class="empleado-celda">$${montoCortes.toLocaleString('es-AR')} (${cortes})</div>
-          <div class="empleado-celda">$${montoProductos.toLocaleString('es-AR')} (${productos})</div>
-          <div class="empleado-celda">$${propinas.toLocaleString('es-AR')}</div>
-        `;
-      }).join('')}
-    </div>
-  </div>
-
-
-
+            return `
+              <div class="empleado-celda">${nombre}</div>
+              <div class="empleado-celda">$${totalConPropinas.toLocaleString('es-AR')}</div>
+              <div class="empleado-celda">$${montoCortes.toLocaleString('es-AR')} (${cortes})</div>
+              <div class="empleado-celda">$${montoProductos.toLocaleString('es-AR')} (${productos})</div>
+              <div class="empleado-celda">$${propinas.toLocaleString('es-AR')}</div>
+            `;
+          }).join('')}
+        </div>
+      </div>
 
       <div class="linea-inferior"></div>
-
 
       <p><strong>Total propietario:</strong> $${parseInt(data.totales.propietario_total).toLocaleString('es-AR')}</p>
       <div class="linea-inferior"></div>
@@ -108,8 +104,6 @@
       <div class="linea-inferior"></div>
 
     `;
-
-
 
     // Tabla de pagos
     html += `

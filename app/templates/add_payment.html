@@ -239,7 +239,7 @@
       <td>  <!-- Tipo de servicio -->
         {% if pago.appointment.service %}
           {% if pago.appointment.tipo_precio_servicio == 'amigo' %}
-            <!-- {{ pago.appointment.service.name }} --> Vale por Corte
+            Vale por {{ pago.appointment.service.name }} 
           {% elif pago.appointment.tipo_precio_servicio == 'descuento' %}
             {{ pago.appointment.service.name }} Descuento
           {% else %}
@@ -357,6 +357,9 @@
   function updateToggleSections(e = null) {
     const source = e?.target?.id || null;
     const membresiaCheckbox = document.getElementById('membresiaCheckbox');
+
+    // Ocultar mensaje de error si estaba visible
+    document.getElementById('messageContainer').style.display = 'none';
 
     // Si algún toggle está seleccionado, ocultar el mensaje de error
     if (servicioToggle.checked || productoToggle.checked || membresiaToggle.checked) {

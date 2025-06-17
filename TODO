@@ -3,11 +3,12 @@
     - Empleados:
 
     - Servicios: 
-        - si selecciona usa multiples metodos de pago, y luego selecciona usa membrecia queda algo roto. 
-        - arreglar el vale por corte de corte y barba
+        - si selecciona usa multiples metodos de pago, y luego selecciona usa membresia queda algo roto. 
+        - (listo) arreglar el vale por corte de corte y barba
 
     - Productos:
-        - si muestra mensaje de error "Debe haber al menos un producto." y se selecciona otro toggle no se oculta el mensaje
+        - (listo) si muestra mensaje de error "Debe haber al menos un producto." y se selecciona otro toggle no se oculta el mensaje
+        - no hace bien la cuenta cuando compra un producto y usa vale
 
     - Metodos de Pago:
 
