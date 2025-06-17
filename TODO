@@ -13,7 +13,7 @@
     - Metodos de Pago:
 
     - Membresia:
-        - agregar un select donde muestre todos los servicios que hay asi se puede relacionar el precio del corte 
+        - (listo) agregar un select donde muestre todos los servicios que hay asi se puede relacionar el precio del corte 
         - preguntar si mostrar una tabla con las membresias activas en la parte de admin
 
     - Cierre:
@@ -23,17 +23,10 @@
 
 
 - Pagos: (listo)
-    - En venta de producto, los empleados se quedan con el 15%
-    - En color y mechas, los empleados se quedan con el 50%
     - Manejar errores de que no haya peluqueria, empleado, corte, etc
 
 
 - Cierres:
-    - Total por metodo de pago primero
-    - Total por empleado para la derecha
-    - no tan a lo alto, sino a lo ancho
-    - y que todo sea mas visible
-    - abajo de todo general y propietario
 
 
 - Testear:

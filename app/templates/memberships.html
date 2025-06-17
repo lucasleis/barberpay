@@ -24,6 +24,17 @@
       <input type="number" name="cantidad" id="cantidad" min="1" placeholder="Cantidad de usos" required>
     </div>
 
+    <div class="form-group">
+      <label for="servicio_id">Servicio asociado:</label>
+      <select name="servicio_id" id="servicio_id" required>
+        <option value="">-- Seleccionar servicio --</option>
+        {% for servicio in servicios %}
+          <option value="{{ servicio.id }}">{{ servicio.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+
     <button type="submit">Agregar Membresía</button>
   </form>
 
@@ -60,6 +71,16 @@
             <div class="form-group">
               <label for="usos-{{ tipo.id }}">Cantidad de usos:</label>
               <input type="number" name="usos" id="usos-{{ tipo.id }}" min="1" value="{{ tipo.usos }}" required>
+            </div>
+            <div class="form-group">
+              <label for="servicio-{{ tipo.id }}">Servicio asociado:</label>
+              <select name="servicio_id" id="servicio-{{ tipo.id }}" required>
+                {% for servicio in servicios %}
+                  <option value="{{ servicio.id }}" {% if tipo.servicio_id == servicio.id %}selected{% endif %}>
+                    {{ servicio.name }}
+                  </option>
+                {% endfor %}
+              </select>
             </div>
             <button type="submit" class="edit-button">
               <i class="fas fa-check"></i> Confirmar

@@ -96,6 +96,7 @@ def ensure_database_and_tables():
             precio NUMERIC(10,2) NOT NULL,
             usos INTEGER NOT NULL,
             active BOOLEAN DEFAULT TRUE,
+            servicio_id INTEGER NOT NULL REFERENCES servicios(id),
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
         );
                              

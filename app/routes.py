@@ -219,7 +219,10 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             tipo = pago.appointment.membresia.tipo_membresia
             empleado = pago.appointment.barber
             porcentaje = empleado.porcentaje
-            monto = float(tipo.precio) / tipo.usos
+            # monto = float(tipo.precio) / tipo.usos
+            servicio = Servicio.query.get(tipo.servicio_id)
+            monto = servicio.precio if servicio else 0
+
             pago_empleado = (monto * porcentaje) / 100
             pago_propietario = 0
             if pago.appointment.productos_turno:
@@ -675,7 +678,8 @@ def list_memberships():
     if "user" in session:
         salon_id = session.get('salon_id')
         tipos = TipoMembresia.query.filter_by(active=True, peluqueria_id=salon_id).all()
-        return render_template('memberships.html', tipos_membresia=tipos)
+        servicios = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
+        return render_template('memberships.html', tipos_membresia=tipos, servicios=servicios)
     else:
         return redirect(url_for("login"))
 
@@ -685,13 +689,15 @@ def add_membership():
         salon_id = session.get('salon_id')
         nombre = request.form['nombre']
         precio = request.form['precio']
-        usos = request.form['cantidad'] 
+        usos = request.form['cantidad']
+        servicio_id = request.form.get('servicio_id')
 
         nueva = TipoMembresia(
             peluqueria_id=salon_id,
             nombre=nombre,
             precio=precio,
-            usos=usos
+            usos=usos,
+            servicio_id=servicio_id 
         )
         db.session.add(nueva)
         db.session.commit()
@@ -723,6 +729,7 @@ def update_membership_type(id):
     nombre = request.form['nombre']
     precio = float(request.form['precio'])
     usos = int(request.form['usos'])
+    servicio_id = int(request.form['servicio_id']) 
     salon_id = original.peluqueria_id
 
     nueva = TipoMembresia(
@@ -730,7 +737,8 @@ def update_membership_type(id):
         nombre=nombre,
         precio=precio,
         usos=usos,
-        active=True 
+        servicio_id=servicio_id,  
+        active=True
     )
 
     db.session.add(nueva)
