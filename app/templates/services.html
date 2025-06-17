@@ -25,21 +25,9 @@
         <label for="descuentoCheckbox" class="toggle-button">Descuento</label>
       </div>
       <div class="input-wrapper">
-        <input type="number" name="precio_descuento" id="descuentoField" step="1" placeholder="Monto descuento ($)" class="input-condicional" style="display: none;">
+        <input type="number" name="precio_descuento" id="descuentoField" step="1"  min="1" placeholder="Monto descuento ($)" class="input-condicional" style="display: none;">
       </div>
     </div>
-    
-    <!--
-      <div class="form-group toggle-container">
-        <div class="toggle-section">
-          <input type="checkbox" name="amigo" id="amigoCheckbox" value="true" class="toggle-checkbox" onchange="toggleAmigoField()">
-          <label for="amigoCheckbox" class="toggle-button">Amigo</label>
-        </div>
-        <div class="input-wrapper">
-          <input type="number" name="precio_amigo" id="amigoField" step="1" placeholder="Monto amigo ($)" class="input-condicional" style="display: none;">
-        </div>
-      </div>
-    -->
 
     <button type="submit">Agregar Servicio</button>
   </form>

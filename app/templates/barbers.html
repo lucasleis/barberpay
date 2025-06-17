@@ -16,7 +16,7 @@
 
     <div class="form-group">
       <label for="porcentaje">Comisión empleado (%):</label>
-      <input type="number" name="porcentaje" id="porcentaje" step="1" placeholder="Ej. 50" required>
+      <input type="number" name="porcentaje" id="porcentaje" step="1" min="0" max="100" placeholder="Ej. 50" required>
     </div>
 
     <button type="submit">Agregar Barbero</button>
@@ -50,7 +50,7 @@
             </div>
             <div class="form-group">
               <label for="porcentaje-{{ barber.id }}">Nuevo porcentaje (%):</label>
-              <input type="number" name="porcentaje" id="porcentaje-{{ barber.id }}" value="{{ barber.porcentaje|int }}" step="1" required class="cantidad-input">
+              <input type="number" name="porcentaje" id="porcentaje-{{ barber.id }}" value="{{ barber.porcentaje|int }}" step="1" min="0" max="100" required class="cantidad-input">
             </div>
             <button type="submit" class="edit-button">
               <i class="fas fa-check"></i> Confirmar

@@ -3,19 +3,17 @@
     - Empleados:
 
     - Servicios: 
-        - (listo) hacer que si no hay servicio con precio descuento tire error
-        - (listo) vale x corte  (confirmar con el que esta bien)
+        - si selecciona usa multiples metodos de pago, y luego selecciona usa membrecia queda algo roto. 
+        - arreglar el vale por corte de corte y barba
 
     - Productos:
-        - (listo) insertar cantidades a mano y no por un select
-        - (listo) limitar la cantidad mostrada en el select de pagos 
-        - actualizar precio cuando se quita un producto
+        - si muestra mensaje de error "Debe haber al menos un producto." y se selecciona otro toggle no se oculta el mensaje
 
     - Metodos de Pago:
 
     - Membresia:
-        - (listo) quiere que el usa membresia este en el toggle de servicios
-        - (listo) cuando se utiliza membresia y no se asigna id esta mal el error que muestra
+        - agregar un select donde muestre todos los servicios que hay asi se puede relacionar el precio del corte 
+        - preguntar si mostrar una tabla con las membresias activas en la parte de admin
 
     - Cierre:
 
@@ -42,6 +40,8 @@
     - Vision mobile
 
 
+https://docs.python.org/3/library/decimal.html
+https://medium.com/@olivier.s/demystifying-floating-point-arithmetic-why-0-1-0-2-0-3-673b9c4bcf9a
 
 
 - Preguntas:
@@ -61,21 +61,6 @@
         - Agustin asume el valor descontado. A los barberos se le paga como corte comun. 
         - Los productos no tienen descento, solo los servicios. 
         - Color y Mechas tiene descuento, pero no precio amigo. 
-
-
-Corte:
-- Amigos 
-- Descuento
-
-Corte y Barba:
-- Descuento
-
-Membresia:
-- Corte
-- Corte y Barba
-
-Color
-Mechas
 
 
 

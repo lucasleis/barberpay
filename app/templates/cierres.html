@@ -6,14 +6,17 @@
 <h3>Cierres</h3>
 <form id="form-fechas" class="form-fechas">
   <label for="fechaInicio">Seleccionar fecha:</label>
-  <span class="rango-fechas">
-    Desde
-    <input type="date" name="fechaInicio" id="fechaInicio" value="{{ request.args.get('fechaInicio', fechaInicio) }}">
-    Hasta
-    <input type="date" name="fechaFinal" id="fechaFinal" value="{{ request.args.get('fechaFinal', fechaFinal) }}">
-  </span>
 
-  <button type="submit" class="boton-cierre">Ver cierre</button>
+  <div class="rango-fechas">
+    <label for="fechaInicio">Desde</label>
+    <input type="date" name="fechaInicio" id="fechaInicio" value="{{ request.args.get('fechaInicio', fechaInicio) }}">
+
+    <label for="fechaFinal">Hasta</label>
+    <input type="date" name="fechaFinal" id="fechaFinal" value="{{ request.args.get('fechaFinal', fechaFinal) }}">
+
+    <button type="submit" class="boton-cierre">Ver cierre</button>
+  </div>
+
 </form>
 
 <div id="resultados-cierres">
