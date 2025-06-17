@@ -47,7 +47,6 @@
   margin-top: 2rem;
   border-top: 1px solid #ccc;
 }
-  
 
 .form-fechas {
   display: flex;
@@ -101,7 +100,6 @@
   background-color: #218838;
 }
 
-
 .empleados-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(130px, 1fr));
@@ -153,9 +151,6 @@
   background-color: #ffffff;
 }
 
-
-
-
 .semana-cierre p {
   margin-bottom: 0.5rem;
 }
@@ -196,4 +191,41 @@
     margin-left: 0;
     text-align: center;
   }
+
+  .empleado-scroll-wrap {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .empleado-header-row,
+  .empleado-fila {
+    display: flex;
+  }
+
+  .empleado-header,
+  .empleado-celda {
+    min-width: 130px;
+    padding: 0.6rem;
+    text-align: center;
+    white-space: nowrap;
+    border-right: 1px solid #ccc;
+  }
+
+  .empleado-header:last-child,
+  .empleado-celda:last-child {
+    border-right: none;
+  }
+
+  .empleado-fila {
+    border-bottom: 1px solid #ccc;
+  }
+
+  .empleado-scroll-wrap {
+    overflow-x: auto;
+  }
+
+  .empleados-grid {
+    min-width: 650px; /* o más si hay muchas columnas */
+  }
 }
+
