@@ -983,6 +983,7 @@
 
           if (rows.length > 1) {
             row.remove();
+            updatePriceTotal();
             messageContainer.style.display = 'none';
             messageContainer.textContent = '';
           } else {
