@@ -3,7 +3,7 @@
     - Empleados:
 
     - Servicios: 
-        - si selecciona usa multiples metodos de pago, y luego selecciona usa membresia queda algo roto. 
+        - (listo) si selecciona usa multiples metodos de pago, y luego selecciona usa membresia queda algo roto. 
         - (listo) arreglar el vale por corte de corte y barba
 
     - Productos:
@@ -92,7 +92,7 @@ descu 8.000
 porcentaje_servicio = 50
 
 pago_empleado_servicio = (monto_servicio * porcentaje_servicio) / 100
-pago_empleado_servicio = (   $10.000)    *      50            ) / 100
+pago_empleado_servicio = ( ( $10.000  )   *      50           ) / 100
 pago_empleado_servicio =  5.000
 
 pago_propietario_servicio = float(monto_servicio - pago_empleado_servicio)

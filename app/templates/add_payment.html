@@ -736,7 +736,7 @@
         if (!membresiaValue) {
           mostrarError(campo, mensaje);
           return;
-        }
+        } 
       }
 
       agregarInputsOcultos(productosData.items);
@@ -819,6 +819,12 @@
     function updateMembresiaPrice() {
       const selectedOption = membresiaSelect.options[membresiaSelect.selectedIndex];
       const precio = selectedOption.getAttribute('data-precio');
+
+      multiGroup.querySelectorAll('input').forEach(el => {
+        el.required = false;
+        el.classList.remove('input-error');
+      });
+      multiGroup.querySelectorAll('select').forEach(el => el.classList.remove('input-error'));
       
       if (checkbox_use_member && checkbox_use_member.checked) {
         // Si está usando un corte de membresía, mostrar precio en 0
@@ -863,6 +869,8 @@
       if (checkbox_use_member.checked) {
         servicePriceInput.value = '$0';
         if (amountSimple) amountSimple.value = 0;
+        multiPaymentToggle.disabled = false;
+
       } else {
         // updatePrice();
       }
@@ -898,8 +906,6 @@
       
     });
   
-
-
     // Asegurarse de que el precio esté correcto al cargar
     actualizarPrecioServicio();
   }
