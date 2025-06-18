@@ -8,13 +8,13 @@
 
     - Productos:
         - (listo) si muestra mensaje de error "Debe haber al menos un producto." y se selecciona otro toggle no se oculta el mensaje
-        - no hace bien la cuenta cuando compra un producto y usa vale
+        - (listo) no hace bien la cuenta cuando compra un producto y usa vale
 
     - Metodos de Pago:
 
     - Membresia:
         - (listo) agregar un select donde muestre todos los servicios que hay asi se puede relacionar el precio del corte 
-        - preguntar si mostrar una tabla con las membresias activas en la parte de admin
+        - (listo) mostrar una tabla con las membresias activas en la parte de admin
 
     - Cierre:
 

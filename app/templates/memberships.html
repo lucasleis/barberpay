@@ -27,7 +27,7 @@
     <div class="form-group">
       <label for="servicio_id">Servicio asociado:</label>
       <select name="servicio_id" id="servicio_id" required>
-        <option value="">-- Seleccionar servicio --</option>
+        <option value="" disabled selected>-- Seleccionar servicio --</option>
         {% for servicio in servicios %}
           <option value="{{ servicio.id }}">{{ servicio.name }}</option>
         {% endfor %}
@@ -91,8 +91,29 @@
     {% endfor %}
   </ul>
   
-
-
+  <h3>Membresías activas</h3>
+  <table class="table table-striped table-bordered text-center" style="margin-top: 1rem;">
+    <thead>
+      <tr>
+        <th>ID Membresía</th>
+        <th>Nombre de Membresía</th>
+        <th>Usos Disponibles</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in membresias %}
+        <tr>
+          <td>{{ m.id }}</td>
+          <td>{{ m.tipo_membresia.nombre }}</td>
+          <td>{{ m.usos_disponibles }}</td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="3">No hay membresías activas registradas.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
   <script>
 

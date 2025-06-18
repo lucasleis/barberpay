@@ -10,6 +10,11 @@ from collections import defaultdict
 from zoneinfo import ZoneInfo
 from werkzeug.datastructures import MultiDict
 from decimal import Decimal
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 # Funciones auxiliares
@@ -679,7 +684,8 @@ def list_memberships():
         salon_id = session.get('salon_id')
         tipos = TipoMembresia.query.filter_by(active=True, peluqueria_id=salon_id).all()
         servicios = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
-        return render_template('memberships.html', tipos_membresia=tipos, servicios=servicios)
+        membresias = Membresia.query.filter_by(peluqueria_id=salon_id, active=True).all()
+        return render_template('memberships.html', tipos_membresia=tipos, servicios=servicios, membresias=membresias)
     else:
         return redirect(url_for("login"))
 
