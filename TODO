@@ -3,18 +3,12 @@
     - Empleados:
 
     - Servicios: 
-        - (listo) si selecciona usa multiples metodos de pago, y luego selecciona usa membresia queda algo roto. 
-        - (listo) arreglar el vale por corte de corte y barba
 
     - Productos:
-        - (listo) si muestra mensaje de error "Debe haber al menos un producto." y se selecciona otro toggle no se oculta el mensaje
-        - (listo) no hace bien la cuenta cuando compra un producto y usa vale
 
     - Metodos de Pago:
 
     - Membresia:
-        - (listo) agregar un select donde muestre todos los servicios que hay asi se puede relacionar el precio del corte 
-        - (listo) mostrar una tabla con las membresias activas en la parte de admin
 
     - Cierre:
 
@@ -25,6 +19,8 @@
 - Pagos: (listo)
     - Manejar errores de que no haya peluqueria, empleado, corte, etc
 
+- Cronjob:
+    - DELETE FROM membresias WHERE active = FALSE OR fecha_compra < NOW() - INTERVAL '1 month';
 
 - Cierres:
 

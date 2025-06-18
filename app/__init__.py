@@ -99,9 +99,40 @@ def ensure_database_and_tables():
             servicio_id INTEGER NOT NULL REFERENCES servicios(id),
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
         );
+                
+        CREATE SEQUENCE IF NOT EXISTS membresias_id_seq START 1 MINVALUE 1 MAXVALUE 100 CYCLE;
+
+        CREATE OR REPLACE FUNCTION insertar_membresia(
+          tipo_id INTEGER,
+          usos INTEGER,
+          peluqueria_id INTEGER
+        ) RETURNS void AS $$
+        DECLARE
+          nuevo_id INTEGER;
+        BEGIN
+          SELECT i INTO nuevo_id
+          FROM generate_series(1, 100) AS i
+          WHERE NOT EXISTS (
+            SELECT 1 FROM membresias WHERE id = i
+          )
+          ORDER BY i
+          LIMIT 1;
+
+          IF nuevo_id IS NULL THEN
+            RAISE EXCEPTION 'No hay IDs disponibles entre 1 y 100.';
+          END IF;
+
+          INSERT INTO membresias (
+            id, tipo_membresia_id, usos_disponibles, peluqueria_id
+          )
+          VALUES (
+            nuevo_id, tipo_id, usos, peluqueria_id
+          );
+        END;
+        $$ LANGUAGE plpgsql;
                              
         CREATE TABLE IF NOT EXISTS membresias (
-            id SERIAL PRIMARY KEY,
+            id INTEGER PRIMARY KEY DEFAULT nextval('membresias_id_seq'),
             tipo_membresia_id INTEGER NOT NULL REFERENCES tipos_membresia(id),
             usos_disponibles INTEGER NOT NULL,
             fecha_compra TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
