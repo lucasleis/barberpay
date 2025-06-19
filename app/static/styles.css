@@ -184,6 +184,35 @@ input[readonly] {
     color: #721c24;
 }
 
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.alert-dismissible .btn-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+    z-index: 2;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.m-0 {
+    margin: 0 !important;
+}
+
+.rounded-0 {
+    border-radius: 0 !important;
+}
+
 .text-center th,
 .text-center td {
     text-align: center;

@@ -358,6 +358,22 @@ def miles(valor):
     except (ValueError, TypeError):
         return "0"
 
+def obtener_id_usuario_disponible(peluqueria_id):
+    # Obtener todos los id_usuario y los id existentes en esa peluquería
+    ids = db.session.query(Membresia.id).filter_by(peluqueria_id=peluqueria_id).all()
+    id_usuarios = db.session.query(Membresia.id_usuario).filter_by(peluqueria_id=peluqueria_id).all()
+
+    usados_set = set()
+    usados_set.update(r[0] for r in ids if r[0] is not None)
+    usados_set.update(r[0] for r in id_usuarios if r[0] is not None)
+
+    # Buscar el menor número entero libre
+    i = 1
+    while i in usados_set:
+        i += 1
+
+    return i
+
 
 @app.route('/')
 def index():
@@ -799,7 +815,19 @@ def update_membresia(membresia_id):
         return redirect(url_for('list_memberships'))
 
     membresia = Membresia.query.filter_by(id=membresia_id, peluqueria_id=salon_id).first()
+
     if membresia:
+        # Verificar que el nuevo id_usuario no esté en uso por otra membresía
+        existente = Membresia.query.filter(
+            Membresia.id_usuario == nueva_id_usuario,
+            Membresia.id != membresia_id,
+            Membresia.peluqueria_id == salon_id
+        ).first()
+
+        if existente:
+            flash(f'El ID de usuario {nueva_id_usuario} ya está en uso.', 'danger')
+            return redirect(url_for('list_memberships'))
+
         membresia.id_usuario = nueva_id_usuario
         membresia.usos_disponibles = usos_disponibles
         try:
@@ -857,7 +885,6 @@ def add_payment():
                 if check_membresia == 'on':
 
                     membresia_id = request.form.get('check_membresia')
-                    print(membresia_id)
                     if not membresia_id:
                         raise ValueError("Debe seleccionarse un servicio.")
                 
@@ -941,16 +968,23 @@ def add_payment():
                 )
                 db.session.add(membresia_real)
                 db.session.flush()
-                membresia_real.id_usuario = membresia_real.id
 
-                db.session.flush() 
+                # Generar el ID de usuario amigable
+                num_disp = obtener_id_usuario_disponible(salon_id)
+                membresia_real.id_usuario = num_disp
+                print(f"membresia_real.id_usuario = {membresia_real.id_usuario}")
+
+                db.session.flush()  # Se asegura de que membresia_real.id esté disponible
+
+                # ✅ Asignar la FK real (clave primaria, no el id_usuario)
                 appointment.membresia_id = membresia_real.id
+                print(f"appointment.membresia_id = {appointment.membresia_id}")
 
-            print("000")
             db.session.add(appointment)
             db.session.commit()
 
-            print("111")
+
+
 
             multipagos = 'togglemultiPayment' in request.form
 
@@ -1009,7 +1043,8 @@ def add_payment():
                 amount_tip=tip,
                 peluqueria_id=salon_id,
                 date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires")),
-                membresia_comprada_id=membresia_real.id_usuario if membresia_real else None
+                membresia_comprada_id=membresia_real.id if membresia_real else None
+                #membresia_comprada_id=membresia_real.id_usuario if membresia_real else None
             )
 
             db.session.add(pago)
@@ -1017,7 +1052,7 @@ def add_payment():
             flash("Pago registrado con éxito.", "success")
 
             if membresia_real:
-                flash(f"Numero de membresia: {membresia_real.id}", "success")
+                flash(f"Numero de membresia: {membresia_real.id_usuario}", "success")
 
             return redirect(url_for('add_payment'))
 
