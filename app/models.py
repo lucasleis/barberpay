@@ -86,6 +86,7 @@ class Membresia(db.Model):
     __tablename__ = 'membresias'
 
     id = db.Column(db.Integer, primary_key=True)
+    id_usuario = db.Column(db.Integer, unique=True) 
     tipo_membresia_id = db.Column(db.Integer, db.ForeignKey('tipos_membresia.id'), nullable=False)
     usos_disponibles = db.Column(db.Integer, nullable=False)
     fecha_compra = db.Column(db.DateTime(timezone=True), server_default=db.func.now())

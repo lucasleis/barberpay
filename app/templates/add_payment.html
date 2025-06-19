@@ -271,9 +271,9 @@
       <td>
         {% if pago.appointment.membresia %}
           {% if not pago.membresia_comprada %}
-            {{ pago.appointment.membresia.id }} (uso) 
+            {{ pago.appointment.membresia.id_usuario }} (uso) 
           {% else %}
-            {{ pago.appointment.membresia.id }}
+            {{ pago.appointment.membresia.id_usuario }}
           {% endif %}
         {% else %}
           -
@@ -354,6 +354,70 @@
 
 
   // Función para mostrar/ocultar secciones según el toggle (servicio/producto)
+  /*
+    function updateToggleSections(e = null) {
+      const source = e?.target?.id || null;
+      const membresiaCheckbox = document.getElementById('membresiaCheckbox');
+
+      // Ocultar mensaje de error si estaba visible
+      document.getElementById('messageContainer').style.display = 'none';
+
+      // Si algún toggle está seleccionado, ocultar el mensaje de error
+      if (servicioToggle.checked || productoToggle.checked || membresiaToggle.checked) {
+        mostrarErrorToggle(false);
+      }
+
+      if (source === 'toggleMembresia' && membresiaToggle.checked) {
+        // Si el usuario activó membresía, desactiva los otros
+        servicioToggle.checked = false;
+        productoToggle.checked = false;
+        // Desmarcar el checkbox de usa membresía si estaba marcado
+        if (membresiaCheckbox) {
+          membresiaCheckbox.checked = false;
+          multiMethodGroup.style.display = 'none';
+        
+          // Disparar el evento change para actualizar la UI
+          membresiaCheckbox.dispatchEvent(new Event('change'));
+        }
+      }
+
+      if ((source === 'toggleServicio' && servicioToggle.checked) || 
+          (source === 'toggleProducto' && productoToggle.checked)) {
+        // Si el usuario activó servicio o producto, desactiva membresía
+        membresiaToggle.checked = false;
+        // Si el checkbox de usa membresía estaba marcado, habilitar múltiples métodos
+        if (membresiaCheckbox && membresiaCheckbox.checked) {
+          membresiaCheckbox.checked = false;
+          if (multiPaymentToggle) {
+            multiPaymentToggle.disabled = false;
+          }
+          // Disparar el evento change para actualizar la UI
+          membresiaCheckbox.dispatchEvent(new Event('change'));
+        }
+      }
+
+      // Mostrar u ocultar secciones 
+      servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
+      productSection.style.display = productoToggle.checked ? 'block' : 'none';
+      membresiaSection.style.display = membresiaToggle.checked ? 'block' : 'none';
+      membresiaLabel.style.display = membresiaToggle.checked ? 'none' : 'block';
+
+      if (productoToggle.checked) {
+        const productSelect = document.querySelector('.productSelect');
+        if (productSelect) {
+          updateCantidadOptions(productSelect);
+        }
+        initProductSection(); 
+      }
+
+      if (membresiaToggle.checked) {
+        initMembresiaSection();
+      }
+      
+      resetTip();
+      updatePriceTotal();
+    }
+  */
   function updateToggleSections(e = null) {
     const source = e?.target?.id || null;
     const membresiaCheckbox = document.getElementById('membresiaCheckbox');
@@ -370,6 +434,8 @@
       // Si el usuario activó membresía, desactiva los otros
       servicioToggle.checked = false;
       productoToggle.checked = false;
+      membresiaLabel.style.display = 'none';
+
       // Desmarcar el checkbox de usa membresía si estaba marcado
       if (membresiaCheckbox) {
         membresiaCheckbox.checked = false;
@@ -380,10 +446,27 @@
       }
     }
 
-    if ((source === 'toggleServicio' && servicioToggle.checked) || 
-        (source === 'toggleProducto' && productoToggle.checked)) {
-      // Si el usuario activó servicio o producto, desactiva membresía
+    if (source === 'toggleServicio' && servicioToggle.checked) {
+      // Si el usuario activó servicio desactiva membresía y producto
       membresiaToggle.checked = false;
+      productoToggle.checked = false;
+      membresiaLabel.style.display = 'block';
+      // Si el checkbox de usa membresía estaba marcado, habilitar múltiples métodos
+      if (membresiaCheckbox && membresiaCheckbox.checked) {
+        membresiaCheckbox.checked = false;
+        if (multiPaymentToggle) {
+          multiPaymentToggle.disabled = false;
+        }
+        // Disparar el evento change para actualizar la UI
+        membresiaCheckbox.dispatchEvent(new Event('change'));
+      }
+    }
+
+    if (source === 'toggleProducto' && productoToggle.checked) {
+      // Si el usuario activó producto, desactiva membresía y servicio
+      servicioToggle.checked = false;
+      membresiaToggle.checked = false;
+      membresiaLabel.style.display = 'none';
       // Si el checkbox de usa membresía estaba marcado, habilitar múltiples métodos
       if (membresiaCheckbox && membresiaCheckbox.checked) {
         membresiaCheckbox.checked = false;
@@ -399,7 +482,7 @@
     servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
     productSection.style.display = productoToggle.checked ? 'block' : 'none';
     membresiaSection.style.display = membresiaToggle.checked ? 'block' : 'none';
-    membresiaLabel.style.display = membresiaToggle.checked ? 'none' : 'block';
+    // 
 
     if (productoToggle.checked) {
       const productSelect = document.querySelector('.productSelect');
@@ -416,6 +499,7 @@
     resetTip();
     updatePriceTotal();
   }
+
 
   // Listeners que actualizan la visibilidad si el usuario cambia de opción
   servicioToggle.addEventListener('change', updateToggleSections);
@@ -814,7 +898,7 @@
   function initMembresiaSection() {
     const membresiaSelect = document.getElementById('membresiaSelect');
     const priceInput = document.getElementById('membreciaPrice');
-    const checkbox_use_member = document.getElementById('membresiaCheckbox');
+    // const checkbox_use_member = document.getElementById('membresiaCheckbox');
 
     function updateMembresiaPrice() {
       const selectedOption = membresiaSelect.options[membresiaSelect.selectedIndex];

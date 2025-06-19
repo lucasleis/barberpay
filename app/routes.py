@@ -2,7 +2,7 @@ from flask import current_app as app, render_template, request, redirect, url_fo
 from . import db
 from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno
 from .auth import login_required
-from sqlalchemy import desc
+from sqlalchemy import desc, text
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
 from collections import defaultdict
@@ -777,6 +777,42 @@ def decrementar_usos_membresia(id):
     db.session.commit()
     return "Uso descontado exitosamente", 200
 
+@app.route('/admin/memberships/update/<int:membresia_id>', methods=['POST'])
+def update_membresia(membresia_id):
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    salon_id = session.get('salon_id')
+    nueva_id_usuario = request.form.get('id_usuario')
+    usos_disponibles = request.form.get('usos_disponibles')
+
+    # Validación básica
+    if not nueva_id_usuario or not usos_disponibles:
+        flash('Debes completar todos los campos.', 'warning')
+        return redirect(url_for('list_memberships'))
+
+    try:
+        nueva_id_usuario = int(nueva_id_usuario)
+        usos_disponibles = int(usos_disponibles)
+    except ValueError:
+        flash('Los valores ingresados deben ser numéricos.', 'danger')
+        return redirect(url_for('list_memberships'))
+
+    membresia = Membresia.query.filter_by(id=membresia_id, peluqueria_id=salon_id).first()
+    if membresia:
+        membresia.id_usuario = nueva_id_usuario
+        membresia.usos_disponibles = usos_disponibles
+        try:
+            db.session.commit()
+            flash('Membresía actualizada correctamente.', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar: {str(e)}', 'danger')
+    else:
+        flash('Membresía no encontrada.', 'warning')
+
+    return redirect(url_for('list_memberships'))
+
 
 ### Pagos ###
 
@@ -821,14 +857,17 @@ def add_payment():
                 if check_membresia == 'on':
 
                     membresia_id = request.form.get('check_membresia')
+                    print(membresia_id)
                     if not membresia_id:
                         raise ValueError("Debe seleccionarse un servicio.")
-                    appointment.membresia_id = membresia_id
                 
-                    num_membresia = request.form.get('check_membresia') 
-                    membresia = Membresia.query.get(num_membresia)
+                    #membresia = Membresia.query.get(id_usuario=num_membresia)
+                    membresia = Membresia.query.filter_by(id_usuario=membresia_id).first()
                     if not membresia:
                         raise ValueError("Membresía no encontrada.")
+                    
+                    membresia_id = membresia.id
+                    appointment.membresia_id = membresia_id
 
                     if membresia.usos_disponibles <= 0:
                         raise ValueError("No hay usos disponibles para descontar en esta membresía.")
@@ -902,10 +941,16 @@ def add_payment():
                 )
                 db.session.add(membresia_real)
                 db.session.flush()
+                membresia_real.id_usuario = membresia_real.id
+
+                db.session.flush() 
                 appointment.membresia_id = membresia_real.id
 
+            print("000")
             db.session.add(appointment)
             db.session.commit()
+
+            print("111")
 
             multipagos = 'togglemultiPayment' in request.form
 
@@ -964,7 +1009,7 @@ def add_payment():
                 amount_tip=tip,
                 peluqueria_id=salon_id,
                 date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires")),
-                membresia_comprada_id=membresia_real.id if membresia_real else None
+                membresia_comprada_id=membresia_real.id_usuario if membresia_real else None
             )
 
             db.session.add(pago)

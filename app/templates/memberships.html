@@ -98,20 +98,42 @@
         <th>ID Membresía</th>
         <th>Nombre de Membresía</th>
         <th>Usos Disponibles</th>
+        <th>Modificar</th>
       </tr>
     </thead>
     <tbody>
       {% for m in membresias %}
         <tr>
-          <td>{{ m.id }}</td>
+          <td>{{ m.id_usuario }}</td>
           <td>{{ m.tipo_membresia.nombre }}</td>
           <td>{{ m.usos_disponibles }}</td>
+          <td>
+            <a href="#" class="edit-icon" title="Editar membresía" onclick="openCantidadModal('membresia-{{ m.id }}'); return false;">
+              <i class="fas fa-pen"></i>
+            </a>
+          </td>
         </tr>
-      {% else %}
-        <tr>
-          <td colspan="3">No hay membresías activas registradas.</td>
-        </tr>
+        <div id="modal-membresia-{{ m.id }}" class="modal-cantidad">
+          <div class="modal-content">
+            <h3>Editar Membresía Comprada</h3>
+            <span class="close-modal" onclick="closeCantidadModal('membresia-{{ m.id }}')">&times;</span>
+            <form method="POST" action="{{ url_for('update_membresia', membresia_id=m.id) }}">
+            <div class="form-group">
+              <label for="id_usuario_{{ m.id }}">ID Usuario (1–100):</label>
+              <input type="number" name="id_usuario" id="id_usuario_{{ m.id }}" value="{{ m.id_usuario }}" required min="1" max="100">
+            </div>
+              <div class="form-group">
+                <label for="usos_disponibles_{{ m.id }}">Usos Disponibles:</label>
+                <input type="number" name="usos_disponibles" id="usos_disponibles_{{ m.id }}" value="{{ m.usos_disponibles }}" required min="0">
+              </div>
+              <button type="submit" class="edit-button">
+                <i class="fas fa-check"></i> Confirmar
+              </button>
+            </form>
+          </div>
+        </div>
       {% endfor %}
+
     </tbody>
   </table>
 
