@@ -5,6 +5,8 @@
     - Servicios: 
 
     - Productos:
+        - validacion:
+            - hay un alert en funcion de submit
 
     - Metodos de Pago:
 
@@ -24,6 +26,12 @@
 - Cronjob:
     - DELETE FROM membresias WHERE active = FALSE OR fecha_compra < NOW() - INTERVAL '1 month';
 
+- Usuarios:
+    - Desarrollar:
+        - Panel de control donde permito o anulo permisos
+    - Opciones de validacion:
+        - jwt de duracion de un mes
+        - iniciar sesion con google 
 
 
 

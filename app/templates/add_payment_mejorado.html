@@ -115,7 +115,7 @@
           </option>
         {% endfor %}
       </select>
-      <input type="text" id="membreciaPrice" disabled placeholder="$" style="width: 100px;">
+      <input type="text" id="membresiaPrice" disabled placeholder="$" style="width: 100px;">
     </div>
   </div>
 
@@ -321,12 +321,15 @@
 
   const multiPaymentToggle = document.getElementById('multiPaymentToggle');
 
+
+  const propina = document.getElementById('tip')
+
   /// SELECCION \\\
   const serviceSelected = document.getElementById('serviceSelect');
   const productSection = document.getElementById('productSection');
+  const membresiaSelected = document.getElementById('membresiaSelect');
 
   const cantidadSelectProducto = document.querySelector('.productCant');
-
 
 
   /// CHECKBOXS \\\
@@ -337,10 +340,48 @@
   /// VARS MSJ ERROR \\\ 
   const errorMultiplesPagos = document.getElementById('multiPaymentError');
 
-
+  /// SUBMIT \\\
+  const form = document.getElementById('paymentForm');
 
 
   /// FUNCIONES \\\
+
+  form.addEventListener('submit', function (e) {
+    // Siempre prevenir el envío por defecto primero
+    e.preventDefault();
+
+    let valid = true;
+
+    const servicioActivo = servicioToggle.checked;
+    const productoActivo = productoToggle.checked;
+    const membresiaActivo = membresiaToggle.checked;
+
+    // Validar toggles
+    if (!servicioActivo && !productoActivo && !membresiaActivo) {
+      mostrarErrorToggle(true);
+      return;
+    }
+    mostrarErrorToggle(false);
+
+    // Validar membresia
+    if (membresiaActivo) {
+      if (!validarSubmitMembresia()){
+        console.log("error en validacion membresia");
+      } 
+    }
+
+    // Validar producto
+    if (productoActivo) {
+      if (!validarSubmitProducto()){
+        console.log("error en validacion producto");
+      } 
+    }
+
+
+    return;
+    e.target.submit();  // si todo esta bien envio
+
+  });
 
 
   /// DOM \\\
@@ -348,8 +389,8 @@
   document.addEventListener('DOMContentLoaded', function () {
     
     // Evento que alterna entre Pago Multiple y Usa Membresia
-    if (multiPaymentToggle && membresiaCheckbox) {
-
+    if (multiPaymentToggle && membresiaCheckbox) {    // si existen los elementos entra en if
+    
       // Evento para alternar entre modo de pago simple y múltiple
       multiPaymentToggle.addEventListener('change', function () {
         if (this.checked) {
@@ -369,6 +410,8 @@
           desactivarMetodoPagoMultiple();
           mostrarMembresiaInput();
           ocultarPagoSimpleGroup();
+          desmarcarPrecioDescuentoAmigo();
+          updatePriceTotal();
         } else {
           ocultarMembresiaInput();
           mostrarPagoSimpleGroup();
@@ -390,85 +433,72 @@
 
   // init toggle servicios
   function initServicesSection() {
-
     // Cuando se selecciona "precio amigo", desmarca "precio descuento"
     precioAmigoCheckbox.addEventListener('change', function () {
       if (this.checked) {
-        precioDescuentoCheckbox.checked = false;
+        desmarcarPrecioDescuento();
+        desmarcarMembresia();
       }
     });
 
     // Cuando se selecciona "precio descuento", desmarca "precio amigo"
     precioDescuentoCheckbox.addEventListener('change', function () {
       if (this.checked) {
-        precioAmigoCheckbox.checked = false;
+        desmarcarPrecioAmigo();
+        desmarcarMembresia();
       }
     });
 
     serviceSelected.addEventListener('change', updatePriceTotal);           // Actualiza el precio cada vez que se cambia el servicio seleccionado
     precioAmigoCheckbox.addEventListener('change', updatePriceTotal);       // Actualiza el precio cuando se selecciona checkbox precio amigo
     precioDescuentoCheckbox.addEventListener('change', updatePriceTotal);   // Actualiza el precio cuando se selecciona checkbox precio descuento
-
   }
 
   function initProductSection() {
+    if (!productSection.dataset.listenersAdded) {
 
-  if (!productSection.dataset.listenersAdded) {
-    
-    productSection.addEventListener('click', function (e) {
-      // Agregar producto
-      if (e.target.classList.contains('addProductBtn')) {
-        const currentRow = e.target.closest('.productRow');
-        const newRow = currentRow.cloneNode(true);
-
-        newRow.querySelector('.productSelect').setAttribute('name', 'product_id[]');
-        newRow.querySelector('.productCant').setAttribute('name', 'product_quantity[]');
-
-        newRow.querySelector('.productSelect').selectedIndex = 0;
-        newRow.querySelector('.productCant').selectedIndex = 0;
-        newRow.querySelector('.productPrice').value = '';
-        productSection.appendChild(newRow);
-      }
-
-      // Eliminar producto
-      if (e.target.classList.contains('removeProductBtn')) {
-        const row = e.target.closest('.productRow');
-        const rows = productSection.querySelectorAll('.productRow');
-        const messageContainer = document.getElementById('messageContainer');
-
-        if (rows.length > 1) {
-          row.remove();
-          updatePriceTotal();
-          messageContainer.style.display = 'none';
-          messageContainer.textContent = '';
-        } else {
-          messageContainer.style.display = 'block';
-          messageContainer.textContent = 'Debe haber al menos un producto.';
+      // Agregar o Eliminar row de producto
+      productSection.addEventListener('click', function (e) {
+        // Agregar producto
+        if (e.target.classList.contains('addProductBtn')) {
+          const currentRow = e.target.closest('.productRow');
+          agregarProductoRow(currentRow);
         }
-      }
-    });
-  }
-  
-  cantidadSelectProducto.addEventListener('change', function () {
-    // Aquí actualizás el precio o lo que necesites
-    console.log('Nueva cantidad:', this.value);
-    
-    productos = obtenerPrecioProductosSeleccion();
-    insertarValorProductoMostrador(productos.total);
-    console.log('productos:', productos.total);
-  });
 
-  
+        // Eliminar producto
+        if (e.target.classList.contains('removeProductBtn')) {
+          const row = e.target.closest('.productRow');
+          eliminarProductoRow(row);
+        }
+      });
+
+      // Delegación de eventos para cambios en selects o cantidad
+      productSection.addEventListener('change', function (e) {
+        const row = e.target.closest('.productRow');
+
+        // Actualiza valor de producto cuando detecta un cambio en un select de producto o en cantidad
+        if (row && (e.target.classList.contains('productSelect') || e.target.classList.contains('productCant'))) {
+          const producto = obtenerPrecioProductoRow(row);
+          insertarValorProductoMostradorRow(row, producto.total);
+          updatePriceTotal();
+        }
+      });
+
+      // Marcar que los listeners fueron agregados
+      productSection.dataset.listenersAdded = 'true';
+    }
   }
-  
+
+  function initMembresiaSection() {
+    membresiaSelected.addEventListener('change', updatePriceTotal);           // Actualiza el precio cada vez que se cambia la membresia seleccionada
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     initServicesSection();
     initProductSection();
-    // initMembresiaSection();
-    // setupMembresiaCheckboxToggle();
-    // updatePriceTotal();               // inserta primer valor
+    initMembresiaSection();
 
-    // document.getElementById('tip').addEventListener('input', updatePriceTotal); // Agregar event listener para el input de propina
+    propina.addEventListener('input', updatePriceTotal); // Agregar event listener para el input de propina
   });
   
 </script>

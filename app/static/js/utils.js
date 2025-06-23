@@ -73,6 +73,66 @@ function mostrarProductSection() {
   mostrarElemento('productSection');
 }
 
+function mostrarMensajeErrorProducto(mensaje) {
+  const messageContainer = document.getElementById('messageContainer');
+  if (messageContainer) {
+    messageContainer.style.display = 'block';
+    messageContainer.textContent = mensaje || 'Debe haber al menos un producto.';
+  }
+}
+function ocultarMensajeErrorProducto() {
+  const messageContainer = document.getElementById('messageContainer');
+  if (messageContainer) {
+    messageContainer.style.display = 'none';
+    messageContainer.textContent = '';
+  }
+}
+
+function agregarProductoRow(currentRow) {
+  const newRow = currentRow.cloneNode(true);
+
+  // Asignar nombres a los nuevos campos
+  newRow.querySelector('.productSelect').setAttribute('name', 'product_id[]');
+  newRow.querySelector('.productCant').setAttribute('name', 'product_quantity[]');
+
+  // Reiniciar valores
+  newRow.querySelector('.productSelect').selectedIndex = 0;
+  newRow.querySelector('.productCant').selectedIndex = 0;
+  newRow.querySelector('.productPrice').value = '';
+
+  // Agregar la nueva fila al DOM
+  productSection.appendChild(newRow);
+
+  // Calcular precio y mostrarlo
+  const productos = obtenerPrecioProductoRow(newRow);
+  insertarValorProductoMostradorRow(newRow, productos.total);
+
+  updatePriceTotal();
+}
+function eliminarProductoRow(row) {
+  const rows = productSection.querySelectorAll('.productRow');
+
+  if (rows.length > 1) {
+    row.remove();
+    ocultarMensajeErrorProducto();
+  } else {
+    mostrarMensajeErrorProducto('Debe haber al menos un producto.');
+  }
+
+  updatePriceTotal(); 
+}
+
+function setValorProducto(){
+  // Obtener la primera fila de producto
+  const firstRow = document.querySelector('#productSection .productRow');
+
+  if (firstRow) {
+    const { total } = obtenerPrecioProductoRow(firstRow);
+    insertarValorProductoMostradorRow(firstRow, total);
+  }
+}
+
+
 
 
 /// MEMBRESIAS \\\
@@ -90,6 +150,20 @@ function ocultarMembresiaInput() {
   ocultarElemento('membresiaMethodGroup');
 }
 
+function setValorMembresia() {
+  const valorMembresia = obtenerPrecioMembresiaSeleccion();
+
+  const inputPrecio = document.getElementById('membresiaPrice');
+  if (inputPrecio) {
+    inputPrecio.value = `$${valorMembresia}`;
+  }
+}
+
+function obtenerPrecioMembresiaSeleccion() {
+  const selectedOption = membresiaSelect.options[membresiaSelect.selectedIndex];
+  const precio = selectedOption.getAttribute('data-precio');
+  return parseFloat(precio) || 0;
+}
 
 
 /// METODOS DE PAGO \\\
@@ -153,11 +227,9 @@ function updateCantidadOptions() {
     option.textContent = i;
     cantidadSelect.appendChild(option);
   }
-
-    // updatePrice(row); // Actualizar el precio si querés
 }
 
-function insertarValorProductoMostrador(precioTotal){     // verificar que no este obteniendo el valor de TODOS los productos en carrito
+function insertarValorProductoMostrador(precioTotal){  
   const inputPrecio = document.querySelector('.productPrice'); 
 
   if (inputPrecio) {
@@ -166,6 +238,13 @@ function insertarValorProductoMostrador(precioTotal){     // verificar que no es
 
 }
 
+function insertarValorProductoMostradorRow(row, precioTotal) {
+  const inputPrecio = row.querySelector('.productPrice');
+
+  if (inputPrecio) {
+    inputPrecio.value = `$${precioTotal}`;
+  }
+}
 
 
 // Funciones de script \\\
@@ -243,8 +322,15 @@ function updateToggleSections(e = null) {
 
     mostrarMetodoPago();
 
-    if (source === 'toggleProducto') {  // inserto valor inicial de cant cuando selecciono el toggle de servicio
-      updateCantidadOptions();          // Asumiendo que solo hay un .productSelect en ese momento
+    if (source === 'toggleProducto') {    // inserto valor inicial de cant cuando selecciono el toggle de servicio
+      updateCantidadOptions();            // Asumiendo que solo hay un .productSelect en ese momento
+      setValorProducto();
+      desmarcarPrecioDescuentoAmigo();    // si salgo de servicio desmarco precio descuento y amigo
+    }
+
+    if (source === 'toggleMembresia') {   // inserto valor inicial de cant cuando selecciono el toggle de membresia
+      setValorMembresia();
+      desmarcarPrecioDescuentoAmigo();    // si salgo de servicio desmarco precio descuento y amigo
     }
   }
 
@@ -264,6 +350,31 @@ function updateToggleSections(e = null) {
   resetTip(); // hace updatePriceTotal(); dentro de reset
 }
 
+function desmarcarPrecioAmigo() {
+  const checkbox = document.getElementById('precioAmigoCheckbox');
+  if (checkbox.checked) {
+    checkbox.checked = false;
+  }
+}
+
+function desmarcarPrecioDescuento() {
+  const checkbox = document.getElementById('precioDescuentoCheckbox');
+  if (checkbox.checked) {
+    checkbox.checked = false;
+  }
+}
+
+function desmarcarPrecioDescuentoAmigo() {
+  desmarcarPrecioDescuento();
+  desmarcarPrecioAmigo();
+}
+
+function desmarcarMembresia() {
+  const checkbox = document.getElementById('membresiaCheckbox');
+  if (checkbox.checked) {
+    checkbox.checked = false;
+  }
+}
 
 
 
@@ -274,14 +385,40 @@ function formatearMoneda(valor) {
   return `$${numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
 }
 
+function actualizarPrecioServicio() {
+  const servicePriceInput = document.getElementById('servicePrice');
+  if (!servicePriceInput) return;
 
-function obtenerPrecioMembresiaSeleccion() {
-  const input = document.getElementById('membreciaPrice');
-  const valor = input.value.replace(/\./g, '').replace('$', '').trim();
-  return parseFloat(valor) || 0;
+  if (checkbox_use_member.checked) {
+    servicePriceInput.value = '$0';
+    if (amountSimple) amountSimple.value = 0;
+    multiPaymentToggle.disabled = false;
+
+  }
 }
 
-function obtenerPrecioProductosSeleccion() {
+function obtenerPrecioServicioSeleccion() {
+  const usaMembresia = document.getElementById('membresiaCheckbox')?.checked || false;
+  const membresiaActivo = membresiaToggle.checked;
+  
+  // Si está usando un corte de membresía por cualquiera de los dos medios, el precio es 0
+  if (membresiaActivo || usaMembresia) {
+    return 0;
+  }
+
+  const selected = serviceSelect.options[serviceSelect.selectedIndex];
+  if (!selected) return 0;
+
+  if (precioDescuentoCheckbox.checked) {
+    return parseFloat(selected.getAttribute('data-precio-descuento')) || 0;
+  } else if (precioAmigoCheckbox.checked) {
+    return parseFloat(selected.getAttribute('data-precio-amigo')) || 0;
+  }
+
+  return parseFloat(selected.getAttribute('data-precio')) || 0;
+}
+
+function obtenerPrecioTotalProductosSeleccion() {
   const rows = document.querySelectorAll('#productSection .productRow');
   const items = [];
   let total = 0;
@@ -302,34 +439,79 @@ function obtenerPrecioProductosSeleccion() {
       total += precio * cantidad;
     }
 
-    console.log("precio: ",precio, " cantidad: ",cantidad, " total: ",total)
-
+    // console.log("precio: ",precio, " cantidad: ",cantidad, " total: ",total)
   });
 
   return { total, items };
 }
 
-function obtenerPrecioServicioSeleccion() {
-  const usaMembresia = document.getElementById('membresiaCheckbox')?.checked || false;
-  const membresiaActivo = membresiaToggle.checked;
+function obtenerPrecioProductoRow(row) {
+  const productSelect = row.querySelector('.productSelect');
+  const cantidadSelect = row.querySelector('.productCant');
 
-  // Si está usando un corte de membresía, el precio es 0
-  if (membresiaActivo && usaMembresia) {
-    return 0;
+  if (!productSelect || !cantidadSelect) return { total: 0, item: null };
+
+  const selected = productSelect.options[productSelect.selectedIndex];
+  const id = selected.value;
+  const precio = parseFloat(selected.getAttribute('data-precio')) || 0;
+  const cantidad = parseInt(cantidadSelect.value) || 0;
+
+  if (cantidad > 0) {
+    const total = precio * cantidad;
+    const item = { id, precio, cantidad };
+    return { total, item };
   }
 
-  const selected = serviceSelect.options[serviceSelect.selectedIndex];
-  if (!selected) return 0;
-
-  if (precioDescuentoCheckbox.checked) {
-    return parseFloat(selected.getAttribute('data-precio-descuento')) || 0;
-  } else if (precioAmigoCheckbox.checked) {
-    return parseFloat(selected.getAttribute('data-precio-amigo')) || 0;
-  }
-
-  return parseFloat(selected.getAttribute('data-precio')) || 0;
+  return { total: 0, item: null };
 }
 
+
+
+function validarMultiplesMetodos(totalEsperado) {
+  const form = document.querySelector('form');
+  const repeatError = document.getElementById('methodRepeatError');
+  const montoError = document.getElementById('montoError');
+
+  const amount1 = parseFloat(form.querySelector('input[name="amount_method_multi_1"]').value) || 0;
+  const amount2 = parseFloat(form.querySelector('input[name="amount_method_multi_2"]').value) || 0;
+  const propina = parseFloat(form.querySelector('input[name="tip"]').value) || 0;
+  const totalPagado = amount1 + amount2;
+
+  const method1 = form.querySelector('select[name="method_multiple_1"]').value;
+  const method2 = form.querySelector('select[name="method_multiple_2"]').value;
+
+  const metodoInputs = [
+    form.querySelector('select[name="method_multiple_1"]'),
+    form.querySelector('select[name="method_multiple_2"]')
+  ];
+
+  const montoInputs = [
+    form.querySelector('input[name="amount_method_multi_1"]'),
+    form.querySelector('input[name="amount_method_multi_2"]'),
+    form.querySelector('input[name="tip"]')
+  ];
+
+  // Ocultar mensajes de error inicialmente
+  repeatError.style.display = 'none';
+  montoError.style.display = 'none';
+  metodoInputs.forEach(select => select.classList.remove('input-error'));
+  montoInputs.forEach(input => input.classList.remove('input-error'));
+
+  // Validar métodos repetidos
+  if (method1 === method2) {
+    metodoInputs.forEach(select => select.classList.add('input-error'));
+    repeatError.style.display = 'block';
+    return false;
+  }
+
+  if (Math.abs(totalPagado - totalEsperado - propina) > 0.01) {
+    montoInputs.forEach(input => input.classList.add('input-error'));
+    montoError.style.display = 'block';
+    return false;
+  }
+
+  return true;
+}
 
 function updatePrice() {
   const precio = obtenerPrecioServicioSeleccion();
@@ -349,26 +531,23 @@ function updatePriceTotal() {
   const servicioActivo = servicioToggle.checked;
   const productoActivo = productoToggle.checked;
   const membresiaActivo = membresiaToggle.checked;
-  // const usaMembresia = document.getElementById('membresiaCheckbox')?.checked || false;
   
   if (membresiaActivo) {
-    
+
     precioTotal = obtenerPrecioMembresiaSeleccion();
-    console.log("membresiaActivo precioTotal: ",precioTotal);
+    setValorMembresia();
   
   } else {
 
     if (servicioActivo) {
-      precioTotal += obtenerPrecioServicioSeleccion();    // la funcion valida si se usa membrecia
-      console.log("servicioActivo precioTotal: ",precioTotal);
+      precioTotal += obtenerPrecioServicioSeleccion();    // la funcion valida si se usa membresia
     }
 
     if (productoActivo) {
-      const productosData = obtenerPrecioProductosSeleccion();
+      const productosData = obtenerPrecioTotalProductosSeleccion();
       precioTotal += productosData.total;
-      // console.log("productoActivo precioTotal: ",precioTotal);
-      insertarValorProductoMostrador(precioTotal)
     }
+
   }
 
   updatePrice(); // Aseguramos que el precio del servicio esté actualizado
@@ -376,5 +555,66 @@ function updatePriceTotal() {
   const tipAmount = parseFloat(document.getElementById('tip').value) || 0;
   const totalConPropina = precioTotal + tipAmount;
 
+  console.log("updatePriceTotal totalConPropina: ",totalConPropina);
+
   document.getElementById('totalPago').value = formatearMoneda(totalConPropina);
 }
+
+
+
+/// FUNCIONES SUBMIT \\\
+
+function mostrarErrorToggle(mostrar) {
+  toggleError.style.display = mostrar ? 'block' : 'none';
+  toggleContainer.classList.toggle('border', mostrar);
+  toggleContainer.classList.toggle('border-danger', mostrar);
+  toggleContainer.classList.toggle('rounded', mostrar);
+  toggleContainer.classList.toggle('p-2', mostrar);
+}
+
+
+
+/// MEMBRESIA \\\
+function validarSubmitMembresia(){
+  const valorMembresia = obtenerPrecioMembresiaSeleccion();
+
+  if (multiPaymentToggle.checked && !validarMultiplesMetodos(valorMembresia)) {
+    return false;
+  }
+
+  return true;
+}
+
+
+/// PRODUCTO \\\
+function agregarInputsOcultos(productos) {
+  productos.forEach((producto, index) => {
+    const inputId = crearInputOculto(`product_id_${index}`, producto.id);
+    const inputCant = crearInputOculto(`cantidad_${index}`, producto.cantidad);
+    form.appendChild(inputId);
+    form.appendChild(inputCant);
+  });
+}
+
+function validarSubmitProducto() { 
+  const productosData = obtenerPrecioTotalProductosSeleccion();
+
+  console.log("validarSubmitProducto productosData: ",productosData);
+
+  if (productoActivo && productosData.items.length === 0) {             // valido que no haya cantidad 0
+    alert('Debe seleccionar al menos un producto con cantidad válida'); // modificar para que no sea un alert
+    return;
+  }
+
+  let productosData_num = String(productosData.total).replace('$', '').replace(/\./g, '');
+  productosData_num = parseFloat(productosData_num);
+
+  const totalEsperado = servicePrecio_num + productosData_num;
+
+  return false;
+}
+
+
+/// SERVICIO \\\
+
+
