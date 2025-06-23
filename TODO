@@ -13,21 +13,18 @@
     - Cierre:
 
 - Errores:
-    - Que todos tengan el mismo formato 
 
+- Pagos:
 
-- Pagos: (listo)
-    - Manejar errores de que no haya peluqueria, empleado, corte, etc
+- Cierres:
+
+- Testear:
+    - updatePriceTotal() servicios toma bien el valor cuando usa membresia
 
 - Cronjob:
     - DELETE FROM membresias WHERE active = FALSE OR fecha_compra < NOW() - INTERVAL '1 month';
 
-- Cierres:
 
-
-- Testear:
-    - Tiempos de carga
-    - Vision mobile
 
 
 https://docs.python.org/3/library/decimal.html
