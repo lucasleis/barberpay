@@ -1,13 +1,14 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import os
 
 def get_connection():
     return psycopg2.connect(
-        dbname="tu_basedatos",
-        user="tu_usuario",
-        password="tu_password",
-        host="localhost",  # o IP/hostname si usas servidor remoto
-        port=5432
+        dbname=os.getenv('DB_NAME', 'peluqueria_db'),
+        user=os.getenv('DB_USER', 'admin'),
+        password=os.getenv('DB_PASSWORD', 'admin123'),
+        host=os.getenv('DB_HOST', 'db'),
+        port=int(os.getenv('DB_PORT', 5432))
     )
 
 def obtener_peluquerias():
