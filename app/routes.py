@@ -292,55 +292,6 @@ def calcular_pagos_entre_fechas(start_date, end_date):
         }
     }
 
-"""
-def calcular_total_servicio(service_id):
-    ""Calcula el total para un servicio""
-    if not service_id:
-        return 0.0
-    service = Servicio.query.get(service_id)
-    return service.precio if service else 0.0
-
-def calcular_total_producto(product_id, cantidad):
-    ""Calcula el total para un producto""
-    if not product_id or not cantidad:
-        return 0.0
-    product = Producto.query.get(product_id)
-    return (product.precio * cantidad) if product else 0.0
-
-
-def calcular_total_pagado(request_form, toggle_servicio, toggle_producto, product_precio=0, product_cantidad=0):
-    ""Calcula el total pagado según el método de pago y los toggles""
-    tip = float(request_form.get('tip') or 0.0)
-    multipagos = 'togglemultiPayment' in request_form
-    
-    if multipagos:
-        amount1 = float(request_form.get('amount_method_multi_1') or 0)
-        amount2 = float(request_form.get('amount_method_multi_2') or 0)
-        return amount1 + amount2 + tip
-    
-    amount_simple = float(request_form.get('amount_simple') or 0)
-    
-    if toggle_servicio and toggle_producto:
-        return amount_simple + (product_precio * product_cantidad) + tip
-    elif toggle_servicio:
-        return amount_simple + tip
-    elif toggle_producto:
-        return (product_precio * product_cantidad) + tip
-    
-    return 0.0
-
-def calcular_total_real(toggle_servicio, toggle_producto, service_id=None, product_id=None, product_cantidad=0):
-    ""Calcula el total real sumando servicio y/o producto""
-    total = 0.0
-    
-    if toggle_servicio:
-        total += calcular_total_servicio(service_id)
-    
-    if toggle_producto:
-        total += calcular_total_producto(product_id, product_cantidad)
-    
-    return total
-"""
 
 @app.template_filter('moneda')
 def moneda(valor):

@@ -92,6 +92,22 @@
               <div class="empleado-celda">$${propinas.toLocaleString('es-AR')}</div>
             `;
           }).join('')}
+          <div class="empleado-celda"><strong>CANTIDAD</strong></div>
+          <div class="empleado-celda">-</div>
+          <div class="empleado-celda">
+            <!-- $${Object.values(data.totales.empleados).reduce((acc, emp) => acc + (parseFloat(emp.monto_cortes) || 0), 0).toLocaleString('es-AR')} -->
+            (${Object.values(data.totales.empleados).reduce((acc, emp) => acc + (parseInt(emp.cortes) || 0), 0)})
+          </div>
+          <div class="empleado-celda">
+            <!-- $${Object.values(data.totales.empleados).reduce((acc, emp) => acc + (parseFloat(emp.monto_productos) || 0), 0).toLocaleString('es-AR')} -->
+            (${Object.values(data.totales.empleados).reduce((acc, emp) => acc + (parseInt(emp.productos) || 0), 0)})
+          </div>
+          <div class="empleado-celda">
+            <!-- $${Object.values(data.totales.empleados).reduce((acc, emp) => acc + (parseFloat(emp.propinas) || 0), 0).toLocaleString('es-AR')} -->
+            <!-- (${Object.values(data.totales.empleados).reduce((acc, emp) => acc + (parseFloat(emp.propinas) || 0), 0)}) -->
+            -
+          </div>
+
         </div>
       </div>
 
