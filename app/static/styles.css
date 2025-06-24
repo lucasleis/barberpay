@@ -550,54 +550,77 @@ td.borrar-pago button.btn-danger {
 @media (max-width: 768px) {
 
     .logo {
-        max-width: 70%;
+        max-width: 45%;
     }
 
     header {
-        padding: 0.5rem;
+        padding: 0.3rem;
     }
 
     nav a {
-        /* display: block; */
-        /* margin: 0.5rem 0; */
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
 
     main {
-        padding: 1rem;
+        padding: 0.5rem;
     }
 
     form {
-        padding: 1rem;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 0.5rem;
+    }
+
+    label {
+        font-size: 0.95rem;
+        margin-bottom: 0.2rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    .btn-primary {
+        font-size: 0.95rem;
+        height: 30px;
+        padding: 0.3rem;
+    }
+
+    button, .btn-primary {
+        font-size: 0.95rem;
+        padding: 0.3rem 0.5rem;
+        height: 32px;
     }
 
     .form-row-flex {
         flex-direction: column;
         align-items: flex-start;
-        gap: 0.5rem;
+        gap: 0.3rem;
     }
 
     .checkbox-group {
-        flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
-        gap: 0.5rem;
+        gap: 0.3rem;
     }
 
     .propina-row {
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.3rem;
+        margin-bottom: 1rem;
     }
 
     .propina-row input[type="number"],
     .propina-row input[type="text"],
     .propina-row .btn-primary {
         width: 100%;
+        height: 30px;
+        font-size: 0.95rem;
     }
 
     .productRow > div {
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.3rem;
     }
 
     .productRow .productCant,
@@ -605,25 +628,29 @@ td.borrar-pago button.btn-danger {
     .productRow .productSelect {
         width: 100% !important;
         flex: 1;
+        height: 30px;
+        font-size: 0.95rem;
     }
 
     .table {
-            display: block;
-    overflow-x: auto;
-    white-space: nowrap;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
     }
 
     .table td, .table th {
-        padding: 0.3rem;
+        padding: 0.15rem;
+        font-size: 0.95rem;
     }
 
     .checkbox-label {
         justify-content: flex-start;
+        font-size: 0.95rem;
     }
 
     .h2, h2 {
         text-align: center;
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
 
     /* Estilos específicos para los grupos de checkbox en mobile */
@@ -632,7 +659,7 @@ td.borrar-pago button.btn-danger {
         flex-direction: column;
         align-items: flex-start;
         width: 100%;
-        gap: 0.5rem;
+        gap: 0.3rem;
     }
 
     .checkbox-group.servicio-precio .checkbox-left,
@@ -647,10 +674,9 @@ td.borrar-pago button.btn-danger {
     .checkbox-group.metodo-pago .checkbox-label {
         width: 100%;
         justify-content: flex-start;
-        gap: 0.4rem;
+        gap: 0.2rem;
     }
 
-    /* Ajuste específico para el grupo de método de pago */
     .form-group.payment-methods .checkbox-group {
         justify-content: flex-start;
     }
@@ -663,31 +689,53 @@ td.borrar-pago button.btn-danger {
         width: 100%;
     }
 
-    
     .productCant-container {
-        flex-direction: row; /* Changed from column to row for mobile */
-        flex-wrap: wrap; /* Allow items to wrap to the next line */
-        align-items: center; /* Vertically align items in the row */
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
         width: 100%;
-        gap: 0.5rem; /* Maintain gap between items */
+        gap: 0.3rem;
     }
 
     .productCant-container .productCant {
-        flex-grow: 1; /* Allow productCant to grow and take available space */
-        width: auto; /* Reset width to auto */
-        min-width: 100px; /* Ensure a minimum width for the select */
+        flex-grow: 1;
+        width: auto;
+        min-width: 70px;
+        height: 30px;
+        font-size: 0.95rem;
     }
 
     .addProductBtn,
     .removeProductBtn {
-        width: 38px;
+        width: 30px;
+        height: 30px;
         padding: 0;
-        flex-shrink: 0; /* Prevent buttons from shrinking */
+        flex-shrink: 0;
+        font-size: 1rem;
     }
 
     .productCant-container .productPrice {
-        flex-basis: 100%; /* Force this element to take full width and move to a new line */
-        order: 1; /* Place it at the end of the flex items */
+        flex-basis: 100%;
+        order: 1;
+        height: 30px;
+        font-size: 0.95rem;
+    }
+
+    .btn,
+    .btn.full-width {
+        padding: 0.2rem 0.3rem;
+        font-size: 0.9rem;
+        height: 28px;
+        min-width: 60px;
+    }
+
+    #toggleContainer {
+        gap: 0.5rem;
+    }
+
+    #toggleContainer > div {
+        margin: 0;
+        padding: 0;
     }
 
 }
