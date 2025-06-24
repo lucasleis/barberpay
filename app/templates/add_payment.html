@@ -320,10 +320,10 @@
   <strong>Total de cortes:</strong> {{ contadores.cortes }}<br>
 
   <div class="linea-inferior"></div>
-  <strong>Servicios por barbero:</strong>
+  <strong>Cantidad de Cortes por barbero:</strong>
   <ul>
     {% for barbero, cantidad in servicios_barbero.data.items() %}
-      <li>{{ barbero }}: {{ cantidad }}</li>
+      <li>- {{ barbero }}: {{ cantidad }}</li>
     {% endfor %}
   </ul>
 
