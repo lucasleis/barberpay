@@ -6,8 +6,8 @@ from sqlalchemy import desc, text
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
 from collections import defaultdict
-# from backports.zoneinfo import ZoneInfo
-from zoneinfo import ZoneInfo
+from backports.zoneinfo import ZoneInfo
+# from zoneinfo import ZoneInfo
 from werkzeug.datastructures import MultiDict
 from decimal import Decimal
 import logging
@@ -106,6 +106,10 @@ def calcular_pagos_entre_fechas(start_date, end_date):
 
         empleado = None
         porcentaje = 0
+        productos_nombres = []
+        montos_productos = []
+        pago_empleado_productos = 0
+        total_propietarios_productos = 0
   
         if pago.appointment and pago.appointment.service:
             pago_propietario_servicio = 0
@@ -171,20 +175,27 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 empleado = pago.appointment.barber
                 pago_empleado_producto = (monto_producto * porcentaje_producto) / 100
 
+                productos_nombres.append(producto.name + " (" + str(pt.cantidad)+")")
+                montos_productos.append(monto_producto)
+
+
                 if not pago.appointment.service:
-                    pago_dict.update({
-                        "empleado": empleado.name,
-                        "porcentaje_empleado": porcentaje_producto,
-                        "producto": producto.name,
-                        "valor_producto": monto_producto,
-                        "pago_empleado": float(pago_empleado_producto),
-                        "pago_propietario": float(Decimal(monto_producto) - Decimal(pago_empleado_producto))
-                    })
+                    pago_empleado_productos += float(pago_empleado_producto) 
                     total_por_empleado[empleado.name]["monto"] += float(pago_empleado_producto)
                     total_por_empleado[empleado.name]["monto_productos"] += float(pago_empleado_producto)
                     total_por_empleado[empleado.name]["productos"] += float(pt.cantidad)
+                    total_propietarios_productos += float(monto_producto - pago_empleado_producto) 
                     total_propietario += float(monto_producto - pago_empleado_producto)
                     total_general += float(monto_producto)
+
+            pago_dict.update({
+                "empleado": empleado.name,
+                "porcentaje_empleado": porcentaje_producto,
+                "producto": productos_nombres,
+                "valor_producto": montos_productos,
+                "pago_empleado": float(pago_empleado_productos),
+                "pago_propietario": total_propietarios_productos
+            })
 
         if pago.appointment and pago.appointment.service and pago.appointment.productos_turno:
             pago_dict.update({

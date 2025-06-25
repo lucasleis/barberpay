@@ -142,8 +142,12 @@
               <td>${p.porcentaje_empleado}%</td>
               <td>${p.servicio || '-'}</td>
               <td>${p.valor_servicio === 0 ? '-' : '$' + parseInt(p.valor_servicio).toLocaleString('es-AR')}</td>
-              <td>${p.producto || '-'}</td>
-              <td>${p.valor_producto === 0 ? '-' : '$' + parseInt(p.valor_producto).toLocaleString('es-AR')}</td>
+              <td>${p.producto && p.producto.length ? p.producto.join(' - ') : '-'}</td>
+              <td>
+                ${p.monto_producto && p.monto_producto.length
+                  ? p.monto_producto.map(m => '$' + parseInt(m).toLocaleString('es-AR')).join(' - ')
+                  : '-'}
+              </td>
               <td>${p.membresia || '-'}</td>
               <td>${p.valor_membresia === 0 ? '-' : '$' + parseInt(p.valor_membresia).toLocaleString('es-AR')}</td>
               <td>${p.metodo_pago.join(' - ')}</td>
