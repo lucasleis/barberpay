@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block head %}
-<script src="{{ url_for('static', filename='../static/js/utils.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='../static/js/utils.js') }}" defer></script>
 {% endblock %}
 
 {% block content %}
@@ -203,6 +203,10 @@
 
 <h3>Pagos Hoy</h3>
 
+{% set contadores = namespace(cortes=0, productos=0) %}
+{% set servicios_barbero = namespace(data={}) %}
+
+
 <table class="table table-striped table-bordered text-center" style="margin-top: 1rem;">
   <thead>
     <tr>
@@ -229,6 +233,13 @@
       <!-- <td>{{ pago.appointment.service.name if pago.appointment.service else '-' }}</td> -->
       <td>  <!-- Tipo de servicio -->
         {% if pago.appointment.service %}
+          {% set contadores.cortes = contadores.cortes + 1 %}
+          {% set barbero = pago.appointment.barber.name %}
+          {% if barbero in servicios_barbero.data %}
+            {% set _ = servicios_barbero.data.update({barbero: servicios_barbero.data[barbero] + 1}) %}
+          {% else %}
+            {% set _ = servicios_barbero.data.update({barbero: 1}) %}
+          {% endif %}
           {% if pago.appointment.tipo_precio_servicio == 'amigo' %}
             Vale por {{ pago.appointment.service.name }} 
           {% elif pago.appointment.tipo_precio_servicio == 'descuento' %}
@@ -244,6 +255,7 @@
         {% if pago.appointment.productos_turno %}
           {% set productos = {} %}
           {% for pt in pago.appointment.productos_turno %}
+            {% set contadores.productos = contadores.productos + pt.cantidad %}
             {% set nombre = pt.producto.name %}
             {% if nombre in productos %}
               {% set _ = productos.update({nombre: productos[nombre] + pt.cantidad}) %}
@@ -263,6 +275,13 @@
         {% if pago.appointment.membresia %}
           {% if not pago.membresia_comprada %}
             {{ pago.appointment.membresia.id_usuario }} (uso) 
+            {% set contadores.cortes = contadores.cortes + 1 %}
+            {% set barbero = pago.appointment.barber.name %}
+            {% if barbero in servicios_barbero.data %}
+              {% set _ = servicios_barbero.data.update({barbero: servicios_barbero.data[barbero] + 1}) %}
+            {% else %}
+              {% set _ = servicios_barbero.data.update({barbero: 1}) %}
+            {% endif %}
           {% else %}
             {{ pago.appointment.membresia.id_usuario }}
           {% endif %}
@@ -308,6 +327,22 @@
     </tr>
   {% endfor %}
 </table>
+<div class="linea-inferior"></div>
+  <div style="margin-top: 1rem;">
+  <strong>Total de cortes:</strong> {{ contadores.cortes }}<br>
+
+  <div class="linea-inferior"></div>
+  <strong>Cantidad de Cortes por barbero:</strong>
+  <ul>
+    {% for barbero, cantidad in servicios_barbero.data.items() %}
+      <li>- {{ barbero }}: {{ cantidad }}</li>
+    {% endfor %}
+  </ul>
+
+
+  <strong>Total de productos vendidos:</strong> {{ contadores.productos }}
+  <div class="linea-inferior"></div>
+</div>
 
 
 <script>
@@ -321,6 +356,7 @@
 
   const multiPaymentToggle = document.getElementById('multiPaymentToggle');
 
+  const numeroMembresia = document.getElementById('check_membresia');
 
   const propina = document.getElementById('tip')
 
@@ -336,6 +372,9 @@
   const membresiaCheckbox = document.getElementById('membresiaCheckbox');
   const precioAmigoCheckbox = document.getElementById('precioAmigoCheckbox');
   const precioDescuentoCheckbox = document.getElementById('precioDescuentoCheckbox');
+
+  const multiMetodosPagoGroup = document.getElementById('multiMethodGroup');    // Usa multiples metodos de pago
+
 
   /// VARS MSJ ERROR \\\ 
   const errorMultiplesPagos = document.getElementById('multiPaymentError');
@@ -358,27 +397,40 @@
 
     // Validar toggles
     if (!servicioActivo && !productoActivo && !membresiaActivo) {
-      mostrarErrorToggle(true);
+      muestraMensajeErrorToggle();
       return;
     }
-    mostrarErrorToggle(false);
 
     // Validar membresia
     if (membresiaActivo) {
       if (!validarSubmitMembresia()){
-        console.log("error en validacion membresia");
+        return;
       } 
     }
 
-    // Validar producto
-    if (productoActivo) {
-      if (!validarSubmitProducto()){
-        console.log("error en validacion producto");
-      } 
+    if (productoActivo && servicioActivo) {
+
+      if (!validarSubmitServicioProducto()){
+        return;
+      }
+
+    } else {
+
+      // Validar producto
+      if (productoActivo) {
+        if (!validarSubmitProducto()){
+          return;
+        } 
+      }
+
+      // Validar servicio
+      if (servicioActivo) {
+        if (!validarSubmitServicio()){
+          return;
+        }
+      }
     }
 
-
-    return;
     e.target.submit();  // si todo esta bien envio
 
   });
@@ -400,7 +452,10 @@
           activarMetodoPagoMultiple();
         } else {
           desactivarMetodoPagoMultiple();
+          ocultarErrorMetodoPagoRepetido();
+          ocultarErrorMonto();
         }
+        updatePriceTotal();
       });
 
       // Evento para alternar el pago con membresia  
@@ -411,11 +466,12 @@
           mostrarMembresiaInput();
           ocultarPagoSimpleGroup();
           desmarcarPrecioDescuentoAmigo();
-          updatePriceTotal();
         } else {
           ocultarMembresiaInput();
           mostrarPagoSimpleGroup();
+          ocultarErrorMembresia();
         }
+        updatePriceTotal();
       });
     }
 
@@ -493,10 +549,37 @@
     membresiaSelected.addEventListener('change', updatePriceTotal);           // Actualiza el precio cada vez que se cambia la membresia seleccionada
   }
 
+  function initFuncionalidadesBotones(){
+    // Seleccioná todos los selects e inputs dentro de #multiMethodGroup
+    if (multiMetodosPagoGroup) {
+
+      /// Seleccion de metodos de pago  \\\
+      const campos = multiMetodosPagoGroup.querySelectorAll('select, input');
+      campos.forEach((campo) => {                             // oculto mensajes de error cuando hay algun movimiento
+        campo.addEventListener('change', ocultarErrorMetodoPagoRepetido);
+        campo.addEventListener('input', ocultarErrorMetodoPagoRepetido);
+      });
+
+      /// Ingreso de montos a pagar \\\
+      const camposMonto = multiMethodGroup.querySelectorAll(
+        'input[name="amount_method_multi_1"], input[name="amount_method_multi_2"], input[name="tip"]'
+      );
+      camposMonto.forEach((campo) => {                        // oculto mensajes de error cuando hay algun movimiento
+        campo.addEventListener('change', ocultarErrorMonto);
+        campo.addEventListener('input', ocultarErrorMonto);
+      });
+    }
+
+    if (numeroMembresia) {
+      numeroMembresia.addEventListener('input', ocultarErrorMembresia);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     initServicesSection();
     initProductSection();
     initMembresiaSection();
+    initFuncionalidadesBotones();
 
     propina.addEventListener('input', updatePriceTotal); // Agregar event listener para el input de propina
   });
