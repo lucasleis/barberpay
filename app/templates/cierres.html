@@ -139,13 +139,17 @@
             <tr>
               <td>${p.fecha}</td>
               <td>${p.empleado}</td>
-              <td>${p.porcentaje_empleado}%</td>
+              <td>
+                ${Array.isArray(p.porcentaje_empleado)
+                  ? p.porcentaje_empleado.map(pct => pct + '%').join(' - ')
+                  : p.porcentaje_empleado + '%'}
+              </td>
               <td>${p.servicio || '-'}</td>
               <td>${p.valor_servicio === 0 ? '-' : '$' + parseInt(p.valor_servicio).toLocaleString('es-AR')}</td>
               <td>${p.producto && p.producto.length ? p.producto.join(' - ') : '-'}</td>
               <td>
-                ${p.monto_producto && p.monto_producto.length
-                  ? p.monto_producto.map(m => '$' + parseInt(m).toLocaleString('es-AR')).join(' - ')
+                ${p.montos_productos && p.montos_productos.length
+                  ? p.montos_productos.map(m => '$' + parseInt(m).toLocaleString('es-AR')).join(' - ')
                   : '-'}
               </td>
               <td>${p.membresia || '-'}</td>

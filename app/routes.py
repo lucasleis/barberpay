@@ -108,6 +108,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
         porcentaje = 0
         productos_nombres = []
         montos_productos = []
+        porcentajes_productos = []
         pago_empleado_productos = 0
         total_propietarios_productos = 0
   
@@ -177,7 +178,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
 
                 productos_nombres.append(producto.name + " (" + str(pt.cantidad)+")")
                 montos_productos.append(monto_producto)
-
+                porcentajes_productos.append(porcentaje_producto)
 
                 if not pago.appointment.service:
                     pago_empleado_productos += float(pago_empleado_producto) 
@@ -190,9 +191,10 @@ def calcular_pagos_entre_fechas(start_date, end_date):
 
             pago_dict.update({
                 "empleado": empleado.name,
-                "porcentaje_empleado": porcentaje_producto,
+                #"porcentaje_empleado": porcentaje_producto,
+                "porcentaje_empleado": porcentajes_productos if len(porcentajes_productos) > 1 else porcentajes_productos[0],
                 "producto": productos_nombres,
-                "valor_producto": montos_productos,
+                "montos_productos": montos_productos,
                 "pago_empleado": float(pago_empleado_productos),
                 "pago_propietario": total_propietarios_productos
             })
@@ -269,7 +271,11 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 # monto_metodo1 = pago.amount_method1 or 0
                 if tipo_precio == 'amigo':
                     total_por_metodo_pago[pago.method1.nombre] += 0
-                    pago_dict["metodo_pago"].append("-")
+                    if pago.amount_tip != 0:
+                        pago_dict["metodo_pago"].append(pago.method1.nombre)
+                        total_por_metodo_pago[pago.method1.nombre] += pago.amount_tip
+                    else: 
+                        pago_dict["metodo_pago"].append("-")
                     metodos_pago_str = "$0"
                 else: 
                     total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
