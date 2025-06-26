@@ -343,6 +343,21 @@ function updateToggleSections(e = null) {
     ocultarServicioSection();
     ocultarProductSection();
     ocultarMetodoPago();
+  } else {  // cuando desactivo Producto o Servicio
+    // Oculto elementos cuando Producto y Servicio estaban activos
+    if (source === 'toggleServicio') {          
+      if (!toggleActivado('toggleServicio')) {
+        ocultarServicioSection();
+        desmarcarPrecioDescuentoAmigo();
+      }
+    }
+    if (source === 'toggleProducto') {           
+      if (!toggleActivado('toggleProducto')) {
+        ocultarProductSection();
+        desmarcarPrecioDescuentoAmigo();
+        mostrarMembresiaLabel();
+      }
+    }
   }
 
 

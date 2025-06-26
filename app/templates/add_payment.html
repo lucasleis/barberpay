@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 
+{% block head %}
+  <script src="{{ url_for('static', filename='../static/js/utils.js') }}" defer></script>
+{% endblock %}
+
 {% block content %}
 
 <h2>Registrar un nuevo pago</h2>
@@ -44,13 +48,13 @@
       <label for="service_id">Servicio y precio:</label>
       <div class="checkbox-group servicio-precio">
         <div class="checkbox-left">
-          <label class="checkbox-label">
+          <label class="checkbox-label" id="labelPrecioDesc" name="labelPrecioDesc">
             <input type="checkbox" id="precioDescuentoCheckbox" name="precioDescuentoCheckbox">
             <span class="checkbox-text">¿Precio Descuento?</span>
           </label>
         </div>
         <div class="checkbox-right">
-          <label class="checkbox-label">
+          <label class="checkbox-label" id="labelPrecioAmigo" name="labelPrecioAmigo">
             <input type="checkbox" id="precioAmigoCheckbox" name="precioAmigoCheckbox">
             <span class="checkbox-text">¿Vale por Corte?</span>
           </label>
@@ -111,13 +115,13 @@
           </option>
         {% endfor %}
       </select>
-      <input type="text" id="membreciaPrice" disabled placeholder="$" style="width: 100px;">
+      <input type="text" id="membresiaPrice" disabled placeholder="$" style="width: 100px;">
     </div>
   </div>
 
   <!-- Metodo de Pago -->
-  <div class="form-group payment-methods">
-    <div class="form-row-flex">
+  <div class="form-group payment-methods" id="divMetodoPago" name="divMetodoPago">
+    <div class="form-row-flex" >
       <label for="method">Método de pago:</label>
       <div class="checkbox-group metodo-pago">
         <div class="checkbox-left">
@@ -127,7 +131,7 @@
           </label>
         </div>
         <div class="checkbox-right">
-          <label class="checkbox-label">
+          <label class="checkbox-label" id="MultiPagosLabel" name="MultiPagosLabel">
             <input type="checkbox" id="multiPaymentToggle" name="togglemultiPayment">
             <span class="checkbox-text">¿Usa múltiples métodos?</span>
           </label>
@@ -137,7 +141,7 @@
 
     <div class="payment-method-container">
       <!-- Modo simple -->
-      <div id="singleMethodGroup">
+      <div id="singleMethodGroup" name="singleMethodGroup">
         <select id="methodSimple" name="methodSimple">
           {% for method in methods %}
             <option value="{{ method.id }}">{{ method.nombre }}</option>
@@ -147,14 +151,14 @@
       </div>
 
       <!-- Membresia -->
-      <div id="membresiaMethodGroup" style="display: none;">
+      <div id="membresiaMethodGroup" name="membresiaMethodGroup" style="display: none;">
         <div class="membresia-method-group">
           <input type="number" name="check_membresia" id="check_membresia" step="1" placeholder="Número de Membresía">
         </div>
       </div>
 
       <!-- Modo múltiple -->
-      <div id="multiMethodGroup" style="display: none;">
+      <div id="multiMethodGroup" name="multiMethodGroup" style="display: none;">
         <div class="payment-method-group">
           <select name="method_multiple_1" id="method_multiple_1">
             {% for method in methods %}
@@ -225,7 +229,6 @@
     <tr>
       <td>{{ pago.date.strftime('%H:%M') }}</td>
       <td>{{ pago.appointment.barber.name }}</td>
-      <!-- <td>{{ pago.appointment.service.name if pago.appointment.service else '-' }}</td> -->
       <td>  <!-- Tipo de servicio -->
         {% if pago.appointment.service %}
           {% set contadores.cortes = contadores.cortes + 1 %}
@@ -265,11 +268,17 @@
           -
         {% endif %}
       </td>
-      <!-- <td>{{ pago.appointment.membresia.id if pago.appointment.membresia else '-' }}</td>-->
       <td>
         {% if pago.appointment.membresia %}
           {% if not pago.membresia_comprada %}
             {{ pago.appointment.membresia.id_usuario }} (uso) 
+            {% set contadores.cortes = contadores.cortes + 1 %}
+            {% set barbero = pago.appointment.barber.name %}
+            {% if barbero in servicios_barbero.data %}
+              {% set _ = servicios_barbero.data.update({barbero: servicios_barbero.data[barbero] + 1}) %}
+            {% else %}
+              {% set _ = servicios_barbero.data.update({barbero: 1}) %}
+            {% endif %}
           {% else %}
             {{ pago.appointment.membresia.id_usuario }}
           {% endif %}
@@ -282,7 +291,11 @@
           {{ pago.method1.nombre }} - {{ pago.method2.nombre }}
         {% elif pago.appointment.service %}
           {% if pago.appointment.tipo_precio_servicio == 'amigo' %}
-            -
+            {% if pago.amount_tip > 0 %}
+              {{ pago.method1.nombre }}
+            {% else %}
+              -
+            {% endif %}
           {% else %}
             {{ pago.method1.nombre }}
           {% endif %}
@@ -292,17 +305,18 @@
       </td>
       <td> <!-- Montos de pago -->
         {% if pago.appointment and pago.appointment.tipo_precio_servicio == 'amigo' %}
-          $0
+          <!-- $0 -->
+          ${{ "{:,.0f}".format((pago.amount_method1 or 0) - (pago.amount_tip or 0)).replace(",", ".") }}
         {% elif pago.method2 %}
           ${{ "{:,.0f}".format(pago.amount_method1 or 0).replace(",", ".") }} - ${{ "{:,.0f}".format(pago.amount_method2 or 0).replace(",", ".") }}
         {% else %}
           ${{ "{:,.0f}".format((pago.amount_method1 or 0) - (pago.amount_tip or 0)).replace(",", ".") }}
         {% endif %}
       </td>      
-      <td>${{ "{:,.0f}".format(pago.amount_tip)|replace(",", ".") }}</td>
-      <td>
+      <td>${{ "{:,.0f}".format(pago.amount_tip)|replace(",", ".") }}</td> <!-- Propina -->
+      <td>  <!-- Monto -->
         {% if pago.appointment and pago.appointment.tipo_precio_servicio == 'amigo' %}
-          $0
+          ${{ "{:,.0f}".format(pago.amount_tip)|replace(",", ".") }}
         {% else %}
           ${{ "{:,.0f}".format((pago.amount_method1 or 0) + (pago.amount_method2 or 0)) | replace(",", ".") }}
         {% endif %}
@@ -333,477 +347,51 @@
 </div>
 
 
-
 <script>
-  const serviceSelect = document.getElementById('serviceSelect');
-  const servicePrice = document.getElementById('servicePrice');
-  const togglemultiPayment = document.getElementById('multiPaymentToggle');   // cambiar al nombre de abajo
-  const multiPaymentToggle = document.getElementById('multiPaymentToggle');
-  const productToggle = document.getElementById('productToggle');
-  const singleGroup = document.getElementById('singleMethodGroup');
-  const multiGroup = document.getElementById('multiMethodGroup');
-  const form = document.getElementById('paymentForm');
-  const errorMsg = document.getElementById('multiPaymentError');
-  const repeatError = document.getElementById('methodRepeatError');
-  
-  const amountSimple = document.getElementById('amountSimple');
-  const method1Select = document.getElementById('method1');
-  const method2Select = document.getElementById('method2');
 
+  /// VARIABLES \\\ 
+
+  /// TOGGLES \\\
   const servicioToggle = document.getElementById('toggleServicio');
   const productoToggle = document.getElementById('toggleProducto');
   const membresiaToggle = document.getElementById('toggleMembresia');
 
-  const servicioSection = document.getElementById('servicioSection');
+  const multiPaymentToggle = document.getElementById('multiPaymentToggle');
+
+  const numeroMembresia = document.getElementById('check_membresia');
+
+  const propina = document.getElementById('tip')
+
+  /// SELECCION \\\
+  const serviceSelected = document.getElementById('serviceSelect');
   const productSection = document.getElementById('productSection');
-  const membresiaSelect = document.getElementById('membresiaSelect');
-  const priceInput = document.getElementById('membreciaPrice');
+  const membresiaSelected = document.getElementById('membresiaSelect');
 
-  const membresiaLabel = document.getElementById('membresiaLabel');
-  const membershipDiv = document.getElementById('membresiaMethodGroup');
+  const cantidadSelectProducto = document.querySelector('.productCant');
 
-  // checkboxs 
+
+  /// CHECKBOXS \\\
+  const membresiaCheckbox = document.getElementById('membresiaCheckbox');
   const precioAmigoCheckbox = document.getElementById('precioAmigoCheckbox');
   const precioDescuentoCheckbox = document.getElementById('precioDescuentoCheckbox');
-  const checkbox_use_member = document.getElementById('membresiaCheckbox');
 
+  const multiMetodosPagoGroup = document.getElementById('multiMethodGroup');    // Usa multiples metodos de pago
 
-  // Función para mostrar/ocultar secciones según el toggle (servicio/producto)
-  /*
-    function updateToggleSections(e = null) {
-      const source = e?.target?.id || null;
-      const membresiaCheckbox = document.getElementById('membresiaCheckbox');
 
-      // Ocultar mensaje de error si estaba visible
-      document.getElementById('messageContainer').style.display = 'none';
+  /// VARS MSJ ERROR \\\ 
+  const errorMultiplesPagos = document.getElementById('multiPaymentError');
 
-      // Si algún toggle está seleccionado, ocultar el mensaje de error
-      if (servicioToggle.checked || productoToggle.checked || membresiaToggle.checked) {
-        mostrarErrorToggle(false);
-      }
+  /// SUBMIT \\\
+  const form = document.getElementById('paymentForm');
 
-      if (source === 'toggleMembresia' && membresiaToggle.checked) {
-        // Si el usuario activó membresía, desactiva los otros
-        servicioToggle.checked = false;
-        productoToggle.checked = false;
-        // Desmarcar el checkbox de usa membresía si estaba marcado
-        if (membresiaCheckbox) {
-          membresiaCheckbox.checked = false;
-          multiMethodGroup.style.display = 'none';
-        
-          // Disparar el evento change para actualizar la UI
-          membresiaCheckbox.dispatchEvent(new Event('change'));
-        }
-      }
 
-      if ((source === 'toggleServicio' && servicioToggle.checked) || 
-          (source === 'toggleProducto' && productoToggle.checked)) {
-        // Si el usuario activó servicio o producto, desactiva membresía
-        membresiaToggle.checked = false;
-        // Si el checkbox de usa membresía estaba marcado, habilitar múltiples métodos
-        if (membresiaCheckbox && membresiaCheckbox.checked) {
-          membresiaCheckbox.checked = false;
-          if (multiPaymentToggle) {
-            multiPaymentToggle.disabled = false;
-          }
-          // Disparar el evento change para actualizar la UI
-          membresiaCheckbox.dispatchEvent(new Event('change'));
-        }
-      }
+  /// FUNCIONES \\\
 
-      // Mostrar u ocultar secciones 
-      servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
-      productSection.style.display = productoToggle.checked ? 'block' : 'none';
-      membresiaSection.style.display = membresiaToggle.checked ? 'block' : 'none';
-      membresiaLabel.style.display = membresiaToggle.checked ? 'none' : 'block';
-
-      if (productoToggle.checked) {
-        const productSelect = document.querySelector('.productSelect');
-        if (productSelect) {
-          updateCantidadOptions(productSelect);
-        }
-        initProductSection(); 
-      }
-
-      if (membresiaToggle.checked) {
-        initMembresiaSection();
-      }
-      
-      resetTip();
-      updatePriceTotal();
-    }
-  */
-  function updateToggleSections(e = null) {
-    const source = e?.target?.id || null;
-    const membresiaCheckbox = document.getElementById('membresiaCheckbox');
-
-    // Ocultar mensaje de error si estaba visible
-    document.getElementById('messageContainer').style.display = 'none';
-
-    // Si algún toggle está seleccionado, ocultar el mensaje de error
-    if (servicioToggle.checked || productoToggle.checked || membresiaToggle.checked) {
-      mostrarErrorToggle(false);
-    }
-
-    if (source === 'toggleMembresia' && membresiaToggle.checked) {
-      // Si el usuario activó membresía, desactiva los otros
-      servicioToggle.checked = false;
-      productoToggle.checked = false;
-      membresiaLabel.style.display = 'none';
-
-      // Desmarcar el checkbox de usa membresía si estaba marcado
-      if (membresiaCheckbox) {
-        membresiaCheckbox.checked = false;
-        multiMethodGroup.style.display = 'none';
-      
-        // Disparar el evento change para actualizar la UI
-        membresiaCheckbox.dispatchEvent(new Event('change'));
-      }
-    }
-
-    if (source === 'toggleServicio' && servicioToggle.checked) {
-      // Si el usuario activó servicio desactiva membresía y producto
-      membresiaToggle.checked = false;
-      productoToggle.checked = false;
-      membresiaLabel.style.display = 'block';
-      // Si el checkbox de usa membresía estaba marcado, habilitar múltiples métodos
-      if (membresiaCheckbox && membresiaCheckbox.checked) {
-        membresiaCheckbox.checked = false;
-        if (multiPaymentToggle) {
-          multiPaymentToggle.disabled = false;
-        }
-        // Disparar el evento change para actualizar la UI
-        membresiaCheckbox.dispatchEvent(new Event('change'));
-      }
-    }
-
-    if (source === 'toggleProducto' && productoToggle.checked) {
-      // Si el usuario activó producto, desactiva membresía y servicio
-      servicioToggle.checked = false;
-      membresiaToggle.checked = false;
-      membresiaLabel.style.display = 'none';
-      // Si el checkbox de usa membresía estaba marcado, habilitar múltiples métodos
-      if (membresiaCheckbox && membresiaCheckbox.checked) {
-        membresiaCheckbox.checked = false;
-        if (multiPaymentToggle) {
-          multiPaymentToggle.disabled = false;
-        }
-        // Disparar el evento change para actualizar la UI
-        membresiaCheckbox.dispatchEvent(new Event('change'));
-      }
-    }
-
-    // Mostrar u ocultar secciones 
-    servicioSection.style.display = servicioToggle.checked ? 'block' : 'none';
-    productSection.style.display = productoToggle.checked ? 'block' : 'none';
-    membresiaSection.style.display = membresiaToggle.checked ? 'block' : 'none';
-    // 
-
-    if (productoToggle.checked) {
-      const productSelect = document.querySelector('.productSelect');
-      if (productSelect) {
-        updateCantidadOptions(productSelect);
-      }
-      initProductSection(); 
-    }
-
-    if (membresiaToggle.checked) {
-      initMembresiaSection();
-    }
-    
-    resetTip();
-    updatePriceTotal();
-  }
-
-
-  // Listeners que actualizan la visibilidad si el usuario cambia de opción
-  servicioToggle.addEventListener('change', updateToggleSections);
-  productoToggle.addEventListener('change', updateToggleSections);
-  membresiaToggle.addEventListener('change', updateToggleSections);
-
-  // Actualiza dinámicamente las opciones de cantidad según el producto seleccionado
-  function updateCantidadOptions(selectElement) {
-    const row = selectElement.closest('.productRow');
-    const selectedOption = selectElement.options[selectElement.selectedIndex];
-    const cantidadDisponible = parseInt(selectedOption.dataset.cantidad || 0);
-
-    const cantidadSelect = row.querySelector('.productCant');
-    cantidadSelect.innerHTML = ''; // Limpiar opciones previas
-
-    const maxCantidad = Math.min(10, cantidadDisponible);
-
-    for (let i = 1; i <= maxCantidad; i++) {
-      const option = document.createElement('option');
-      option.value = i;
-      option.textContent = i;
-      cantidadSelect.appendChild(option);
-    }
-
-    // Actualizar el precio después de cambiar las opciones de cantidad
-    updatePrice(row);
-  }
-
-  function resetTip() {
-    const tipInput = document.getElementById('tip');
-    tipInput.value = 0;
-    updatePriceTotal(); // Actualiza el total sin la propina
-  }
-
-  // Funciones que actualizan el precio del servicio seleccionado y lo asigna al input de solo lectura y a propina
-  function obtenerPrecioServicioSeleccionado() {
-    const usaMembresia = document.getElementById('membresiaCheckbox')?.checked || false;
-    const membresiaActivo = membresiaToggle.checked;
-
-    // Si está usando un corte de membresía, el precio es 0
-    if (membresiaActivo && usaMembresia) {
-      return 0;
-    }
-
-    const selected = serviceSelect.options[serviceSelect.selectedIndex];
-    if (!selected) return 0;
-
-    if (precioDescuentoCheckbox.checked) {
-      return parseFloat(selected.getAttribute('data-precio-descuento')) || 0;
-    } else if (precioAmigoCheckbox.checked) {
-      return parseFloat(selected.getAttribute('data-precio-amigo')) || 0;
-    }
-
-    return parseFloat(selected.getAttribute('data-precio')) || 0;
-  }
-
-  function updatePrice() {
-    const precio = obtenerPrecioServicioSeleccionado();
-    const precioRedondeado = Math.round(precio);
-
-    // Formatear con separador de miles y símbolo $
-    // const precioFormateado = `$${precioRedondeado.toLocaleString('es-ES')}`;
-    const precioFormateado = formatearMoneda(precio);
-
-    // Asignar valores al input visible y al oculto
-    servicePrice.value = precioFormateado;
-    amountSimple.value = precioRedondeado; // Este mantiene el valor numérico sin formato
-  }
-
-  function updatePriceTotal() {
-    let precioTotal = 0;
-
-    const servicioActivo = servicioToggle.checked;
-    const productoActivo = productoToggle.checked;
-    const membresiaActivo = membresiaToggle.checked;
-    const usaMembresia = document.getElementById('membresiaCheckbox')?.checked || false;
-    
-    if (membresiaActivo) {
-      /*
-        if (usaMembresia) {
-          // Si está usando un corte de membresía, el precio es 0
-          precioTotal = 0;
-        } else {
-          // Si está comprando una membresía nueva
-          precioTotal = obtenerPrecioMembresia();
-        }
-      */
-      precioTotal = obtenerPrecioMembresia();
-    } else {
-      if (servicioActivo) {
-        if (usaMembresia) {
-          // Si está usando un corte de membresía, el precio es 0
-          precioTotal = 0;
-        } else {
-          precioTotal += obtenerPrecioServicioSeleccionado();
-        }
-      }
-
-      if (productoActivo) {
-        const productosData = obtenerProductosSeleccionados();
-        precioTotal += productosData.total;
-      }
-    }
-
-    updatePrice(); // Aseguramos que el precio del servicio esté actualizado
-    
-    const tipAmount = parseFloat(document.getElementById('tip').value) || 0;
-    const totalConPropina = precioTotal + tipAmount;
-
-    document.getElementById('totalPago').value = formatearMoneda(totalConPropina);
-  }
-
-
-  // Oculta alertas automáticamente después de 15 segundos
-  setTimeout(() => {
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
-      alert.classList.remove('show');
-      alert.classList.add('fade');
-      setTimeout(() => alert.remove(), 1000);
-    });
-  }, 15000);
-
-  // Evento para alternar entre modo de pago simple y múltiple
-  togglemultiPayment.addEventListener('change', function () {
-    const paymentMethodsGroup = document.querySelector('.form-group.payment-methods');
-
-    // Al entrar a esta función, desactivar la membresía si estaba activa
-    if (checkbox_use_member.checked) {
-      checkbox_use_member.checked = false;
-      membershipDiv.style.display = 'none';
-      servicioSection.style.display = 'block';
-      updatePriceTotal();
-
-      // checkbox_use_member.dispatchEvent(new Event('change'));
-    }
-    
-    if (this.checked) {
-      // Si se activa el pago múltiple, ocultar el modo simple y mostrar campos adicionales
-      singleGroup.style.display = 'none';
-      multiGroup.style.display = 'block';
-      multiGroup.querySelectorAll('input').forEach(el => el.required = true);
-      paymentMethodsGroup.classList.add('multiple');
-    } else {
-      // Si se desactiva, volver al modo simple
-      singleGroup.style.display = 'flex';
-      multiGroup.style.display = 'none';
-      multiGroup.querySelectorAll('input').forEach(el => {
-        el.required = false;
-        el.classList.remove('input-error');
-      });
-      multiGroup.querySelectorAll('select').forEach(el => el.classList.remove('input-error'));
-      errorMsg.style.display = 'none';
-      repeatError.style.display = 'none';
-      paymentMethodsGroup.classList.remove('multiple');
-    }
-  });
-
-
-  /// Funciones utilizadas en submit
-
-  function mostrarErrorToggle(mostrar) {
-    toggleError.style.display = mostrar ? 'block' : 'none';
-    toggleContainer.classList.toggle('border', mostrar);
-    toggleContainer.classList.toggle('border-danger', mostrar);
-    toggleContainer.classList.toggle('rounded', mostrar);
-    toggleContainer.classList.toggle('p-2', mostrar);
-  }
-
-  function obtenerPrecioServicio() {
-    const precio = obtenerPrecioServicioSeleccionado();
-    // const precioRedondeado = Math.round(precio);
-    // return parseFloat(precioRedondeado) ;
-    return formatearMoneda(precio);
-  }
-
-  function obtenerPrecioMembresia() {
-    const input = document.getElementById('membreciaPrice');
-    // const valor = input.value.replace('$', '').trim();
-    const valor = input.value.replace(/\./g, '').replace('$', '').trim();
-    return parseFloat(valor) || 0;
-  }
-
-
-  function obtenerProductosSeleccionados() {
-    const rows = document.querySelectorAll('#productSection .productRow');
-    const items = [];
-    let total = 0;
-
-    rows.forEach((row) => {
-      const productSelect = row.querySelector('.productSelect');
-      const cantidadSelect = row.querySelector('.productCant');
-
-      if (!productSelect || !cantidadSelect) return;
-
-      const selected = productSelect.options[productSelect.selectedIndex];
-      const id = selected.value;
-      const precio = parseFloat(selected.getAttribute('data-precio')) || 0;
-      const cantidad = parseInt(cantidadSelect.value) || 0;
-
-      if (cantidad > 0) {
-        items.push({ id, precio, cantidad });
-        total += precio * cantidad;
-      }
-    });
-
-    return { total, items };
-  }
-
-  function agregarInputsOcultos(productos) {
-    productos.forEach((producto, index) => {
-      const inputId = crearInputOculto(`product_id_${index}`, producto.id);
-      const inputCant = crearInputOculto(`cantidad_${index}`, producto.cantidad);
-      form.appendChild(inputId);
-      form.appendChild(inputCant);
-    });
-  }
-
-  function crearInputOculto(nombre, valor) {
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = nombre;
-    input.value = valor;
-    return input;
-  }
-
-  function validarMultiplesMetodos(totalEsperado) {
-    const form = document.querySelector('form');
-    const repeatError = document.getElementById('methodRepeatError');
-    const montoError = document.getElementById('montoError');
-
-    const amount1 = parseFloat(form.querySelector('input[name="amount_method_multi_1"]').value) || 0;
-    const amount2 = parseFloat(form.querySelector('input[name="amount_method_multi_2"]').value) || 0;
-    const propina = parseFloat(form.querySelector('input[name="tip"]').value) || 0;
-    const totalPagado = amount1 + amount2;
-
-    const method1 = form.querySelector('select[name="method_multiple_1"]').value;
-    const method2 = form.querySelector('select[name="method_multiple_2"]').value;
-
-    const metodoInputs = [
-      form.querySelector('select[name="method_multiple_1"]'),
-      form.querySelector('select[name="method_multiple_2"]')
-    ];
-
-    const montoInputs = [
-      form.querySelector('input[name="amount_method_multi_1"]'),
-      form.querySelector('input[name="amount_method_multi_2"]'),
-      form.querySelector('input[name="tip"]')
-    ];
-
-    // Ocultar mensajes de error inicialmente
-    repeatError.style.display = 'none';
-    montoError.style.display = 'none';
-    metodoInputs.forEach(select => select.classList.remove('input-error'));
-    montoInputs.forEach(input => input.classList.remove('input-error'));
-
-    // Validar métodos repetidos
-    if (method1 === method2) {
-      metodoInputs.forEach(select => select.classList.add('input-error'));
-      repeatError.style.display = 'block';
-      return false;
-    }
-
-    // Validar que el total pagado sea correcto
-    // console.log("totalPagado: ",totalPagado)
-    // console.log("totalEsperado: ",totalEsperado)
-    // console.log("propina: ",propina)
-    // console.log("totalEsperado + propina: ",totalEsperado + propina)
-    // console.log("totalPagado - totalEsperado + propina: ",totalPagado - totalEsperado + propina)
-    if (Math.abs(totalPagado - totalEsperado - propina) > 0.01) {
-      montoInputs.forEach(input => input.classList.add('input-error'));
-      montoError.style.display = 'block';
-      return false;
-    }
-
-    return true;
-  }
-
-
-  // Validaciones al enviar el formulario
-  // Validar que haga las mismas validaciones que func python
   form.addEventListener('submit', function (e) {
     // Siempre prevenir el envío por defecto primero
     e.preventDefault();
-    
-    let valid = true;
 
-    const toggleError = document.getElementById('toggleError');
-    const toggleContainer = document.getElementById('toggleContainer');
+    let valid = true;
 
     const servicioActivo = servicioToggle.checked;
     const productoActivo = productoToggle.checked;
@@ -811,217 +399,94 @@
 
     // Validar toggles
     if (!servicioActivo && !productoActivo && !membresiaActivo) {
-      mostrarErrorToggle(true);
+      muestraMensajeErrorToggle();
       return;
     }
-    mostrarErrorToggle(false);
 
-    if (servicioActivo || productoActivo) {   // arreglar 
-      const servicePrecio = servicioActivo ? obtenerPrecioServicio() : 0;
-      
-      const productosData = productoActivo ? obtenerProductosSeleccionados() : { total: 0, items: [] };
+    // Validar membresia
+    if (membresiaActivo) {
+      if (!validarSubmitMembresia()){
+        return;
+      } 
+    }
 
-      if (productoActivo && productosData.items.length === 0) {
-        alert('Debe seleccionar al menos un producto con cantidad válida');
+    if (productoActivo && servicioActivo) {
+
+      if (!validarSubmitServicioProducto()){
         return;
       }
 
-      let membresiaValue = parseInt(document.getElementById("check_membresia").value);
-      let campo = document.getElementById("check_membresia");
-      let mensaje = document.getElementById("mensaje_error_membresia");
+    } else {
 
-      if (servicioActivo && checkbox_use_member.checked) {
-        console.log("checkbox_use_member:",checkbox_use_member.checked);
-        if (!membresiaValue) {
-          mostrarError(campo, mensaje);
+      // Validar producto
+      if (productoActivo) {
+        if (!validarSubmitProducto()){
           return;
         } 
       }
 
-      agregarInputsOcultos(productosData.items);
-
-      let servicePrecio_num = servicePrecio.toString().replace('$', '').replace(/\./g, '');
-      servicePrecio_num = parseFloat(servicePrecio_num);
-
-      let productosData_num = String(productosData.total).replace('$', '').replace(/\./g, '');
-      productosData_num = parseFloat(productosData_num);
-
-      const totalEsperado = servicePrecio_num + productosData_num;
-
-      // console.log("servicePrecio: ",servicePrecio_num)
-      // console.log("productosData.total: ",productosData_num)
-      // console.log("totalEsperado: ",totalEsperado)
-
-      if (togglemultiPayment.checked && !validarMultiplesMetodos(totalEsperado)) {
-        return;
-      }
-    }
-
-    if (membresiaActivo) {
-      const usa_membresia = document.getElementById('membresiaCheckbox');
-        
-      if (!usa_membresia.checked) {
-        const precioActual = obtenerPrecioMembresia();
-        const totalEsperado = precioActual;
-
-        if (togglemultiPayment.checked && !validarMultiplesMetodos(totalEsperado)) {
+      // Validar servicio
+      if (servicioActivo) {
+        if (!validarSubmitServicio()){
           return;
         }
       }
     }
 
-    // Si llega aca, todo es válido
-    e.target.submit();
+    e.target.submit();  // si todo esta bien envio
+
   });
 
 
-  // Limpia el error de validación en los inputs de monto al modificarlos
-  document.querySelectorAll('input[name="amount1"], input[name="amount2"]').forEach(input => {
-    input.addEventListener('input', () => {
-      input.classList.remove('input-error');
-      errorMsg.style.display = 'none';
-    });
-  });
+  /// DOM \\\
 
-  // Limpia el error si se corrige la selección de métodos de pago
-  document.querySelectorAll('select[name="method1"], select[name="method2"]').forEach(select => {
-    select.addEventListener('change', () => {
-      select.classList.remove('input-error');
-      repeatError.style.display = 'none';
-    });
-  });
-
-  // Inicial
-  updateToggleSections();   // Inicializa visibilidad de secciones al cargar el script
-
-  function formatearMoneda(valor) {
-    const numero = Math.round(Number(valor));
-    return `$${numero.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
-  }
- 
-  function mostrarError(campo, mensaje) {
-    campo.classList.add('input-error');
-    mensaje.style.display = 'block';
-  }
-
-  function ocultarError(campo, mensaje) {
-    campo.classList.remove('input-error');
-    mensaje.style.display = 'none';
-  }
-
-  // Muestra/oculta los métodos de pago según si está marcada la membresía
-  function initMembresiaSection() {
-    const membresiaSelect = document.getElementById('membresiaSelect');
-    const priceInput = document.getElementById('membreciaPrice');
-    // const checkbox_use_member = document.getElementById('membresiaCheckbox');
-
-    function updateMembresiaPrice() {
-      const selectedOption = membresiaSelect.options[membresiaSelect.selectedIndex];
-      const precio = selectedOption.getAttribute('data-precio');
-
-      multiGroup.querySelectorAll('input').forEach(el => {
-        el.required = false;
-        el.classList.remove('input-error');
-      });
-      multiGroup.querySelectorAll('select').forEach(el => el.classList.remove('input-error'));
-      
-      if (checkbox_use_member && checkbox_use_member.checked) {
-        // Si está usando un corte de membresía, mostrar precio en 0
-        priceInput.value = '$0';
-      } else {
-        // Si está comprando una membresía nueva, mostrar precio normal
-        // priceInput.value = precio ? `$${parseFloat(precio).toFixed(0)}` : '';
-        priceInput.value = precio ? formatearMoneda(precio) : '';
-      }
-      updatePriceTotal();
-    }
-
-    if (!membresiaSelect.dataset.listenerAdded) {
-      membresiaSelect.addEventListener('change', updateMembresiaPrice);
-      membresiaSelect.dataset.listenerAdded = "true";
-    }
-
-    if (checkbox_use_member && !checkbox_use_member.dataset.listenerAdded) {
-      checkbox_use_member.addEventListener('change', updateMembresiaPrice);
-      checkbox_use_member.dataset.listenerAdded = "true";
-    }
-
-    // Forzar actualización inicial
-    updateMembresiaPrice();
-  }
-
-  function setupMembresiaCheckboxToggle() {
-    const multiPaymentToggle = document.getElementById('multiPaymentToggle');
-    const singleMethodGroup = document.getElementById('singleMethodGroup');
-    const multiMethodGroup = document.getElementById('multiMethodGroup');
-    const membresiaSection = document.getElementById('membresiaSection');
-
-    if (!checkbox_use_member || !membershipDiv || !multiPaymentToggle || !singleMethodGroup) {
-      console.warn("❌ Uno o más elementos no se encontraron.");
-      return;
-    }
-
-    function actualizarPrecioServicio() {
-      const servicePriceInput = document.getElementById('servicePrice');
-      if (!servicePriceInput) return;
-
-      if (checkbox_use_member.checked) {
-        servicePriceInput.value = '$0';
-        if (amountSimple) amountSimple.value = 0;
-        multiPaymentToggle.disabled = false;
-
-      } else {
-        // updatePrice();
-      }
-      //updatePriceTotal();
-    }
-
-
-    checkbox_use_member.addEventListener('change', function () {
-
-      if (togglemultiPayment.checked){
-        togglemultiPayment.checked = false; 
-      }
-
-      if (checkbox_use_member.checked) {
-
-        servicioSection.style.display = 'none';
-        membershipDiv.style.display = 'block';
-        singleMethodGroup.style.display = 'none';
-        multiMethodGroup.style.display = 'none';
-
-      } else {
-        servicioSection.style.display = 'block';
-        membershipDiv.style.display = 'none';
-        singleMethodGroup.style.display = 'block';
-
-        if (multiPaymentToggle.checked) {
-          multiMethodGroup.style.display = 'block';
-          singleGroup.style.display = 'none';
+  document.addEventListener('DOMContentLoaded', function () {
+    
+    // Evento que alterna entre Pago Multiple y Usa Membresia
+    if (multiPaymentToggle && membresiaCheckbox) {    // si existen los elementos entra en if
+    
+      // Evento para alternar entre modo de pago simple y múltiple
+      multiPaymentToggle.addEventListener('change', function () {
+        if (this.checked) {
+          membresiaCheckbox.checked = false;
+          ocultarMembresiaInput();
+          mostrarPagoSimpleGroup();
+          activarMetodoPagoMultiple();
+        } else {
+          desactivarMetodoPagoMultiple();
+          ocultarErrorMetodoPagoRepetido();
+          ocultarErrorMonto();
         }
+        updatePriceTotal();
+      });
 
-      }
-      actualizarPrecioServicio();
-      
-    });
-  
-    // Asegurarse de que el precio esté correcto al cargar
-    actualizarPrecioServicio();
-  }
-
-  // Asegurarse de que el precio se actualice cuando cambia el servicio seleccionado
-  serviceSelect.addEventListener('change', function() {
-    const checkbox_use_member = document.getElementById('membresiaCheckbox');
-    if (checkbox_use_member && checkbox_use_member.checked) {
-      const servicePriceInput = document.getElementById('servicePrice');
-      if (servicePriceInput) {
-        servicePriceInput.value = '$0';
-        if (amountSimple) amountSimple.value = 0;
-      }
-    } else {
-      updatePrice();
+      // Evento para alternar el pago con membresia  
+      membresiaCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+          multiPaymentToggle.checked = false;
+          desactivarMetodoPagoMultiple();
+          mostrarMembresiaInput();
+          ocultarPagoSimpleGroup();
+          desmarcarPrecioDescuentoAmigo();
+        } else {
+          ocultarMembresiaInput();
+          mostrarPagoSimpleGroup();
+          ocultarErrorMembresia();
+        }
+        updatePriceTotal();
+      });
     }
-    updatePriceTotal();
+
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+
+    // Listeners que actualizan la visibilidad si el usuario cambia de opción
+    updateToggleSections(); 
+    if (servicioToggle) servicioToggle.addEventListener('change', updateToggleSections);
+    if (productoToggle) productoToggle.addEventListener('change', updateToggleSections);
+    if (membresiaToggle) membresiaToggle.addEventListener('change', updateToggleSections);
+
   });
 
   // init toggle servicios
@@ -1029,109 +494,98 @@
     // Cuando se selecciona "precio amigo", desmarca "precio descuento"
     precioAmigoCheckbox.addEventListener('change', function () {
       if (this.checked) {
-        precioDescuentoCheckbox.checked = false;
+        desmarcarPrecioDescuento();
+        desmarcarMembresia();
       }
     });
 
     // Cuando se selecciona "precio descuento", desmarca "precio amigo"
     precioDescuentoCheckbox.addEventListener('change', function () {
       if (this.checked) {
-        precioAmigoCheckbox.checked = false;
+        desmarcarPrecioAmigo();
+        desmarcarMembresia();
       }
     });
 
-    document.addEventListener('DOMContentLoaded', updatePrice);
-
-    updatePrice();                                            // Se llama una vez al cargar la página para mostrar el precio inicial
-    serviceSelect.addEventListener('change', updatePriceTotal);    // Actualiza el precio cada vez que se cambia el servicio seleccionado
-    precioAmigoCheckbox.addEventListener('change', updatePriceTotal);
-    precioDescuentoCheckbox.addEventListener('change', updatePriceTotal);
-    updatePriceTotal();
+    serviceSelected.addEventListener('change', updatePriceTotal);           // Actualiza el precio cada vez que se cambia el servicio seleccionado
+    precioAmigoCheckbox.addEventListener('change', updatePriceTotal);       // Actualiza el precio cuando se selecciona checkbox precio amigo
+    precioDescuentoCheckbox.addEventListener('change', updatePriceTotal);   // Actualiza el precio cuando se selecciona checkbox precio descuento
   }
 
-  // Init toggle producto
   function initProductSection() {
-    const productSection = document.getElementById('productSection');
-
-    function updatePrice(row) {
-      const precio = parseFloat(row.querySelector('.productSelect').selectedOptions[0].dataset.precio || 0);
-      const cantidad = parseInt(row.querySelector('.productCant').value || 1);
-      const total = precio * cantidad;
-      // row.querySelector('.productPrice').value = `$${Math.round(total)}`;
-      row.querySelector('.productPrice').value = formatearMoneda(total);
-      updatePriceTotal();
-    }
-
     if (!productSection.dataset.listenersAdded) {
-      // Agregar producto
+
+      // Agregar o Eliminar row de producto
       productSection.addEventListener('click', function (e) {
+        // Agregar producto
         if (e.target.classList.contains('addProductBtn')) {
           const currentRow = e.target.closest('.productRow');
-          const newRow = currentRow.cloneNode(true);
-
-          newRow.querySelector('.productSelect').setAttribute('name', 'product_id[]');
-          newRow.querySelector('.productCant').setAttribute('name', 'product_quantity[]');
-
-          newRow.querySelector('.productSelect').selectedIndex = 0;
-          newRow.querySelector('.productCant').selectedIndex = 0;
-          newRow.querySelector('.productPrice').value = '';
-          productSection.appendChild(newRow);
-
-          updatePrice(newRow);
-
-          const messageContainer = document.getElementById('messageContainer');
-          messageContainer.style.display = 'none';
-          messageContainer.textContent = '';
+          agregarProductoRow(currentRow);
         }
 
         // Eliminar producto
         if (e.target.classList.contains('removeProductBtn')) {
           const row = e.target.closest('.productRow');
-          const rows = productSection.querySelectorAll('.productRow');
-          const messageContainer = document.getElementById('messageContainer');
-
-          if (rows.length > 1) {
-            row.remove();
-            updatePriceTotal();
-            messageContainer.style.display = 'none';
-            messageContainer.textContent = '';
-          } else {
-            messageContainer.style.display = 'block';
-            messageContainer.textContent = 'Debe haber al menos un producto.';
-          }
+          eliminarProductoRow(row);
         }
       });
 
-      // Recalcular precios
+      // Delegación de eventos para cambios en selects o cantidad
       productSection.addEventListener('change', function (e) {
-        if (e.target.classList.contains('productSelect') || e.target.classList.contains('productCant')) {
-          const row = e.target.closest('.productRow');
-          updatePrice(row);
+        const row = e.target.closest('.productRow');
+
+        // Actualiza valor de producto cuando detecta un cambio en un select de producto o en cantidad
+        if (row && (e.target.classList.contains('productSelect') || e.target.classList.contains('productCant'))) {
+          const producto = obtenerPrecioProductoRow(row);
+          insertarValorProductoMostradorRow(row, producto.total);
+          updatePriceTotal();
         }
       });
 
-      productSection.dataset.listenersAdded = "true";
+      // Marcar que los listeners fueron agregados
+      productSection.dataset.listenersAdded = 'true';
+    }
+  }
+
+  function initMembresiaSection() {
+    membresiaSelected.addEventListener('change', updatePriceTotal);           // Actualiza el precio cada vez que se cambia la membresia seleccionada
+  }
+
+  function initFuncionalidadesBotones(){
+    // Seleccioná todos los selects e inputs dentro de #multiMethodGroup
+    if (multiMetodosPagoGroup) {
+
+      /// Seleccion de metodos de pago  \\\
+      const campos = multiMetodosPagoGroup.querySelectorAll('select, input');
+      campos.forEach((campo) => {                             // oculto mensajes de error cuando hay algun movimiento
+        campo.addEventListener('change', ocultarErrorMetodoPagoRepetido);
+        campo.addEventListener('input', ocultarErrorMetodoPagoRepetido);
+      });
+
+      /// Ingreso de montos a pagar \\\
+      const camposMonto = multiMethodGroup.querySelectorAll(
+        'input[name="amount_method_multi_1"], input[name="amount_method_multi_2"], input[name="tip"]'
+      );
+      camposMonto.forEach((campo) => {                        // oculto mensajes de error cuando hay algun movimiento
+        campo.addEventListener('change', ocultarErrorMonto);
+        campo.addEventListener('input', ocultarErrorMonto);
+      });
     }
 
-    // Calcular precio inicial
-    document.querySelectorAll('.productRow').forEach(row => {
-      updatePrice(row);
-    });
-
-    updatePriceTotal();
+    if (numeroMembresia) {
+      numeroMembresia.addEventListener('input', ocultarErrorMembresia);
+    }
   }
 
   document.addEventListener('DOMContentLoaded', function () {
     initServicesSection();
     initProductSection();
     initMembresiaSection();
-    setupMembresiaCheckboxToggle();
-    updatePriceTotal();
+    initFuncionalidadesBotones();
+
+    propina.addEventListener('input', updatePriceTotal); // Agregar event listener para el input de propina
   });
-
-  // Agregar event listener para el input de propina
-  document.getElementById('tip').addEventListener('input', updatePriceTotal);
-
+  
 </script>
 
 {% endblock %}
