@@ -216,10 +216,6 @@
       <th>Membresia</th>
       <th>M. Pago </th>
       <th>Monto</th>
-      <!-- 
-        <th>M. Pago</th> 
-        <th>Monto</th> 
-      -->
       <th>Propina</th>
       <th>Monto Total</th>
       <th>Borrar Pago</th>
@@ -268,7 +264,7 @@
           -
         {% endif %}
       </td>
-      <td>
+      <td>  <!-- Id Membresia -->
         {% if pago.appointment.membresia %}
           {% if not pago.membresia_comprada %}
             {{ pago.appointment.membresia.id_usuario }} (uso) 
@@ -316,7 +312,7 @@
       <td>${{ "{:,.0f}".format(pago.amount_tip)|replace(",", ".") }}</td> <!-- Propina -->
       <td>  <!-- Monto -->
         {% if pago.appointment and pago.appointment.tipo_precio_servicio == 'amigo' %}
-          ${{ "{:,.0f}".format(pago.amount_tip)|replace(",", ".") }}
+          ${{ "{:,.0f}".format((pago.amount_method1 or 0)+ (pago.amount_method2 or 0)).replace(",", ".") }}
         {% else %}
           ${{ "{:,.0f}".format((pago.amount_method1 or 0) + (pago.amount_method2 or 0)) | replace(",", ".") }}
         {% endif %}
