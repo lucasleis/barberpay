@@ -7,8 +7,10 @@ services:
       POSTGRES_DB: peluqueria_db
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
+      TZ: America/Argentina/Buenos_Aires
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
     # ports:
     # - "5432:5432"
     healthcheck:
@@ -29,11 +31,13 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
       - SECRET_KEY=clave_segura_default
+      - TZ=America/Argentina/Buenos_Aires
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - .:/app
+      - /etc/localtime:/etc/localtime:ro
 
 volumes:
   postgres_data: 

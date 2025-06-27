@@ -1,5 +1,8 @@
 FROM python:3.9-slim
 
+# Instalar zona horaria
+RUN apt-get update && apt-get install -y tzdata
+
 WORKDIR /app
 
 COPY requirements.txt .
