@@ -287,7 +287,7 @@ function updateToggleSections(e = null) {
     toggleServicio: {
       show: mostrarServicioSection,
       hide: [
-        // { fn: ocultarProductSection, toggleId: 'toggleProducto' },
+        { fn: ocultarProductSection, toggleId: 'toggleProducto' },    // si quiero permitir servicios y productos comentar linea
         { fn: ocultarMembresiaSection, toggleId: 'toggleMembresia' },
         { fn: mostrarMembresiaLabel } // Mostrar el label Usa Membresia
       ],
@@ -295,7 +295,7 @@ function updateToggleSections(e = null) {
     toggleProducto: {
       show: mostrarProductSection,
       hide: [
-        // { fn: ocultarServicioSection, toggleId: 'toggleServicio' },
+        { fn: ocultarServicioSection, toggleId: 'toggleServicio' },   // si quiero permitir servicios y productos comentar linea
         { fn: ocultarMembresiaSection, toggleId: 'toggleMembresia' },
         { fn: ocultarMembresiaLabel } // Ocultar el label Usa Membresia
       ],

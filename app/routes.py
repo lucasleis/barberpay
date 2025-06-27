@@ -873,7 +873,7 @@ def add_payment():
 
                     membresia.usos_disponibles -= 1
                     db.session.add(membresia)
-                    flash(f"Membresía #{membresia.id}: Quedan {membresia.usos_disponibles} usos disponibles.", "success")
+                    flash(f"Membresía #{membresia.id_usuario}: Quedan {membresia.usos_disponibles} usos disponibles.", "success")
 
                 else:
                     service_id = request.form.get('service_id')
