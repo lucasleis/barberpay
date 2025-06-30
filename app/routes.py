@@ -1,16 +1,19 @@
 from flask import current_app as app, render_template, request, redirect, url_for, session, flash, jsonify
 from . import db
-from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno
+from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno, Usuario
 from .auth import login_required
 from sqlalchemy import desc, text
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
 from collections import defaultdict
-# from backports.zoneinfo import ZoneInfo
-from zoneinfo import ZoneInfo
-from werkzeug.datastructures import MultiDict
+from backports.zoneinfo import ZoneInfo
+# from zoneinfo import ZoneInfo
 from decimal import Decimal
 import logging
+from werkzeug.security import check_password_hash
+from functools import wraps
+
+
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -353,8 +356,18 @@ def index():
 
 ### Administrador ###
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            # Guarda la URL original a la que intentaba acceder
+            return redirect(url_for('login', next=request.path))
+        return f(*args, **kwargs)
+    return decorated_function
+
+"""
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -373,19 +386,54 @@ def login():
         return redirect(url_for("dashboard"))
 
     return render_template('login.html')
+"""
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    next_page = request.args.get('next')
+
+    # i el usuario ya está en sesión, redirigir directamente
+    if 'user' in session:
+        if session.get('rol') == 'admin':
+            return redirect(next_page or url_for('dashboard'))
+        else:
+            return redirect(next_page or url_for('add_payment'))
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        usuario = Usuario.query.filter_by(username=username).first()
+
+        if usuario and check_password_hash(usuario.password, password):
+            session.permanent = True
+            session['user'] = usuario.username
+            session['salon_id'] = usuario.salon_id
+            session['rol'] = usuario.rol
+
+            if usuario.rol == 'admin':
+                return redirect(next_page or url_for('dashboard'))
+            else:
+                return redirect(next_page or url_for('add_payment'))
+
+        else:
+            flash("Usuario o contraseña incorrectos.", "danger")
+            return redirect(url_for("login", next=next_page))
+
+    return render_template('login.html')
 
 @app.route("/logout")
 def logout():
-    session.pop("user", None)
-    session.pop("salon_id", None)
+    session.clear()
     return redirect(url_for("login"))
 
 @app.route('/dashboard')
+@login_required
 def dashboard():
-    if "user" in session:
-        return render_template('dashboard.html')
-    else:
+    if session.get("rol") != "admin":
+        flash("Acceso denegado. Solo el administrador puede acceder al panel.", "danger")
         return redirect(url_for("login"))
+
+    return render_template('dashboard.html')
 
 
 ### Empleados ###
@@ -818,6 +866,9 @@ def update_membresia(membresia_id):
 
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():
+    if "user" not in session:
+        return redirect(url_for("login", next=request.path))
+
     session['salon_id'] = 1
     raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
 
@@ -1098,6 +1149,9 @@ def delete_payment(pago_id):
 
 @app.route('/pagos_entre_fechas', methods=['POST'])
 def pagos_entre_fechas():
+    if "user" not in session:
+        return redirect(url_for("login", next=request.path))
+
     data = request.get_json()
 
     # Definir la zona horaria correcta
@@ -1118,6 +1172,9 @@ def pagos_entre_fechas():
 
 @app.route('/cierres/<int:salon_id>', methods=['GET'])
 def cierre_entre_dias(salon_id):
+    if "user" not in session:
+        return redirect(url_for("login", next=request.path))
+
     today = datetime.today()
 
     # Calcular el último domingo (inicio de semana)

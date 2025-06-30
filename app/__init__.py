@@ -146,6 +146,13 @@ def ensure_database_and_tables():
     """)
     conn.commit()
 
+    try:
+        cur.execute("ALTER TABLE usuario ADD COLUMN rol VARCHAR(20) DEFAULT 'barber';")
+        print("Columna 'rol' agregada a tabla 'usuario'.")
+    except psycopg2.errors.DuplicateColumn:
+        conn.rollback()
+        print("La columna 'rol' ya existe en la tabla 'usuario'.")
+
     # Verificar si la tabla 'peluquerias' está vacía
     cur.execute("SELECT COUNT(*) FROM peluquerias;")
     count = cur.fetchone()[0]

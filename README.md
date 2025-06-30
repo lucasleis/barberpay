@@ -69,3 +69,20 @@ SELECT pg_terminate_backend(<pid>);
 \q
 ```
 
+11. Ver roles de usuarios
+```
+\du
+```
+
+
+
+# Usuarios en db
+
+Agregar usuario
+```
+python -m app.create_users_pass_db
+```
+
+```
+python -m app.delete_users_pass_db
+```
