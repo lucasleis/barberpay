@@ -4,10 +4,10 @@ services:
   db:
     image: postgres:14
     environment:
-      POSTGRES_DB: peluqueria_db
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
-      TZ: America/Argentina/Buenos_Aires
+    - POSTGRES_DB
+    - POSTGRES_USER
+    - POSTGRES_PASSWORD
+    - TZ
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
@@ -25,13 +25,13 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - DB_NAME=peluqueria_db
-      - DB_USER=admin
-      - DB_PASSWORD=admin123
-      - DB_HOST=db
-      - DB_PORT=5432
-      - SECRET_KEY=clave_segura_default
-      - TZ=America/Argentina/Buenos_Aires
+    - DB_NAME
+    - DB_USER
+    - DB_PASSWORD
+    - DB_HOST
+    - DB_PORT
+    - SECRET_KEY
+    - TZ
     depends_on:
       db:
         condition: service_healthy

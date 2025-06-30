@@ -6,3 +6,6 @@ psycopg2-binary
 # Huso horario
 # backports.zoneinfo # laburo
 tzdata # casa
+
+
+flask-wtf

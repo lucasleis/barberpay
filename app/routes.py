@@ -12,6 +12,7 @@ from decimal import Decimal
 import logging
 from werkzeug.security import check_password_hash
 from functools import wraps
+from werkzeug.security import generate_password_hash
 
 
 
@@ -1193,3 +1194,61 @@ def cierre_entre_dias(salon_id):
         salon_id=salon_id
     )
 
+
+
+### Usuarios ###
+@app.route('/admin/users')
+def list_users():
+    if "user" not in session:
+        return redirect(url_for("login", next=request.path))
+
+    salon_id = session.get('salon_id')
+    users = Usuario.query.filter_by(salon_id=salon_id).all()
+    return render_template('users.html', users=users)
+    
+@app.route('/admin/users/add', methods=['POST'])
+def add_user():
+    if "user" not in session:
+        return redirect(url_for("login", next=request.path))
+
+    username = request.form['username']
+    password = request.form['password']
+    rol = request.form['rol']
+    salon_id = session.get('salon_id')
+
+    if not username or not password or not rol:
+        return "Faltan datos", 400
+
+    hashed_pw = generate_password_hash(password)
+    nuevo = Usuario(username=username, password=hashed_pw, rol=rol, salon_id=salon_id)
+
+    db.session.add(nuevo)
+    db.session.commit()
+
+    return redirect(url_for('list_users'))
+
+@app.route('/admin/users/delete/<int:id>')
+def delete_user(id):
+    if "user" in session:
+        user = Usuario.query.get_or_404(id)
+        db.session.delete(user)
+        db.session.commit()
+        return redirect(url_for('list_users'))
+    else:
+        return redirect(url_for("login"))
+
+@app.route('/admin/users/update/<int:id>', methods=['POST'])
+def update_user_password(id):
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    user = Usuario.query.get_or_404(id)
+    new_password = request.form.get('new_password')
+
+    if not new_password:
+        return "La nueva contraseña es requerida", 400
+
+    user.password = generate_password_hash(new_password)
+    db.session.commit()
+
+    return redirect(url_for('list_users'))

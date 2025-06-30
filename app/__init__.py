@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_wtf import CSRFProtect 
 from .models import db
 import os
 from datetime import timedelta
@@ -26,7 +27,7 @@ def ensure_database_and_tables():
     )
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
-    cur.execute(f"SELECT 1 FROM pg_database WHERE datname='{DB_NAME}';")
+    cur.execute("SELECT 1 FROM pg_database WHERE datname = %s;", (DB_NAME,))
     exists = cur.fetchone()
     if not exists:
         print(f"Base de datos '{DB_NAME}' no existe. Creándola...")
@@ -36,7 +37,7 @@ def ensure_database_and_tables():
     cur.close()
     conn.close()
 
-    # Crear tablas en la base de datos creada
+    # Crear tablas
     conn = psycopg2.connect(
         dbname=DB_NAME,
         user=DB_USER,
@@ -159,7 +160,10 @@ def ensure_database_and_tables():
 
     if count == 0:
         print("Insertando peluquería inicial...")
-        cur.execute("INSERT INTO peluquerias (id, nombre) VALUES (1, 'Peluquería Central');")
+        cur.execute(
+            "INSERT INTO peluquerias (id, nombre) VALUES (%s, %s);",
+            (1, 'Peluquería Central')
+        )
         conn.commit()
     else:
         print("Ya existen peluquerías registradas. No se insertó ninguna.")
@@ -177,6 +181,14 @@ def create_app():
 
     app = Flask(__name__)
 
+    # Seguridad de cookies
+    app.config.update(
+        SESSION_COOKIE_SECURE=True,      # Solo se envían por HTTPS
+        SESSION_COOKIE_HTTPONLY=True,    # No accesible desde JavaScript
+        SESSION_COOKIE_SAMESITE='Lax',   # Protección CSRF
+        WTF_CSRF_TIME_LIMIT=None         # (opcional) desactiva expiración del token CSRF
+    )
+
     # Configuración de la base de datos PostgreSQL desde variables de entorno
     DB_NAME = os.environ.get('DB_NAME', 'peluqueria_db')
     DB_USER = os.environ.get('DB_USER', 'admin')
@@ -191,13 +203,17 @@ def create_app():
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Clave secreta para sesiones y credenciales admin para login simple
+    # Clave secreta para sesiones y CSRF
     app.secret_key = os.environ.get('SECRET_KEY', 'clave_segura_default')
     app.config['ADMIN_USERNAME'] = DB_USER
     app.config['ADMIN_PASSWORD'] = DB_PASSWORD
 
     # Tiempo de expiración de la sesión
     app.permanent_session_lifetime = timedelta(minutes=15)
+
+    # Inicializar CSRF Protection
+    csrf = CSRFProtect()
+    csrf.init_app(app)
 
     # Inicializar extensión SQLAlchemy
     db.init_app(app)
