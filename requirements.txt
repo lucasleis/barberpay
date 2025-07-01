@@ -11,3 +11,5 @@ tzdata # casa
 flask-wtf
 
 dotenv
+
+mercadopago

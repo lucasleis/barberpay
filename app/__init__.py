@@ -236,6 +236,9 @@ def create_app():
         from . import routes
         db.create_all()
 
+        from . import mp_test
+        app.register_blueprint(mp_test.mercadopago_routes)
+
     # Inyectar CSRF token en todos los templates
     @app.context_processor
     def inject_csrf_token():
