@@ -66,6 +66,7 @@
         <h3>Editar Producto</h3>
         <span class="close-modal" onclick="closeCantidadModal(this.dataset.id)" data-id="{{ product.id }}">&times;</span>
         <form method="POST" action="{{ url_for('update_product_quantity', id=product.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <div class="form-group">
             <label for="name-{{ product.id }}">Nuevo nombre:</label>
             <input type="text" name="nombre" id="name-{{ product.id }}" placeholder="Nombre" required class="cantidad-input" value="{{ product.name }}">

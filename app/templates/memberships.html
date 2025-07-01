@@ -62,6 +62,7 @@
           <h3>Editar Membresía</h3>
           <span class="close-modal" onclick="closeCantidadModal(this.dataset.id)" data-id="{{ tipo.id }}">&times;</span>
           <form method="POST" action="{{ url_for('update_membership_type', id=tipo.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <div class="form-group">
               <label for="nombre-{{ tipo.id }}">Nuevo nombre:</label>
               <input type="text" name="nombre" id="nombre-{{ tipo.id }}" value="{{ tipo.nombre }}" required>
@@ -126,6 +127,7 @@
         <h3>Editar Membresía Comprada</h3>
         <span class="close-modal" onclick="closeCantidadModal('membresia-{{ m.id }}')">&times;</span>
         <form method="POST" action="{{ url_for('update_membresia', membresia_id=m.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <div class="form-group">
             <label for="id_usuario_{{ m.id }}">ID Usuario (1–100):</label>
             <input type="number" name="id_usuario" id="id_usuario_{{ m.id }}" value="{{ m.id_usuario }}" required min="1" max="100">

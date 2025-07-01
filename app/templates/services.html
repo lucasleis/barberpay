@@ -67,6 +67,7 @@
         <h3>Editar Precios</h3>
         <span class="close-modal" onclick="closePrecioModal(this.dataset.id)" data-id="{{ service.id }}">&times;</span>
         <form method="POST" action="{{ url_for('update_service', id=service.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <div class="form-group">
             <label for="nombre-{{ service.id }}">Nuevo Nombre:</label>
             <input type="text" name="name" id="nombre-{{ service.id }}" value="{{ service.name }}" required>

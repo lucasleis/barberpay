@@ -46,6 +46,7 @@
           <h3>Editar Barbero</h3>
           <span class="close-modal" onclick="closeBarberModal(this.dataset.id)" data-id="{{ barber.id }}">&times;</span>
           <form method="POST" action="{{ url_for('update_barber', id=barber.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <div class="form-group">
               <label for="nombre-{{ barber.id }}">Nuevo nombre:</label>
               <input type="text" name="name" id="nombre-{{ barber.id }}" value="{{ barber.name }}" required>

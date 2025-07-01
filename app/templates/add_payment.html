@@ -10,7 +10,6 @@
 
 <form method="POST" id="paymentForm" action="{{ url_for('add_payment') }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-  
   <input type="hidden" name="salon_id" value="{{ salon_id }}">
 
   <!-- Selector de Barbero -->

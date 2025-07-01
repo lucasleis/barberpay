@@ -9,3 +9,5 @@ tzdata # casa
 
 
 flask-wtf
+
+dotenv

@@ -39,6 +39,7 @@
           <h3>Editar Método de Pago</h3>
           <span class="close-modal" onclick="closeModal(this.dataset.id)" data-id="{{ method.id }}">&times;</span>
           <form method="POST" action="{{ url_for('update_payment_method', id=method.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <div class="form-group">
               <label for="nombre-{{ method.id }}">Nuevo nombre:</label>
               <input type="text" name="nombre" id="nombre-{{ method.id }}" value="{{ method.nombre }}" required>

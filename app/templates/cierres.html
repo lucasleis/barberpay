@@ -30,16 +30,25 @@
     const fechaInicio = document.getElementById('fechaInicio').value;
     const fechaFinal = document.getElementById('fechaFinal').value;
 
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
     const response = await fetch('/pagos_entre_fechas', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
       },
       body: JSON.stringify({
         start_date: fechaInicio,
         end_date: fechaFinal
       })
     });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Error en respuesta:", response.status, errorText);
+      return;
+    }
 
     const data = await response.json();
     renderCierres(data);
