@@ -9,6 +9,8 @@
   <h2>Servicios</h2>
 
   <form method="POST" action="{{ url_for('add_service') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    
     <div class="form-group">
       <label for="name">Nombre:</label>
       <input type="text" name="name" id="name" placeholder="Nombre del servicio" required>

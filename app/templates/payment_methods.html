@@ -9,6 +9,8 @@
   <h2>Métodos de Pago</h2>
 
   <form method="POST" action="{{ url_for('add_payment_method') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
     <div class="form-group">
       <label for="nombre">Nombre:</label>
       <input type="text" name="nombre" id="nombre" placeholder="Nombre del método de pago" required>

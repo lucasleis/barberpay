@@ -1,16 +1,21 @@
 from flask import Flask
 from flask_wtf import CSRFProtect 
+from flask_wtf.csrf import generate_csrf
 from .models import db
 import os
 from datetime import timedelta
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from dotenv import load_dotenv
+
 
 # ==============================
 # Crear la base de datos y tablas si no existen
 # ==============================
 
 def ensure_database_and_tables():
+    load_dotenv() 
+
     DB_NAME = os.environ.get('DB_NAME', 'peluqueria_db')
     DB_USER = os.environ.get('DB_USER', 'admin')
     DB_PASSWORD = os.environ.get('DB_PASSWORD', 'admin123')
@@ -143,6 +148,14 @@ def ensure_database_and_tables():
             date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
         );
+                
+        CREATE TABLE IF NOT EXISTS usuario (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(80) NOT NULL UNIQUE,
+            password VARCHAR(200) NOT NULL,
+            salon_id INTEGER,
+            rol VARCHAR(20) NOT NULL
+        );
 
     """)
     conn.commit()
@@ -183,7 +196,7 @@ def create_app():
 
     # Seguridad de cookies
     app.config.update(
-        SESSION_COOKIE_SECURE=True,      # Solo se envían por HTTPS
+        SESSION_COOKIE_SECURE=False,      # Solo se envían por HTTPS
         SESSION_COOKIE_HTTPONLY=True,    # No accesible desde JavaScript
         SESSION_COOKIE_SAMESITE='Lax',   # Protección CSRF
         WTF_CSRF_TIME_LIMIT=None         # (opcional) desactiva expiración del token CSRF
@@ -222,5 +235,15 @@ def create_app():
     with app.app_context():
         from . import routes
         db.create_all()
+
+    # Inyectar CSRF token en todos los templates
+    @app.context_processor
+    def inject_csrf_token():
+        return dict(csrf_token=generate_csrf())
+    
+    @app.after_request
+    def set_csrf_cookie(response):
+        response.set_cookie('csrf_token', generate_csrf())
+        return response
 
     return app

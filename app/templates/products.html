@@ -9,6 +9,8 @@
   <h2>Productos</h2>
 
   <form method="POST" action="{{ url_for('add_product') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
     <div class="form-group">
       <label for="name">Producto:</label>
       <div class="nombre-cantidad">

@@ -9,6 +9,8 @@
   <h2>Tipos de Membresía</h2>
 
   <form method="POST" action="{{ url_for('add_membership') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    
     <div class="form-group">
       <label for="nombre">Nombre:</label>
       <input type="text" name="nombre" id="nombre" placeholder="Nombre de la membresía" required>
