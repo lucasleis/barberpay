@@ -16,9 +16,9 @@
             <img src="{{ url_for('static', filename='Barba&Co_logo.png') }}" alt="Barba&Co Logo" class="img-fluid logo">
         </div>
         <nav>
-            <!-- <a href="{{ url_for('index') }}">Inicio</a> | -->
-            <!--  <a href="{{ url_for('list_barbers') }}">Peluqueros</a> | -->
-            <!--  <a href="{{ url_for('list_services') }}">Servicios</a> | -->
+            {#  <!-- <a href="{{ url_for('app_landing') }}">Inicio</a> |      --> #}
+            {#  <!-- <a href="{{ url_for('list_barbers') }}">Peluqueros</a> | --> #}
+            {#  <!-- <a href="{{ url_for('list_services') }}">Servicios</a> | -->#}
             <a href="{{ url_for('add_payment', salon_id=1) }}">Agregar pago</a>  |
             <a href="{{ url_for('cierre_entre_dias', salon_id=1) }}">Cierres</a> |
             <a href="{{ url_for('login') }}">Administrar</a> 

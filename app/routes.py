@@ -6,8 +6,8 @@ from sqlalchemy import desc, text
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
 from collections import defaultdict
-# from backports.zoneinfo import ZoneInfo
-from zoneinfo import ZoneInfo
+from backports.zoneinfo import ZoneInfo
+# from zoneinfo import ZoneInfo
 from decimal import Decimal
 import logging
 from werkzeug.security import check_password_hash
@@ -350,11 +350,11 @@ def obtener_id_usuario_disponible(peluqueria_id):
 
     return i
 
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
+"""
+    @app.route('/')
+    def index():
+        return render_template('index.html')
+    """
 ### Administrador ###
 
 def login_required(f):
@@ -1252,3 +1252,21 @@ def update_user_password(id):
     db.session.commit()
 
     return redirect(url_for('list_users'))
+
+
+
+
+
+### Landing ### 
+
+@app.route("/")
+def public_landing():
+    return render_template("public_landing.html")
+
+@app.route("/app")
+def app_landing():
+    return render_template("index.html")
+
+@app.route("/turnos")
+def turnos():
+    return redirect("https://www.fresha.com/es/a/barba-co-pineyro-avenida-presidente-bernardino-rivadavia-215-o1ukwtm0/all-offer?menu=true&pId=1429418")  # Si querés que redirija directo
