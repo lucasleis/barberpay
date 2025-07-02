@@ -3,6 +3,7 @@ from . import db
 from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno, Usuario
 from .auth import login_required
 from sqlalchemy import desc, text
+from sqlalchemy.sql import extract, func
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
 from collections import defaultdict
@@ -870,7 +871,7 @@ def add_payment():
     if "user" not in session:
         return redirect(url_for("login", next=request.path))
 
-    session['salon_id'] = 1
+    #session['salon_id'] = 1
     raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
 
     try:
@@ -1098,7 +1099,7 @@ def add_payment():
 
 @app.route('/payments/delete/<int:pago_id>', methods=['POST'])
 def delete_payment(pago_id):
-    session['salon_id'] = 1
+    #session['salon_id'] = 1
     salon_id = session.get("salon_id")
 
     pago = Pago.query.get_or_404(pago_id)
@@ -1270,3 +1271,29 @@ def app_landing():
 @app.route("/turnos")
 def turnos():
     return redirect("https://www.fresha.com/es/a/barba-co-pineyro-avenida-presidente-bernardino-rivadavia-215-o1ukwtm0/all-offer?menu=true&pId=1429418")  # Si querés que redirija directo
+
+
+
+### Metricas ### 
+
+
+@app.route('/metricas')
+def metricas():
+    hoy = datetime.now()
+    hace_7_dias = hoy - timedelta(days=7)
+
+    horas_pico = (
+        db.session.query(
+            extract('hour', Appointment.date).label('hora'),
+            func.count().label('cantidad')
+        )
+        .filter(Appointment.date >= hace_7_dias)
+        .group_by('hora')
+        .order_by(func.count().desc())
+        .all()
+    )
+
+    # Convertimos a lista de tuplas (int, int) para Jinja
+    horas_pico = [(int(row.hora), row.cantidad) for row in horas_pico]
+
+    return render_template('metricas.html', horas_pico=horas_pico)

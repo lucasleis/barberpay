@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='metricas.css') }}">
+
+<div class="container">
+  <h2>📊 Horas Pico (últimos 7 días)</h2>
+
+  <div class="chart-container">
+    {% for hora, cantidad in horas_pico %}
+      <div class="bar-row">
+        <span class="label">{{ "%02d:00" % hora }}</span>
+        <div class="bar" style="width: {{ cantidad * 10 }}px;">
+            {{ cantidad }} turno{{ 's' if cantidad != 1 }}
+        </div>
+      </div>
+    {% else %}
+      <p>No hay datos de turnos en la última semana.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+

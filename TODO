@@ -15,6 +15,7 @@
     - Cierre:
 
 - Errores:
+    - no se puede eliminar membresia utilizada
 
 - Pagos:
     - Arreglar
@@ -29,10 +30,23 @@
 
 - Usuarios:
     - Desarrollar:
-        - Panel de control donde permito o anulo permisos
     - Opciones de validacion:
         - jwt de duracion de un mes
         - iniciar sesion con google 
+
+
+
+- Metricas:
+    - Comparativa temporal (semana/mes actual vs anterior) (incluir variacion)
+    - Servicios más vendidos
+    - Productos más y menos vendidos
+    - Membresías vendidas y uso
+    - Dashboard de desempeño de barberos:
+        - Servicios promedio por día
+        - Ticket promedio por barbero
+        - Ranking semanal
+
+
 
 
 
