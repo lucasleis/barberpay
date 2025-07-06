@@ -196,7 +196,7 @@ def create_app():
 
     # Seguridad de cookies
     app.config.update(
-        SESSION_COOKIE_SECURE=False,      # Solo se envían por HTTPS
+        SESSION_COOKIE_SECURE=True,      # Solo se envían por HTTPS
         SESSION_COOKIE_HTTPONLY=True,    # No accesible desde JavaScript
         SESSION_COOKIE_SAMESITE='Lax',   # Protección CSRF
         WTF_CSRF_TIME_LIMIT=None         # (opcional) desactiva expiración del token CSRF
@@ -222,7 +222,7 @@ def create_app():
     app.config['ADMIN_PASSWORD'] = DB_PASSWORD
 
     # Tiempo de expiración de la sesión
-    app.permanent_session_lifetime = timedelta(minutes=15)
+    app.permanent_session_lifetime = timedelta(hours=12)
 
     # Inicializar CSRF Protection
     csrf = CSRFProtect()
