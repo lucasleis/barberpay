@@ -4,21 +4,85 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='metricas.css') }}">
 
 <div class="container">
-  <h2>📊 Horas Pico (últimos 7 días)</h2>
 
+  <!-- Horas pico -->
+  <h2>📊 Horas Pico (últimos 30 días)</h2>
   <div class="chart-container">
-    {% for hora, cantidad in horas_pico %}
+    {% for hora, media_hora, cantidad in horas_pico %}
       <div class="bar-row">
-        <span class="label">{{ "%02d:00" % hora }}</span>
-        <div class="bar" style="width: {{ cantidad * 10 }}px;">
-            {{ cantidad }} turno{{ 's' if cantidad != 1 }}
+        <span class="label">{{ "%02d:%02d" % (hora, media_hora) }}</span>
+        <span class="separator">|</span>
+        <div class="bar" style="width: {{ cantidad * 12 }}px;">
+          {{ "█" * cantidad }} ({{ cantidad }}) turno{{ 's' if cantidad != 1 }}
         </div>
       </div>
     {% else %}
-      <p>No hay datos de turnos en la última semana.</p>
+      <p>No hay datos de turnos en los últimos 30 días.</p>
     {% endfor %}
   </div>
+
+
+  <!-- Servicios más vendidos -->
+  <hr>
+  <h2>💈 Servicios más vendidos (últimos 30 días)</h2>
+  <div class="chart-container">
+    {% for servicio in servicios_mas_vendidos %}
+      <div class="bar-row">
+        <span class="label">{{ servicio.nombre }}</span>
+        <span class="separator">|</span>
+        <div class="bar" style="width: {{ servicio.total * 12 }}px;">
+          <strong>{{ servicio.total }} venta{{ 's' if servicio.total != 1 }}</strong> 
+          <small>
+            (
+              común: {{ servicio.comun }}, 
+              amigo:{{ servicio.amigo }},
+              descuento: {{ servicio.descuento }}
+            )
+          </small>
+        </div>
+      </div>
+    {% else %}
+      <p>No hay servicios vendidos en los últimos 30 días.</p>
+    {% endfor %}
+  </div>
+
+
+  <!-- Productos más vendidos -->
+  <hr>
+  <h2>🧴 Productos más vendidos (últimos 30 días)</h2>
+  <div class="chart-container">
+    {% for producto in productos_mas_vendidos %}
+      <div class="bar-row">
+        <span class="label">{{ producto.nombre }}</span>
+        <span class="separator">|</span>
+        <div class="bar" style="width: {{ producto.cantidad * 12 }}px;">
+          {{ "█" * producto.cantidad }} ({{ producto.cantidad }}) unidad{{ 'es' if producto.cantidad != 1 }}
+        </div>
+      </div>
+    {% else %}
+      <p>No hay productos vendidos en los últimos 30 días.</p>
+    {% endfor %}
+  </div>
+
+  
+  <!-- Membresias vendidas -->
+  <hr>
+  <h2>🏷️ Membresías vendidas (últimos 30 días)</h2>
+  <div class="chart-container">
+    {% for m in membresias_vendidas %}
+      <div class="bar-row">
+        <span class="label">{{ m.nombre }}</span>
+        <span class="separator">|</span>
+        <div class="bar" style="width: {{ m.cantidad * 12 }}px;">
+          {{ "█" * m.cantidad }} ({{ m.cantidad }}) venta{{ 's' if m.cantidad != 1 }}
+        </div>
+      </div>
+    {% else %}
+      <p>No hay membresías vendidas en los últimos 30 días.</p>
+    {% endfor %}
+  </div>
+
+
+
 </div>
 {% endblock %}
-
-

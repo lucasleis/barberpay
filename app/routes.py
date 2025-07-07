@@ -1,8 +1,8 @@
-from flask import current_app as app, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import current_app as app, render_template, request, redirect, url_for, session, flash, jsonify, Blueprint
 from . import db
 from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno, Usuario
 from .auth import login_required
-from sqlalchemy import desc, text
+from sqlalchemy import desc, text, case
 from sqlalchemy.sql import extract, func
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
@@ -1279,21 +1279,118 @@ def turnos():
 
 @app.route('/metricas')
 def metricas():
-    hoy = datetime.now()
-    hace_7_dias = hoy - timedelta(days=7)
+    fecha_limite = datetime.now() - timedelta(days=30)
 
-    horas_pico = (
+    servicios_mas_vendidos = obtener_servicios_mas_vendidos(fecha_limite)
+    productos_mas_vendidos = obtener_productos_mas_vendidos(fecha_limite)
+    horas_pico = obtener_horas_pico_por_media_hora(fecha_limite)
+    membresias_vendidas = obtener_membresias_vendidas(fecha_limite)
+
+
+    return render_template(
+        "metricas.html",
+        horas_pico=horas_pico,
+        servicios_mas_vendidos=servicios_mas_vendidos,
+        productos_mas_vendidos=productos_mas_vendidos,
+        membresias_vendidas=membresias_vendidas
+    )
+
+
+def obtener_servicios_mas_vendidos(fecha_limite):
+    resultados = (
+        db.session.query(
+            Servicio.name,
+            Appointment.tipo_precio_servicio,
+            func.count(Pago.id).label('cantidad_vendida')
+        )
+        .join(Appointment, Appointment.id == Pago.appointment_id)
+        .join(Servicio, Servicio.id == Appointment.service_id)
+        .filter(Pago.date >= fecha_limite)
+        .group_by(Servicio.name, Appointment.tipo_precio_servicio)
+        .order_by(func.count(Pago.id).desc())
+        .all()
+    )
+
+    servicios = {}
+    for nombre, tipo_precio, cantidad in resultados:
+        if nombre not in servicios:
+            servicios[nombre] = {"total": 0, "comun": 0, "amigo": 0, "descuento": 0}
+        servicios[nombre][tipo_precio] += cantidad
+        servicios[nombre]["total"] += cantidad
+
+    return [
+        {
+            "nombre": nombre,
+            "total": datos["total"],
+            "comun": datos["comun"],
+            "amigo": datos["amigo"],
+            "descuento": datos["descuento"]
+        }
+        for nombre, datos in servicios.items()
+    ]
+
+
+def obtener_productos_mas_vendidos(fecha_limite):
+    resultados = (
+        db.session.query(
+            Producto.name,
+            func.sum(AppointmentTurno.cantidad).label('cantidad_total')
+        )
+        .join(AppointmentTurno.producto)  
+        .join(Appointment, Appointment.id == AppointmentTurno.turno_id)
+        .filter(Appointment.date >= fecha_limite)
+        .group_by(Producto.name)
+        .order_by(func.sum(AppointmentTurno.cantidad).desc())
+        .all()
+    )
+
+    return [
+        {"nombre": nombre, "cantidad": int(cantidad)}
+        for nombre, cantidad in resultados
+    ]
+
+
+def obtener_horas_pico_por_media_hora(fecha_limite):
+    media_hora_case = case(
+        (extract('minute', Appointment.date) < 30, 0),
+        else_=30
+    )
+
+    resultados = (
         db.session.query(
             extract('hour', Appointment.date).label('hora'),
+            media_hora_case.label('media_hora'),
             func.count().label('cantidad')
         )
-        .filter(Appointment.date >= hace_7_dias)
-        .group_by('hora')
+        .filter(Appointment.date >= fecha_limite)
+        .group_by('hora', 'media_hora')
         .order_by(func.count().desc())
         .all()
     )
 
-    # Convertimos a lista de tuplas (int, int) para Jinja
-    horas_pico = [(int(row.hora), row.cantidad) for row in horas_pico]
+    return [
+        (int(row.hora), int(row.media_hora), row.cantidad)
+        for row in resultados
+    ]
 
-    return render_template('metricas.html', horas_pico=horas_pico)
+
+def obtener_membresias_vendidas(fecha_limite):
+    resultados = (
+        db.session.query(
+            TipoMembresia.nombre,
+            func.count(Pago.id).label('cantidad_vendida')
+        )
+        .join(Pago.membresia_comprada)
+        .join(TipoMembresia, TipoMembresia.id == Membresia.tipo_membresia_id)
+        .filter(Pago.date >= fecha_limite)
+        .filter(Pago.membresia_comprada_id.isnot(None))
+        .group_by(TipoMembresia.nombre)
+        .order_by(func.count(Pago.id).desc())
+        .all()
+    )
+
+    return [
+        {"nombre": nombre, "cantidad": cantidad}
+        for nombre, cantidad in resultados
+    ]
+
