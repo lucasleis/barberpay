@@ -7,8 +7,8 @@ from sqlalchemy.sql import extract, func
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time
 from collections import defaultdict
-# from backports.zoneinfo import ZoneInfo
-from zoneinfo import ZoneInfo
+from backports.zoneinfo import ZoneInfo
+# from zoneinfo import ZoneInfo
 from decimal import Decimal
 import logging
 from werkzeug.security import check_password_hash
@@ -253,6 +253,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             if pago.appointment.productos_turno:
                 pago_empleado += float(pago_empleado_producto)
                 pago_propietario = float(Decimal(monto_producto) - Decimal(pago_empleado_producto))
+
             pago_dict.update({
                 "empleado": empleado.name,
                 "porcentaje_empleado": porcentaje,
@@ -261,6 +262,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 "pago_empleado": pago_empleado,
                 "pago_propietario": pago_propietario,
             })
+            
             total_por_empleado[empleado.name]["monto"] += float(pago_empleado)
             total_por_empleado[empleado.name]["monto_cortes"] += float(pago_empleado)
             total_por_empleado[empleado.name]["cortes"] += 1
@@ -1292,11 +1294,12 @@ def metricas():
         horas_pico=horas_pico,
         servicios_mas_vendidos=servicios_mas_vendidos,
         productos_mas_vendidos=productos_mas_vendidos,
-        membresias_vendidas=membresias_vendidas
+        membresias_vendidas=membresias_vendidas,
     )
 
 
 def obtener_servicios_mas_vendidos(fecha_limite):
+    # Parte 1: servicios pagados
     resultados = (
         db.session.query(
             Servicio.name,
@@ -1307,24 +1310,58 @@ def obtener_servicios_mas_vendidos(fecha_limite):
         .join(Servicio, Servicio.id == Appointment.service_id)
         .filter(Pago.date >= fecha_limite)
         .group_by(Servicio.name, Appointment.tipo_precio_servicio)
-        .order_by(func.count(Pago.id).desc())
         .all()
     )
 
     servicios = {}
     for nombre, tipo_precio, cantidad in resultados:
         if nombre not in servicios:
-            servicios[nombre] = {"total": 0, "comun": 0, "amigo": 0, "descuento": 0}
+            servicios[nombre] = {
+                "total": 0,
+                "comun": 0,
+                "amigo": 0,
+                "descuento": 0,
+                "membresia": 0  # este campo se llenará abajo
+            }
         servicios[nombre][tipo_precio] += cantidad
         servicios[nombre]["total"] += cantidad
 
+    # Parte 2: usos de membresías (no compradas, solo usadas)
+    pagos = (
+        db.session.query(Pago)
+        .filter(Pago.date >= fecha_limite)
+        .all()
+    )
+
+    for pago in pagos:
+        if not pago.membresia_comprada and pago.appointment and pago.appointment.membresia:
+            tipo = pago.appointment.membresia.tipo_membresia
+            servicio = Servicio.query.get(tipo.servicio_id)
+            if not servicio:
+                continue
+
+            nombre_servicio = servicio.name
+            if nombre_servicio not in servicios:
+                servicios[nombre_servicio] = {
+                    "total": 0,
+                    "comun": 0,
+                    "amigo": 0,
+                    "descuento": 0,
+                    "membresia": 0
+                }
+
+            servicios[nombre_servicio]["membresia"] += 1
+            servicios[nombre_servicio]["total"] += 1
+
+    # Resultado final
     return [
         {
             "nombre": nombre,
             "total": datos["total"],
             "comun": datos["comun"],
             "amigo": datos["amigo"],
-            "descuento": datos["descuento"]
+            "descuento": datos["descuento"],
+            "membresia": datos["membresia"]
         }
         for nombre, datos in servicios.items()
     ]
