@@ -262,7 +262,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 "pago_empleado": pago_empleado,
                 "pago_propietario": pago_propietario,
             })
-            
+
             total_por_empleado[empleado.name]["monto"] += float(pago_empleado)
             total_por_empleado[empleado.name]["monto_cortes"] += float(pago_empleado)
             total_por_empleado[empleado.name]["cortes"] += 1
@@ -353,11 +353,20 @@ def obtener_id_usuario_disponible(peluqueria_id):
 
     return i
 
-"""
-    @app.route('/')
-    def index():
-        return render_template('index.html')
-    """
+
+@app.context_processor
+def inject_logo():
+    dominio = request.host
+
+    logos_por_dominio = {
+        'barbacompany.com.ar': './static/Barba&Co_logo.png',
+    }
+
+    return {
+        #'logo_url': logos_por_dominio.get(dominio, '/RacingEscudo.png')
+        'logo_url': logos_por_dominio.get(dominio, '/Barba&Co_logo.png')
+    }
+
 ### Administrador ###
 
 def login_required(f):
