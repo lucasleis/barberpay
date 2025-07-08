@@ -43,24 +43,29 @@ function quitarRequired(selector) {
 function ocultarServicioSection() {
   ocultarElemento('servicioSection');
 }
-function mostrarServicioSection() {
-  mostrarElemento('servicioSection');
-}
+/*
+  function mostrarServicioSection() {
+    mostrarElemento('servicioSection');
+  }
+*/
 
-function mostrarLabelPrecioDesc() {
-  mostrarElemento('labelPrecioDesc');
-}
-function ocultarLabelPrecioDesc() {
-  ocultarElemento('labelPrecioDesc');
-}
+/*
+  function mostrarLabelPrecioDesc() {
+    mostrarElemento('labelPrecioDesc');
+  }
+  function ocultarLabelPrecioDesc() {
+    ocultarElemento('labelPrecioDesc');
+  }
+*/
 
-function mostrarLabelPrecioAmigo() {
-  mostrarElemento('labelPrecioAmigo');
-}
-function ocultarLabelPrecioAmigo() {
-  ocultarElemento('labelPrecioAmigo');
-}
-
+/*
+  function mostrarLabelPrecioAmigo() {
+    mostrarElemento('labelPrecioAmigo');
+  }
+  function ocultarLabelPrecioAmigo() {
+    ocultarElemento('labelPrecioAmigo');
+  }
+*/
 
 
 
@@ -69,9 +74,11 @@ function ocultarLabelPrecioAmigo() {
 function ocultarProductSection() {
   ocultarElemento('productSection');
 }
-function mostrarProductSection() {
-  mostrarElemento('productSection');
-}
+/*
+  function mostrarProductSection() {
+    mostrarElemento('productSection');
+  }
+*/
 
 function mostrarMensajeErrorProducto(mensaje) {
   const messageContainer = document.getElementById('messageContainer');
@@ -139,9 +146,11 @@ function setValorProducto(){
 function ocultarMembresiaSection() {
   ocultarElemento('membresiaSection');
 }
-function mostrarMembresiaSection() {
-  mostrarElemento('membresiaSection');
-}
+/*
+  function mostrarMembresiaSection() {
+    mostrarElemento('membresiaSection');
+  }
+*/
 
 function mostrarMembresiaInput() {
   mostrarElemento('membresiaMethodGroup');
@@ -181,16 +190,20 @@ function ocultarMetodoPago() {
 function mostrarMembresiaLabel() {
   mostrarElemento('membresiaLabel');
 }
-function ocultarMembresiaLabel() {
-  ocultarElemento('membresiaLabel');
-}
+/*
+  function ocultarMembresiaLabel() {
+    ocultarElemento('membresiaLabel');
+  }
+*/
 
-function mostrarMultiPagosCheckbox() {
-  mostrarElemento('MultiPagosLabel');
-}
-function ocultarMultiPagosCheckbox() {
-  ocultarElemento('MultiPagosLabel');
-}
+/*
+  function mostrarMultiPagosCheckbox() {
+    mostrarElemento('MultiPagosLabel');
+  }
+  function ocultarMultiPagosCheckbox() {
+    ocultarElemento('MultiPagosLabel');
+  }
+*/
 
 function mostrarPagoSimpleGroup() {
   mostrarElemento('singleMethodGroup');
@@ -229,14 +242,16 @@ function updateCantidadOptions() {
   }
 }
 
-function insertarValorProductoMostrador(precioTotal){  
-  const inputPrecio = document.querySelector('.productPrice'); 
+/*
+  function insertarValorProductoMostrador(precioTotal){  
+    const inputPrecio = document.querySelector('.productPrice'); 
 
-  if (inputPrecio) {
-    inputPrecio.value = `$${precioTotal}`;
+    if (inputPrecio) {
+      inputPrecio.value = `$${precioTotal}`;
+    }
+
   }
-
-}
+*/
 
 function insertarValorProductoMostradorRow(row, precioTotal) {
   const inputPrecio = row.querySelector('.productPrice');
