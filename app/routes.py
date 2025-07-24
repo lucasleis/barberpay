@@ -363,8 +363,7 @@ def inject_logo():
     }
 
     return {
-        #'logo_url': logos_por_dominio.get(dominio, '/RacingEscudo.png')
-        'logo_url': logos_por_dominio.get(dominio, '/Barba&Co_logo.png')
+        'logo_url': logos_por_dominio.get(dominio, '')  # Retorna vacío si no está
     }
 
 ### Administrador ###
@@ -1069,6 +1068,15 @@ def add_payment():
                 # flash(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).", "danger")
                 raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
 
+            # Validar que al menos haya un método de pago seleccionado
+            if not multipagos:
+                if not method_simple_service:
+                    flash("Debe seleccionarse al menos un método de pago.", "danger")
+                    return redirect(url_for('add_payment'))
+            else:
+                if not method_multiple_1 or not method_multiple_2:
+                    flash("Debe seleccionarse al menos un método de pago en ambas opciones.", "danger")
+                    return redirect(url_for('add_payment'))
 
             pago = Pago(
                 appointment_id=appointment.id,
