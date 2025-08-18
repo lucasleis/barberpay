@@ -1226,26 +1226,37 @@ def list_users():
     users = Usuario.query.filter_by(salon_id=salon_id).all()
     return render_template('users.html', users=users)
     
+
 @app.route('/admin/users/add', methods=['POST'])
 def add_user():
     if "user" not in session:
         return redirect(url_for("login", next=request.path))
 
-    username = request.form['username']
+    username = request.form['username'].strip()
     password = request.form['password']
     rol = request.form['rol']
     salon_id = session.get('salon_id')
 
     if not username or not password or not rol:
-        return "Faltan datos", 400
+        flash("Faltan datos obligatorios.", "danger")
+        return redirect(url_for('list_users'))
 
+    # Validar si ya existe usuario con mismo nombre en este salón
+    existente = Usuario.query.filter_by(username=username, salon_id=salon_id).first()
+    if existente:
+        flash("El nombre de usuario ya existe. Elija otro.", "danger")
+        return redirect(url_for('list_users'))
+
+    # Crear nuevo usuario
     hashed_pw = generate_password_hash(password)
     nuevo = Usuario(username=username, password=hashed_pw, rol=rol, salon_id=salon_id)
 
     db.session.add(nuevo)
     db.session.commit()
 
+    flash("Usuario agregado correctamente.", "success")
     return redirect(url_for('list_users'))
+
 
 @app.route('/admin/users/delete/<int:id>')
 def delete_user(id):
