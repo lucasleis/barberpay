@@ -112,11 +112,14 @@
       <p><strong>Total de productos vendidos:</strong> ${Object.values(data.totales.empleados).reduce((acc, emp) => acc + (parseInt(emp.productos) || 0), 0)}</p>
       <div class="linea-inferior"></div>
 
-      <p><strong>Total propietario:</strong> $${parseInt(data.totales.propietario_total).toLocaleString('es-AR')}</p>
-      <div class="linea-inferior"></div>
+      {% if role == "admin" %}
+        <p><strong>Total propietario:</strong> $${parseInt(data.totales.propietario_total).toLocaleString('es-AR')}</p>
+        <div class="linea-inferior"></div>
 
-      <p><strong>Total general:</strong> $${parseInt(data.totales.monto_total).toLocaleString('es-AR')}</p>
-      <div class="linea-inferior"></div>
+        <p><strong>Total general:</strong> $${parseInt(data.totales.monto_total).toLocaleString('es-AR')}</p>
+        <div class="linea-inferior"></div>
+      {% endif %}
+
 
     `;
 

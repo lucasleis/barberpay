@@ -1174,6 +1174,7 @@ def pagos_entre_fechas():
         return redirect(url_for("login", next=request.path))
 
     data = request.get_json()
+    role = session.get("rol")
 
     # Definir la zona horaria correcta
     tz = ZoneInfo("America/Argentina/Buenos_Aires")
@@ -1189,6 +1190,11 @@ def pagos_entre_fechas():
     # start_date = datetime.fromisoformat(data['start_date']).replace(hour=0, minute=0, second=0, microsecond=0)
     # end_date = datetime.fromisoformat(data['end_date']).replace(hour=23, minute=59, second=59, microsecond=999999)
     resultado = calcular_pagos_entre_fechas(start_date, end_date)
+
+    if role != "admin":
+        resultado["totales"].pop("propietario_total", None)
+        resultado["totales"].pop("monto_total", None)
+    
     return jsonify(resultado)
 
 @app.route('/cierres/<int:salon_id>', methods=['GET'])
@@ -1196,6 +1202,7 @@ def cierre_entre_dias(salon_id):
     if "user" not in session:
         return redirect(url_for("login", next=request.path))
 
+    role = session.get("rol")
     today = datetime.today()
 
     # Calcular el último domingo (inicio de semana)
@@ -1211,7 +1218,8 @@ def cierre_entre_dias(salon_id):
         'cierres.html',
         fechaInicio=fechaInicio,
         fechaFinal=fechaFinal,
-        salon_id=salon_id
+        salon_id=salon_id,
+        role=role
     )
 
 
