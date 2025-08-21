@@ -43,20 +43,20 @@ function quitarRequired(selector) {
 function ocultarServicioSection() {
   ocultarElemento('servicioSection');
 }
-/*
+
   function mostrarServicioSection() {
     mostrarElemento('servicioSection');
   }
-*/
 
-/*
+
+
   function mostrarLabelPrecioDesc() {
     mostrarElemento('labelPrecioDesc');
   }
   function ocultarLabelPrecioDesc() {
     ocultarElemento('labelPrecioDesc');
   }
-*/
+
 
 /*
   function mostrarLabelPrecioAmigo() {
@@ -74,11 +74,11 @@ function ocultarServicioSection() {
 function ocultarProductSection() {
   ocultarElemento('productSection');
 }
-/*
+
   function mostrarProductSection() {
     mostrarElemento('productSection');
   }
-*/
+
 
 function mostrarMensajeErrorProducto(mensaje) {
   const messageContainer = document.getElementById('messageContainer');
@@ -146,11 +146,11 @@ function setValorProducto(){
 function ocultarMembresiaSection() {
   ocultarElemento('membresiaSection');
 }
-/*
+
   function mostrarMembresiaSection() {
     mostrarElemento('membresiaSection');
   }
-*/
+
 
 function mostrarMembresiaInput() {
   mostrarElemento('membresiaMethodGroup');
@@ -190,11 +190,11 @@ function ocultarMetodoPago() {
 function mostrarMembresiaLabel() {
   mostrarElemento('membresiaLabel');
 }
-/*
+
   function ocultarMembresiaLabel() {
     ocultarElemento('membresiaLabel');
   }
-*/
+
 
 /*
   function mostrarMultiPagosCheckbox() {
@@ -242,7 +242,7 @@ function updateCantidadOptions() {
   }
 }
 
-/*
+
   function insertarValorProductoMostrador(precioTotal){  
     const inputPrecio = document.querySelector('.productPrice'); 
 
@@ -251,7 +251,7 @@ function updateCantidadOptions() {
     }
 
   }
-*/
+
 
 function insertarValorProductoMostradorRow(row, precioTotal) {
   const inputPrecio = row.querySelector('.productPrice');
