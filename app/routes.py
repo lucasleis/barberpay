@@ -448,16 +448,47 @@ def dashboard():
     return render_template('dashboard.html')
 
 
+"""
+@app.route('/clientes')
+def get_clientes():
+    clientes = Cliente.query.filter_by(active=True).all()  # suponiendo que tienes un modelo Cliente
+    return jsonify([
+        {
+            "id": c.id,
+            "nombre": c.nombre,
+            "telefono": c.telefono,
+            "email": c.email,
+            "active": c.active
+        }
+        for c in clientes
+    ])
+"""
+
 ### Empleados ###
+
+@app.route('/barbers')
+def get_barbers():
+    barberos = Empleado.query.filter_by(active=True).all()
+    return jsonify([
+        {
+            "id": b.id,
+            "name": b.name,
+            "active": b.active,
+            "porcentaje": b.porcentaje,
+            "peluqueria_id": b.peluqueria_id
+        }
+        for b in barberos
+    ])
+
 
 @app.route('/admin/barbers')
 def list_barbers():
-    if "user" in session:
-        salon_id = session.get('salon_id')
-        barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
-        return render_template('barbers.html', barbers=barbers)
-    else:
-        return redirect(url_for("login"))
+    if "user" not in session:
+        return redirect(url_for("login", next=request.path))
+
+    salon_id = session.get('salon_id')
+    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    return render_template('barbers.html', barbers=barbers)
 
 @app.route('/admin/barbers/add', methods=['POST'])
 def add_barber():
@@ -512,14 +543,31 @@ def update_barber(id):
 
 ### Servicios ###
 
+@app.route('/services')
+def get_services():
+    servicios = Servicio.query.filter_by(active=True).all()
+    return jsonify([
+        {
+            "id": s.id,
+            "name": s.name,
+            "active": s.active,
+            "precio": float(s.precio) if s.precio is not None else None,
+            "precio_amigo": s.precio_amigo,
+            "precio_descuento": s.precio_descuento,
+            "peluqueria_id": s.peluqueria_id
+        }
+        for s in servicios
+    ])
+
+
 @app.route('/admin/services')
 def list_services():
-    if "user" in session:
-        salon_id = session.get('salon_id')
-        services = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
-        return render_template('services.html', services=services)
-    else:
-        return redirect(url_for("login"))
+    if "user" not in session:
+        return redirect(url_for("login", next=request.path))
+
+    salon_id = session.get('salon_id')
+    services = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    return render_template('services.html', services=services)
 
 @app.route('/admin/services/add', methods=['POST'])
 def add_service():
