@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_wtf import CSRFProtect 
 from flask_wtf.csrf import generate_csrf
+from flask_cors import CORS
 from .models import db
 import os
 from datetime import timedelta
@@ -86,6 +87,10 @@ def ensure_database_and_tables():
             precio_descuento NUMERIC(10,2) DEFAULT 0
         );
                 
+        ALTER TABLE servicios
+        ADD COLUMN IF NOT EXISTS duracion_minutos INTEGER NOT NULL DEFAULT 30;
+
+                
         CREATE TABLE IF NOT EXISTS productos (
             id SERIAL PRIMARY KEY,
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
@@ -156,6 +161,36 @@ def ensure_database_and_tables():
             salon_id INTEGER,
             rol VARCHAR(20) NOT NULL
         );
+                
+        CREATE TABLE IF NOT EXISTS clientes (
+            id SERIAL PRIMARY KEY,
+            nombre VARCHAR(100) NOT NULL,
+            apellido VARCHAR(100) NOT NULL,
+            email VARCHAR(100),
+            dni VARCHAR(20),
+            telefono VARCHAR(20),
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+
+                
+        CREATE TABLE IF NOT EXISTS turnos_clientes (
+            id SERIAL PRIMARY KEY,
+            cliente_id INTEGER NOT NULL REFERENCES clientes(id),
+            barber_id INTEGER NOT NULL REFERENCES barberos(id),
+            service_id INTEGER NOT NULL REFERENCES servicios(id),
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
+
+            fecha DATE NOT NULL,
+            hora_inicio TIME NOT NULL,
+            duracion_minutos INTEGER NOT NULL,
+            hora_fin TIME GENERATED ALWAYS AS (hora_inicio + make_interval(mins => duracion_minutos)) STORED,
+
+            estado TEXT CHECK (estado IN ('pendiente', 'confirmado', 'cancelado')) DEFAULT 'pendiente',
+            notas TEXT,
+            precio_aplicado NUMERIC(10,2)
+        );
+
 
     """)
     conn.commit()
@@ -230,6 +265,9 @@ def create_app():
 
     # Inicializar extensión SQLAlchemy
     db.init_app(app)
+
+    CORS(app, origins=["http://localhost:5173"])  
+
 
     # Crear tablas automáticamente si no existen
     with app.app_context():

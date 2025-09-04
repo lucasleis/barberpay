@@ -160,3 +160,44 @@ class Usuario(db.Model):
     password = db.Column(db.String(200), nullable=False)  # almacena el hash
     salon_id = db.Column(db.Integer) 
     rol = db.Column(db.String(20), nullable=False)  
+
+
+
+### Agenda ###
+
+class Cliente(db.Model):
+    __tablename__ = 'clientes'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    apellido = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100))
+    dni = db.Column(db.String(20))
+    telefono = db.Column(db.String(20))
+    peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id', ondelete="CASCADE"), nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), default=now_buenos_aires)
+    #activo = db.Column(db.Boolean, default=True)
+
+    peluqueria = db.relationship('Peluqueria', backref=db.backref('clientes', lazy=True))
+    turnos = db.relationship('TurnoCliente', backref='cliente', cascade="all, delete-orphan")
+
+
+class TurnoCliente(db.Model):
+    __tablename__ = 'turnos_clientes'
+    id = db.Column(db.Integer, primary_key=True)
+    cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=False)
+    barber_id = db.Column(db.Integer, db.ForeignKey('barberos.id'), nullable=False)
+    service_id = db.Column(db.Integer, db.ForeignKey('servicios.id'), nullable=False)
+    peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id', ondelete="CASCADE"), nullable=False)
+
+    fecha = db.Column(db.Date, nullable=False)
+    hora_inicio = db.Column(db.Time, nullable=False)
+    duracion_minutos = db.Column(db.Integer, nullable=False)
+    # hora_fin se calcula en la app o usando Generated Column en PostgreSQL 12+
+    estado = db.Column(db.String(20), nullable=False, default='pendiente')  # pendiente, confirmado, cancelado
+    notas = db.Column(db.Text)
+    # tipo_precio_servicio = db.Column(db.String(20))  # comun, amigo, descuento
+    precio_aplicado = db.Column(db.Float)
+
+    barber = db.relationship('Empleado', backref=db.backref('turnos_clientes', lazy=True))
+    service = db.relationship('Servicio', backref=db.backref('turnos_clientes', lazy=True))
+    peluqueria = db.relationship('Peluqueria', backref=db.backref('turnos_clientes', lazy=True))

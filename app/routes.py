@@ -1,11 +1,13 @@
 from flask import current_app as app, render_template, request, redirect, url_for, session, flash, jsonify, Blueprint
 from . import db
-from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno, Usuario
+from . import csrf
+from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno, Usuario, TurnoCliente, Cliente
 from .auth import login_required
 from sqlalchemy import desc, text, case
 from sqlalchemy.sql import extract, func
 from sqlalchemy.orm import aliased, selectinload, joinedload
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, date
+from dateutil.relativedelta import relativedelta
 from collections import defaultdict
 # from backports.zoneinfo import ZoneInfo
 from zoneinfo import ZoneInfo
@@ -15,6 +17,7 @@ from werkzeug.security import check_password_hash
 from functools import wraps
 from werkzeug.security import generate_password_hash
 
+from app.models import now_buenos_aires
 
 
 # Configure logging
@@ -1515,3 +1518,141 @@ def obtener_membresias_vendidas(fecha_limite):
         for nombre, cantidad in resultados
     ]
 
+
+
+### Agenda ###
+
+
+@app.route('/availability/<int:barber_id>/day')
+def get_barber_availability_day(barber_id):
+    """
+        Devuelve la disponibilidad de turnos de un barbero para una fecha específica.
+        Parámetros:
+            - fecha (YYYY-MM-DD) obligatorio
+            - salon_id (opcional)
+    """
+    salon_id = request.args.get('salon_id', None)
+    fecha_str = request.args.get('fecha', None)
+
+    if not fecha_str:
+        return jsonify({"error": "Parámetro 'fecha' obligatorio"}), 400
+
+    try:
+        fecha_obj = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+    except ValueError:
+        return jsonify({"error": "Formato de fecha inválido, use YYYY-MM-DD"}), 400
+
+    # Obtener todos los turnos del barbero en esa fecha
+    query = TurnoCliente.query.filter(
+        TurnoCliente.barber_id == barber_id,
+        TurnoCliente.fecha == fecha_obj
+    )
+    if salon_id:
+        query = query.filter(TurnoCliente.peluqueria_id == salon_id)
+
+    turnos = query.all()
+
+    # Definir horario de trabajo y intervalo de slots
+    hora_inicio_jornada = time(11, 0)
+    hora_fin_jornada = time(20, 0)
+    intervalo_minutos = 30
+
+    # Crear lista de slots del día
+    slots = []
+    current = datetime.combine(fecha_obj, hora_inicio_jornada)
+    fin_jornada_dt = datetime.combine(fecha_obj, hora_fin_jornada)
+
+    while current + timedelta(minutes=intervalo_minutos) <= fin_jornada_dt:
+        slots.append(current.time())
+        current += timedelta(minutes=intervalo_minutos)
+
+    # Marcar slots ocupados
+    horarios_ocupados = []
+    for t in turnos:
+        turno_inicio = datetime.combine(fecha_obj, t.hora_inicio)
+        turno_fin = turno_inicio + timedelta(minutes=t.duracion_minutos)
+        horarios_ocupados.append((turno_inicio.time(), turno_fin.time()))
+
+    # Filtrar slots libres
+    disponibilidad = []
+    for slot in slots:
+        slot_dt = datetime.combine(fecha_obj, slot)
+        slot_fin = slot_dt + timedelta(minutes=intervalo_minutos)
+
+        ocupado = False
+        for inicio, fin in horarios_ocupados:
+            if (slot >= inicio and slot < fin) or (slot_fin.time() > inicio and slot_fin.time() <= fin):
+                ocupado = True
+                break
+
+        if not ocupado:
+            disponibilidad.append(slot.strftime("%H:%M"))
+
+    return jsonify({
+        "barber_id": barber_id,
+        "fecha": fecha_obj.strftime("%Y-%m-%d"),
+        "disponibilidad": disponibilidad
+    })
+
+
+
+@app.route('/clientes/<int:client_dni>', methods=['GET'])
+def get_cliente_by_dni(client_dni):
+    """
+    Devuelve un cliente a partir del DNI pasado en la URL.
+    """
+    # Buscar cliente por DNI
+    cliente = Cliente.query.filter(Cliente.dni == str(client_dni)).first()
+
+    if not cliente:
+        return jsonify({"error": "Cliente no encontrado"}), 404
+
+    return jsonify({
+        "id": cliente.id,
+        "nombre": cliente.nombre,
+        "apellido": cliente.apellido,
+        "email": cliente.email,
+        "dni": cliente.dni,
+        "telefono": cliente.telefono,
+        "peluqueria_id": cliente.peluqueria_id,
+        "created_at": cliente.created_at.isoformat()
+    })
+
+
+@app.route('/clientes', methods=['POST'])
+@csrf.exempt
+def crear_cliente():
+    data = request.json
+
+    # Validar campos obligatorios
+    if not all(k in data for k in ("nombre", "apellido", "dni", "peluqueria_id")):
+        return jsonify({"error": "Faltan campos obligatorios"}), 400
+
+    # Verificar si el DNI ya existe para esa peluquería
+    if Cliente.query.filter_by(dni=data['dni'], peluqueria_id=data['peluqueria_id']).first():
+        return jsonify({"error": "El cliente con ese DNI ya existe en esta peluquería"}), 400
+
+    # Crear cliente
+    nuevo_cliente = Cliente(
+        nombre=data['nombre'],
+        apellido=data['apellido'],
+        dni=data['dni'],
+        email=data.get('email'),
+        telefono=data.get('telefono'),
+        peluqueria_id=data['peluqueria_id'],
+        created_at=now_buenos_aires()
+    )
+
+    db.session.add(nuevo_cliente)
+    db.session.commit()
+
+    return jsonify({
+        "id": nuevo_cliente.id,
+        "nombre": nuevo_cliente.nombre,
+        "apellido": nuevo_cliente.apellido,
+        "dni": nuevo_cliente.dni,
+        "email": nuevo_cliente.email,
+        "telefono": nuevo_cliente.telefono,
+        "peluqueria_id": nuevo_cliente.peluqueria_id,
+        "created_at": nuevo_cliente.created_at.isoformat()
+    }), 201
