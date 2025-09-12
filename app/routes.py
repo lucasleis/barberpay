@@ -783,7 +783,7 @@ def list_memberships():
         salon_id = session.get('salon_id')
         tipos = TipoMembresia.query.filter_by(active=True, peluqueria_id=salon_id).all()
         servicios = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
-        membresias = Membresia.query.filter_by(peluqueria_id=salon_id, active=True).all()
+        membresias = (Membresia.query.filter_by(peluqueria_id=salon_id, active=True).order_by(desc(Membresia.id_usuario)).all())
         return render_template('memberships.html', tipos_membresia=tipos, servicios=servicios, membresias=membresias)
     else:
         return redirect(url_for("login"))
