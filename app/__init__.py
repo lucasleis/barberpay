@@ -224,6 +224,8 @@ def ensure_database_and_tables():
 # Crear la app
 # ==============================
 
+csrf = CSRFProtect()
+
 def create_app():
     ensure_database_and_tables() 
 
@@ -260,7 +262,7 @@ def create_app():
     app.permanent_session_lifetime = timedelta(hours=12)
 
     # Inicializar CSRF Protection
-    csrf = CSRFProtect()
+    #csrf = CSRFProtect()
     csrf.init_app(app)
 
     # Inicializar extensión SQLAlchemy

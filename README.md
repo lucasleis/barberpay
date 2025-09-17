@@ -86,3 +86,43 @@ python -m app.create_users_pass_db
 ```
 python -m app.delete_users_pass_db
 ```
+
+
+
+
+
+
+## Frontend
+
+Quiero que crees una landing page para una barbería, desarrollada en React.
+Los requisitos son:
+
+Logo visible en el encabezado.
+
+Sección de servicios con el detalle de los servicios que ofrece la barbería (ejemplo: cortes, perfilado de barba, color, etc.).
+
+Links externos:
+
+Link a Instagram de la barbería.
+
+Link a gestor de turnos online.
+
+Link a WhatsApp para agendar un turno rápido.
+
+Ubicación: integrar un mapa o mostrar la dirección física de la barbería.
+
+Teléfono de contacto visible.
+
+Detalles adicionales:
+
+Diseño moderno, limpio y responsivo (que se vea bien en PC y en celular).
+
+Paleta de colores acorde a barbería (negro, blanco, gris, con detalles en dorado o rojo).
+
+Usar componentes reutilizables y estilos con CSS Modules o Tailwind.
+
+Incluir un botón de "Reservar Turno" que lleve directamente al gestor de turnos.
+
+Entrega: código React completo con componentes, estilos y una estructura lista para correr.
+
+¿Querés que te lo adapte también como prompt para pedir imágenes (logo/banners) en una IA de imágenes o solo lo enfocamos en el desarrollo web en React?
