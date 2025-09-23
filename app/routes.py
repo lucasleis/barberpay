@@ -1,4 +1,4 @@
-from flask import current_app as app, render_template, request, redirect, url_for, session, flash, jsonify, Blueprint
+from flask import current_app as app, render_template, request, redirect, url_for, session, flash, jsonify, Blueprint, send_from_directory
 from . import db
 from . import csrf
 from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno, Usuario, TurnoCliente, Cliente
@@ -19,6 +19,7 @@ from werkzeug.security import generate_password_hash
 
 from app.models import now_buenos_aires
 
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -1661,3 +1662,22 @@ def crear_cliente():
         "peluqueria_id": nuevo_cliente.peluqueria_id,
         "created_at": nuevo_cliente.created_at.isoformat()
     }), 201
+
+
+
+#### 
+@app.route("/landings/v2")
+def landing_v2():
+    return render_template("/landing_v2/home.html")
+
+
+# Ruta para la SPA React
+@app.route("/landings/v1/", defaults={"path": ""})
+@app.route("/landings/v1/<path:path>")
+def react_landing(path):
+    build_dir = os.path.join(os.path.dirname(__file__), "..", "landing_v1", "dist")
+    if path != "" and os.path.exists(os.path.join(build_dir, path)):
+        return send_from_directory(build_dir, path)
+    else:
+        return send_from_directory(build_dir, "index.html")
+

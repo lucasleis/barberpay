@@ -126,3 +126,14 @@ Incluir un botón de "Reservar Turno" que lleve directamente al gestor de turnos
 Entrega: código React completo con componentes, estilos y una estructura lista para correr.
 
 ¿Querés que te lo adapte también como prompt para pedir imágenes (logo/banners) en una IA de imágenes o solo lo enfocamos en el desarrollo web en React?
+
+
+
+
+# Levantar react con python
+```
+cd landing_v1
+npm install
+npm run build
+```
+
