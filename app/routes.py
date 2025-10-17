@@ -1223,6 +1223,104 @@ def delete_payment(pago_id):
     return redirect(url_for('add_payment'))
 
 
+@app.route('/pagos/editar/<int:pago_id>', methods=['GET', 'POST'])
+def edit_payment(pago_id):
+    session.setdefault('salon_id', 1)
+
+    pago = Pago.query.options(joinedload(Pago.appointment)).get_or_404(pago_id)
+    salon_id = session.get('salon_id') or pago.peluqueria_id
+
+    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
+
+    if request.method == 'POST':
+        try:
+            date_str = request.form.get('date')
+            if not date_str:
+                raise ValueError("La fecha es obligatoria.")
+
+            try:
+                updated_date = datetime.strptime(date_str, '%Y-%m-%dT%H:%M')
+                updated_date = updated_date.replace(tzinfo=ZoneInfo("America/Argentina/Buenos_Aires"))
+            except ValueError:
+                raise ValueError("Formato de fecha inválido.")
+
+            barber_id = request.form.get('barber_id')
+            if not barber_id:
+                raise ValueError("Debe seleccionarse un empleado.")
+
+            method1_id = request.form.get('method1')
+            if not method1_id:
+                raise ValueError("Debe seleccionarse un método de pago.")
+
+            amount1_raw = (request.form.get('amount1') or '0').replace(',', '.')
+            method2_id_raw = request.form.get('method2') or None
+            amount2_raw = (request.form.get('amount2') or '0').replace(',', '.')
+            tip_raw = (request.form.get('tip') or '0').replace(',', '.')
+
+            try:
+                amount1 = float(amount1_raw)
+            except ValueError:
+                raise ValueError("El monto del método de pago es inválido.")
+            if amount1 < 0:
+                raise ValueError("El monto del método de pago no puede ser negativo.")
+
+            if method2_id_raw:
+                try:
+                    amount2 = float(amount2_raw)
+                except ValueError:
+                    raise ValueError("El monto del segundo método de pago es inválido.")
+                if amount2 < 0:
+                    raise ValueError("El monto del segundo método de pago no puede ser negativo.")
+                method2_id = int(method2_id_raw)
+            else:
+                method2_id = None
+                amount2 = 0.0
+
+            try:
+                tip = float(tip_raw)
+            except ValueError:
+                raise ValueError("La propina ingresada es inválida.")
+            if tip < 0:
+                raise ValueError("La propina no puede ser negativa.")
+
+            pago.date = updated_date
+            pago.payment_method1_id = int(method1_id)
+            pago.amount_method1 = amount1
+            pago.amount_tip = tip
+            pago.payment_method2_id = method2_id
+            pago.amount_method2 = amount2
+
+            if pago.appointment:
+                pago.appointment.barber_id = int(barber_id)
+
+            db.session.commit()
+            flash("Pago actualizado correctamente.", "success")
+            return redirect(url_for('add_payment'))
+
+        except Exception as e:
+            db.session.rollback()
+            try:
+                db.session.refresh(pago)
+            except Exception:
+                pass
+            flash(f"Error al actualizar el pago: {str(e)}", "danger")
+
+    if pago.date.tzinfo:
+        date_value = pago.date.astimezone(ZoneInfo("America/Argentina/Buenos_Aires")).strftime('%Y-%m-%dT%H:%M')
+    else:
+        date_value = pago.date.strftime('%Y-%m-%dT%H:%M')
+
+    return render_template(
+        'edit_payment.html',
+        pago=pago,
+        barbers=barbers,
+        methods=methods,
+        date_value=date_value
+    )
+
+
+
 ### Cierres ###
 
 @app.route('/pagos_entre_fechas', methods=['POST'])
@@ -1267,16 +1365,23 @@ def cierre_entre_dias(salon_id):
     last_sunday = last_sunday.replace(hour=0, minute=0, second=0, microsecond=0)
     next_sunday = last_sunday + timedelta(days=7)
 
-    # Estas dos variables se usan para precargar el formulario
     fechaInicio = last_sunday.strftime('%Y-%m-%d')
     fechaFinal = next_sunday.strftime('%Y-%m-%d')
+
+    # ✅ Agregar datos necesarios para los selects del modal
+    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    services = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
 
     return render_template(
         'cierres.html',
         fechaInicio=fechaInicio,
         fechaFinal=fechaFinal,
         salon_id=salon_id,
-        role=role
+        role=role,
+        barbers=barbers,
+        services=services,
+        methods=methods
     )
 
 

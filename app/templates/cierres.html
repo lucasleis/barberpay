@@ -2,6 +2,7 @@
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='cierre_entre_dias.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='services.css') }}">
 
 <h3>Cierres</h3>
 <form id="form-fechas" class="form-fechas">
@@ -18,6 +19,85 @@
   </div>
 
 </form>
+
+<div id="editPaymentModal" class="modal-cantidad">
+  <div class="modal-content">
+    <h3>Editar Pago</h3>
+    <span class="close-modal" onclick="closeEditModal()">&times;</span>
+    <form id="editPaymentForm" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      
+      <div class="form-group">
+        <label for="editDate">Fecha:</label>
+        <input type="date" id="editDate" name="date" required>
+      </div>
+
+      <div class="form-group">
+        <label for="editBarber">Empleado:</label>
+        <select id="editBarber" name="barber_id" required>
+          {% for b in barbers %}
+            <option value="{{ b.id }}">{{ b.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="editService">Servicio:</label>
+        <select id="editService" name="service_id" required>
+          {% for s in services %}
+            <option value="{{ s.id }}">{{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="editServicePrice">Precio del Servicio:</label>
+        <input type="text" id="editServicePrice" readonly placeholder="$">
+      </div>
+
+
+
+      <div class="form-group">
+        <label for="editMethod1">Método de Pago 1:</label>
+        <select id="editMethod1" name="method1" required>
+          {% for m in methods %}
+            <option value="{{ m.id }}">{{ m.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="editAmount1">Monto 1:</label>
+        <input type="number" id="editAmount1" name="amount1" step="0.01" required>
+      </div>
+
+      <div class="form-group">
+        <label for="editMethod2">Método de Pago 2 (opcional):</label>
+        <select id="editMethod2" name="method2">
+          <option value="">-- Ninguno --</option>
+          {% for m in methods %}
+            <option value="{{ m.id }}">{{ m.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="editAmount2">Monto 2:</label>
+        <input type="number" id="editAmount2" name="amount2" step="0.01">
+      </div>
+
+      <div class="form-group">
+        <label for="editTip">Propina:</label>
+        <input type="number" id="editTip" name="tip" step="0.01" required>
+      </div>
+
+      <button type="submit" class="edit-button">
+        <i class="fas fa-check"></i> Confirmar cambios
+      </button>
+    </form>
+  </div>
+</div>
+
 
 <div id="resultados-cierres">
   <!-- Aquí se renderizarán los resultados desde JavaScript -->
@@ -51,6 +131,7 @@
     }
 
     const data = await response.json();
+    window.lastPagos = data.pagos;
     renderCierres(data);
   });
 
@@ -144,6 +225,7 @@
             <th>Propina</th>
             <th>$ Empleado</th>
             <th>$ Propietario</th>
+            <th>Editar</th>
           </tr>
         </thead>
         <tbody>
@@ -171,6 +253,11 @@
               <td>$${parseInt(p.propina).toLocaleString('es-AR')}</td>
               <td>$${parseInt(p.pago_empleado).toLocaleString('es-AR')}</td>
               <td>$${parseInt(p.pago_propietario).toLocaleString('es-AR')}</td>
+              <td>
+                <button type="button" class="btn-edit" title="Editar" 
+                  onclick="openEditModal(${p.id}, '${p.fecha}', '${p.empleado}', '${p.metodo_pago.join(' - ')}', ${p.monto_total || 0}, ${p.propina || 0})">✏️
+                </button>
+              </td>
             </tr>
           `).join('')}
         </tbody>
@@ -184,6 +271,85 @@
   window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('form-fechas').dispatchEvent(new Event('submit'));
   });
+
+  function openEditModal(id, fecha, empleado, metodo, monto, propina) {
+    const modal = document.getElementById("editPaymentModal");
+    const form = document.getElementById("editPaymentForm");
+
+    // Buscar el pago en los datos renderizados (para obtener más info)
+    const pago = window.lastPagos.find(p => p.id === id);
+    if (!pago) return;
+
+    form.action = `/pagos/editar/${id}`;
+    modal.style.display = "flex";
+    modal.offsetHeight; // reflow
+    modal.classList.add("active");
+
+    // ✅ Prellenar con valores existentes
+    // Fecha → solo cambia el día (hora forzada a 23:59)
+    const fechaObj = pago.fecha_completa
+      ? new Date(pago.fecha_completa)
+      : new Date();
+
+    // Ajustar hora a 23:59
+    fechaObj.setHours(23, 59, 0, 0);
+    const fechaLocal = fechaObj.toISOString().slice(0, 16);
+    document.getElementById("editDate").value = fechaLocal;
+
+    // Empleado
+    document.getElementById("editBarber").value = pago.empleado_id || "";
+
+    // Método 1 / Monto 1
+    document.getElementById("editMethod1").value = pago.method1_id || "";
+    document.getElementById("editAmount1").value = pago.amount1 || 0;
+
+    // Método 2 / Monto 2 (si existen)
+    document.getElementById("editMethod2").value = pago.method2_id || "";
+    document.getElementById("editAmount2").value = pago.amount2 || "";
+
+    // Servicio
+    document.getElementById("editService").value = pago.service_id || "";
+
+
+    // Propina
+    document.getElementById("editTip").value = pago.propina || 0;
+  }
+
+  function closeEditModal() {
+    const modal = document.getElementById("editPaymentModal");
+    modal.classList.remove("active");
+    setTimeout(() => {
+      modal.style.display = "none";
+    }, 300);
+  }
+
+  // Cerrar al click fuera
+  window.onclick = function (event) {
+    const modal = document.getElementById("editPaymentModal");
+    if (event.target === modal) {
+      closeEditModal();
+    }
+  };
+
+  // 🔹 Forzar hora 23:59 al enviar el formulario de edición
+  document.getElementById("editPaymentForm").addEventListener("submit", function (e) {
+    const inputFecha = document.getElementById("editDate");
+
+    if (inputFecha && inputFecha.value) {
+      const fechaEditada = new Date(inputFecha.value);
+      fechaEditada.setHours(23, 59, 0, 0);
+      inputFecha.value = fechaEditada.toISOString().slice(0, 16);
+    }
+  });
+
+  document.getElementById("editService").addEventListener("change", function() {
+    const selected = this.options[this.selectedIndex];
+    const price = selected.getAttribute("data-precio");
+    document.getElementById("editServicePrice").value = price ? `$${price}` : "";
+  });
+
+
+
 </script>
 
 {% endblock %}

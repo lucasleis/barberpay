@@ -781,3 +781,32 @@ td.borrar-pago button.btn-danger {
 
 }
 
+.btn-edit {
+  background-color: transparent;
+  /* border: 2px solid #1B1E3C; */
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #1B1E3C;
+  transition: all 0.2s ease;
+}
+
+.btn-edit:hover {
+  background-color: #00A0DD;        /* azul institucional */
+  color: #fff;                      /* texto blanco */
+  border-color: #1B1E3C;            
+  transform: scale(1.05);           /* efecto sutil */
+}
+
+.btn-edit:active {
+  transform: scale(0.97);
+  background-color: #0088b8;
+}
+
+.table td form {
+  background: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  display: inline-block;
+}
