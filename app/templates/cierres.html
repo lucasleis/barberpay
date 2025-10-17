@@ -26,12 +26,15 @@
     <span class="close-modal" onclick="closeEditModal()">&times;</span>
     <form id="editPaymentForm" method="POST">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      
+
+      <!-- Fecha -->
       <div class="form-group">
         <label for="editDate">Fecha:</label>
-        <input type="date" id="editDate" name="date" required>
+        <input type="date" id="editDate" required>
+        <input type="hidden" id="editDateHidden" name="date">
       </div>
 
+      <!-- Empleado -->
       <div class="form-group">
         <label for="editBarber">Empleado:</label>
         <select id="editBarber" name="barber_id" required>
@@ -41,6 +44,7 @@
         </select>
       </div>
 
+      <!-- Servicio -->
       <div class="form-group">
         <label for="editService">Servicio:</label>
         <select id="editService" name="service_id" required>
@@ -50,13 +54,7 @@
         </select>
       </div>
 
-      <div class="form-group">
-        <label for="editServicePrice">Precio del Servicio:</label>
-        <input type="text" id="editServicePrice" readonly placeholder="$">
-      </div>
-
-
-
+      <!-- Método de pago 1 -->
       <div class="form-group">
         <label for="editMethod1">Método de Pago 1:</label>
         <select id="editMethod1" name="method1" required>
@@ -71,6 +69,7 @@
         <input type="number" id="editAmount1" name="amount1" step="0.01" required>
       </div>
 
+      <!-- Método de pago 2 -->
       <div class="form-group">
         <label for="editMethod2">Método de Pago 2 (opcional):</label>
         <select id="editMethod2" name="method2">
@@ -86,6 +85,7 @@
         <input type="number" id="editAmount2" name="amount2" step="0.01">
       </div>
 
+      <!-- Propina -->
       <div class="form-group">
         <label for="editTip">Propina:</label>
         <input type="number" id="editTip" name="tip" step="0.01" required>
@@ -254,9 +254,13 @@
               <td>$${parseInt(p.pago_empleado).toLocaleString('es-AR')}</td>
               <td>$${parseInt(p.pago_propietario).toLocaleString('es-AR')}</td>
               <td>
-                <button type="button" class="btn-edit" title="Editar" 
-                  onclick="openEditModal(${p.id}, '${p.fecha}', '${p.empleado}', '${p.metodo_pago.join(' - ')}', ${p.monto_total || 0}, ${p.propina || 0})">✏️
-                </button>
+                {% if role == "admin" %}
+                  <button type="button" class="btn-edit" title="Editar" 
+                    onclick="openEditModal(${p.id}, '${p.fecha}', '${p.empleado}', '${p.metodo_pago.join(' - ')}', ${p.monto_total || 0}, ${p.propina || 0})">✏️
+                  </button>
+                {% else %}
+                  <span style="color: gray;">—</span>
+                {% endif %}
               </td>
             </tr>
           `).join('')}
@@ -282,34 +286,33 @@
 
     form.action = `/pagos/editar/${id}`;
     modal.style.display = "flex";
-    modal.offsetHeight; // reflow
+    modal.offsetHeight;
     modal.classList.add("active");
 
-    // ✅ Prellenar con valores existentes
-    // Fecha → solo cambia el día (hora forzada a 23:59)
-    const fechaObj = pago.fecha_completa
-      ? new Date(pago.fecha_completa)
-      : new Date();
-
-    // Ajustar hora a 23:59
-    fechaObj.setHours(23, 59, 0, 0);
-    const fechaLocal = fechaObj.toISOString().slice(0, 16);
-    document.getElementById("editDate").value = fechaLocal;
+    // ✅ Mostrar solo la fecha, pero luego se setea 23:59 al guardar
+    if (pago.fecha_completa) {
+      const fechaOriginal = new Date(pago.fecha_completa);
+      const fechaLocal = fechaOriginal.toISOString().slice(0, 10); // solo yyyy-mm-dd
+      document.getElementById("editDate").value = fechaLocal;
+    } else {
+      const hoy = new Date();
+      const fechaLocal = hoy.toISOString().slice(0, 10);
+      document.getElementById("editDate").value = fechaLocal;
+    }
 
     // Empleado
     document.getElementById("editBarber").value = pago.empleado_id || "";
+
+    // Servicio
+    document.getElementById("editService").value = pago.service_id || "";
 
     // Método 1 / Monto 1
     document.getElementById("editMethod1").value = pago.method1_id || "";
     document.getElementById("editAmount1").value = pago.amount1 || 0;
 
-    // Método 2 / Monto 2 (si existen)
+    // Método 2 / Monto 2
     document.getElementById("editMethod2").value = pago.method2_id || "";
     document.getElementById("editAmount2").value = pago.amount2 || "";
-
-    // Servicio
-    document.getElementById("editService").value = pago.service_id || "";
-
 
     // Propina
     document.getElementById("editTip").value = pago.propina || 0;
@@ -332,13 +335,15 @@
   };
 
   // 🔹 Forzar hora 23:59 al enviar el formulario de edición
-  document.getElementById("editPaymentForm").addEventListener("submit", function (e) {
+  document.getElementById("editPaymentForm").addEventListener("submit", function () {
     const inputFecha = document.getElementById("editDate");
+    const inputHidden = document.getElementById("editDateHidden");
 
     if (inputFecha && inputFecha.value) {
       const fechaEditada = new Date(inputFecha.value);
       fechaEditada.setHours(23, 59, 0, 0);
-      inputFecha.value = fechaEditada.toISOString().slice(0, 16);
+      // Guardar la versión con hora en el hidden
+      inputHidden.value = fechaEditada.toISOString().slice(0, 16);
     }
   });
 

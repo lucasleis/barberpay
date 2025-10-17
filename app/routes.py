@@ -97,17 +97,24 @@ def calcular_pagos_entre_fechas(start_date, end_date):
 
     for pago in pagos:
         pago_dict = {
+            "id": pago.id,
             "fecha": pago.date.strftime('%d-%m'),
+            "fecha_completa": pago.date.isoformat(),
             "empleado": "",
+            "empleado_id": pago.appointment.barber_id if pago.appointment else None,
             "porcentaje_empleado": 0,
-            "servicio": "",
-            "valor_servicio": 0,
+            "servicio": pago.appointment.service.name if pago.appointment and pago.appointment.service else "",
+            "service_id": pago.appointment.service_id if pago.appointment and pago.appointment.service_id else None,
+            "valor_servicio": pago.appointment.service.precio if pago.appointment and pago.appointment.service else 0,
             "producto": "",
             "valor_producto": 0,
             "membresia": "",
             "valor_membresia": 0,
             "metodo_pago": [],
-            "monto": (pago.amount_method1 or 0) + (pago.amount_method2 or 0),
+            "method1_id": pago.payment_method1_id,
+            "method2_id": pago.payment_method2_id,
+            "amount1": pago.amount_method1 or 0,
+            "amount2": pago.amount_method2 or 0,
             "propina": pago.amount_tip or 0,
             "pago_empleado": 0,
             "pago_propietario": 0,
@@ -1228,27 +1235,44 @@ def edit_payment(pago_id):
     session.setdefault('salon_id', 1)
 
     pago = Pago.query.options(joinedload(Pago.appointment)).get_or_404(pago_id)
-    salon_id = session.get('salon_id') or pago.peluqueria_id
+    # salon_id = session.get('salon_id') or pago.peluqueria_id
 
-    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
-    methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    # --- Validar permisos ---
+    user_role = session.get('role')
+    if user_role != 'admin':
+        flash("No tienes permiso para editar pagos.", "danger")
+        return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+
+    # barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    # methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
 
     if request.method == 'POST':
         try:
+            # --- Fecha ---
             date_str = request.form.get('date')
             if not date_str:
                 raise ValueError("La fecha es obligatoria.")
 
             try:
-                updated_date = datetime.strptime(date_str, '%Y-%m-%dT%H:%M')
+                # Puede venir como 'YYYY-MM-DD' (solo fecha)
+                if "T" in date_str:
+                    updated_date = datetime.strptime(date_str, '%Y-%m-%dT%H:%M')
+                else:
+                    updated_date = datetime.strptime(date_str, '%Y-%m-%d')
+                    # Forzar hora 23:59 para distinguir pagos editados
+                    updated_date = updated_date.replace(hour=23, minute=59)
+                
                 updated_date = updated_date.replace(tzinfo=ZoneInfo("America/Argentina/Buenos_Aires"))
             except ValueError:
                 raise ValueError("Formato de fecha inválido.")
 
+
+            # --- Empleado ---
             barber_id = request.form.get('barber_id')
             if not barber_id:
                 raise ValueError("Debe seleccionarse un empleado.")
 
+            # --- Método de pago principal ---
             method1_id = request.form.get('method1')
             if not method1_id:
                 raise ValueError("Debe seleccionarse un método de pago.")
@@ -1284,6 +1308,7 @@ def edit_payment(pago_id):
             if tip < 0:
                 raise ValueError("La propina no puede ser negativa.")
 
+            # --- Actualizaciones ---
             pago.date = updated_date
             pago.payment_method1_id = int(method1_id)
             pago.amount_method1 = amount1
@@ -1291,12 +1316,16 @@ def edit_payment(pago_id):
             pago.payment_method2_id = method2_id
             pago.amount_method2 = amount2
 
+            # --- Cita asociada ---
             if pago.appointment:
                 pago.appointment.barber_id = int(barber_id)
+                service_id = request.form.get('service_id')
+                if service_id:
+                    pago.appointment.service_id = int(service_id)
 
             db.session.commit()
             flash("Pago actualizado correctamente.", "success")
-            return redirect(url_for('add_payment'))
+            return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
 
         except Exception as e:
             db.session.rollback()
@@ -1305,19 +1334,10 @@ def edit_payment(pago_id):
             except Exception:
                 pass
             flash(f"Error al actualizar el pago: {str(e)}", "danger")
+            return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
 
-    if pago.date.tzinfo:
-        date_value = pago.date.astimezone(ZoneInfo("America/Argentina/Buenos_Aires")).strftime('%Y-%m-%dT%H:%M')
-    else:
-        date_value = pago.date.strftime('%Y-%m-%dT%H:%M')
-
-    return render_template(
-        'edit_payment.html',
-        pago=pago,
-        barbers=barbers,
-        methods=methods,
-        date_value=date_value
-    )
+    # --- Si es GET, redirigir directamente al dashboard ---
+    return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
 
 
 
