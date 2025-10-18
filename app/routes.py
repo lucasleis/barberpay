@@ -96,6 +96,16 @@ def calcular_pagos_entre_fechas(start_date, end_date):
     lista_pagos = []
 
     for pago in pagos:
+        # --- Determinar tipo de pago ---
+        if pago.appointment and pago.appointment.service_id:
+            tipo_pago = "servicio"
+        elif pago.appointment and pago.appointment.productos_turno:
+            tipo_pago = "producto"
+        elif pago.membresia_comprada_id or (pago.appointment and pago.appointment.membresia_id):
+            tipo_pago = "membresia"
+        else:
+            tipo_pago = "otro"
+
         pago_dict = {
             "id": pago.id,
             "fecha": pago.date.strftime('%d-%m'),
@@ -110,6 +120,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             "valor_producto": 0,
             "membresia": "",
             "valor_membresia": 0,
+            "tipo_pago": tipo_pago,
             "metodo_pago": [],
             "method1_id": pago.payment_method1_id,
             "method2_id": pago.payment_method2_id,
@@ -1238,10 +1249,26 @@ def edit_payment(pago_id):
     # salon_id = session.get('salon_id') or pago.peluqueria_id
 
     # --- Validar permisos ---
-    user_role = session.get('role')
+    user_role = session.get('rol')
     if user_role != 'admin':
         flash("No tienes permiso para editar pagos.", "danger")
         return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+
+    # --- Validar que el pago sea de servicio ---
+    if not (pago.appointment and pago.appointment.service_id):
+        flash("Solo se pueden editar pagos correspondientes a servicios.", "danger")
+        return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+
+    # Si tiene productos asociados, también bloquear
+    if pago.appointment and pago.appointment.productos_turno:
+        flash("No se pueden editar pagos correspondientes a productos.", "danger")
+        return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+
+    # Si tiene membresía comprada o usada, bloquear también
+    if pago.membresia_comprada_id or (pago.appointment and pago.appointment.membresia_id):
+        flash("No se pueden editar pagos correspondientes a membresías.", "danger")
+        return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+
 
     # barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
     # methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()

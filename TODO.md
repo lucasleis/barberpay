@@ -5,6 +5,8 @@
     - [✅] Agregar un boton a la derecha de la grilla que permita modificar el campo que quieras. similar al borrar de donde agregas pagos
     - [✅] Solo los que tengan rol de admin
     - [ ] Hacer mismas validaciones que cuando se agrega un pago
+    - [ ] Desarrollar para producto
+    - [ ] Desarrollar para membresia
     
 ## 2. Numeros de membresias con nro de dni
     - Poder vincular los numeros de membresias a un nro de dni, ya que menpaso que perdieron la tarjetita y se olvidan el nro. 

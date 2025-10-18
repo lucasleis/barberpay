@@ -229,3 +229,11 @@
   }
 }
 
+.btn-edit-disabled {
+  background-color: #e0e0e0;
+  color: #aaa;
+  border: 1px solid #ccc;
+  cursor: not-allowed;
+  border-radius: 5px;
+  padding: 5px 8px;
+}
