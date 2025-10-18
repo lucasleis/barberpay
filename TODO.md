@@ -19,4 +19,5 @@
     - Poder poner vale x corte a una membresia para poder regalar. 
 
 
-
+## 4. Fecha en formularios
+    - [ ] Las fechas en los formularios aparecen como mm/dd/aaaa. modificar para que sean dd/mm/aaaa

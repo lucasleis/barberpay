@@ -1238,7 +1238,11 @@ def delete_payment(pago_id):
         db.session.rollback()
         flash(f"Error al eliminar el pago: {str(e)}", "danger")
 
-    return redirect(url_for('add_payment'))
+    referrer = request.referrer or ""
+    if "cierre" in referrer:
+        return redirect(url_for('cierre_entre_dias', salon_id=1))
+    else:
+        return redirect(url_for('add_payment', salon_id=1))
 
 
 @app.route('/pagos/editar/<int:pago_id>', methods=['GET', 'POST'])
