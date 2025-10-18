@@ -7,6 +7,7 @@
     - [ ] Hacer mismas validaciones que cuando se agrega un pago
     - [ ] Desarrollar para producto
     - [ ] Desarrollar para membresia
+    - [ ] Monto 2 que aparezca con 0
     
 ## 2. Numeros de membresias con nro de dni
     - Poder vincular los numeros de membresias a un nro de dni, ya que menpaso que perdieron la tarjetita y se olvidan el nro. 

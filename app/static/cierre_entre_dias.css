@@ -1,4 +1,16 @@
 /* Estilos generales para la sección de cierre semanal */
+button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 10px;
+  font-size: 16px;
+  width: auto !important; 
+}
+
 .semana-cierre {
   margin-bottom: 2.5rem;
   padding: 1.5rem;
@@ -186,6 +198,131 @@
   }
 
   .boton-cierre {
+    display: block;
+    width: 100%;
+    margin-left: 0;
+    text-align: center;
+  }
+
+  .empleado-scroll-wrap {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .empleado-header-row,
+  .empleado-fila {
+    display: flex;
+  }
+
+  .empleado-header,
+  .empleado-celda {
+    min-width: 130px;
+    padding: 0.6rem;
+    text-align: center;
+    white-space: nowrap;
+    border-right: 1px solid #ccc;
+  }
+
+  .empleado-header:last-child,
+  .empleado-celda:last-child {
+    border-right: none;
+  }
+
+  .empleado-fila {
+    border-bottom: 1px solid #ccc;
+  }
+
+  .empleado-scroll-wrap {
+    overflow-x: auto;
+  }
+
+  .empleados-grid {
+    min-width: 650px; /* o más si hay muchas columnas */
+  }
+}
+
+
+
+
+
+/* //////////////////// */
+
+.empleado-header {
+  font-weight: bold;
+  background: black;
+  color: white;
+  padding: 0.6rem;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+}
+
+.empleado-celda {
+  padding: 0.6rem;
+  text-align: center;
+  border-right: 1px solid #ddd;
+  border-bottom: 1px solid #eee;
+  background-color: #fdfdfd;
+}
+
+/* Quitar borde derecho en última columna */
+.empleado-header:nth-child(5n),
+.empleado-celda:nth-child(5n) {
+  border-right: none;
+}
+
+/* Alternancia de color por fila de empleados */
+.empleado-celda:nth-child(10n+1),
+.empleado-celda:nth-child(10n+2),
+.empleado-celda:nth-child(10n+3),
+.empleado-celda:nth-child(10n+4),
+.empleado-celda:nth-child(10n+5) {
+  background-color: #f7f9fc;
+}
+
+.empleado-celda:nth-child(10n+6),
+.empleado-celda:nth-child(10n+7),
+.empleado-celda:nth-child(10n+8),
+.empleado-celda:nth-child(10n+9),
+.empleado-celda:nth-child(10n+10) {
+  background-color: #ffffff;
+}
+
+.semana-cierre p {
+  margin-bottom: 0.5rem;
+}
+
+.metodos-pago {
+  font-weight: 500;
+  margin-left: 0.25rem;
+  color: #333;
+}
+
+.linea-inferior {
+  border-bottom: 1px solid #ccc;
+  margin: 0.5rem 0 1rem 0;
+}
+
+
+@media (max-width: 480px) {
+  .form-fechas {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-fechas label {
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .rango-fechas {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .boton-cierre {
     display: block; 
     width: 100%;  
     margin-left: 0;
@@ -232,31 +369,65 @@
 
 
 /* ===== Botón de editar estilo membresías ===== */
+
 .edit-icon {
-  color: #007bff;              /* Azul normal */
+  color: #007bff;              
   font-size: 18px;
-  background: none !important; /* Quita el fondo verde */
-  border: none !important;     /* Quita bordes */
+  background: none !important; 
+  border: none !important;     
   cursor: pointer;
   padding: 4px;
   transition: color 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
+} 
 
 .edit-icon:hover {
-  color: #0056b3;              /* Azul más oscuro al pasar el mouse */
-  background: none !important; /* Sin fondo en hover */
+  color: #0056b3;              
+  background: none !important; 
 }
 
 .edit-icon:focus {
-  outline: none;               /* Quita el borde de enfoque */
+  outline: none;              
   box-shadow: none !important;
 }
 
 .edit-icon.disabled {
-  color: #b5b5b5;              /* Gris para deshabilitado */
+  color: #b5b5b5;              
   cursor: not-allowed;
 }
 
+/* ===== Campo de fecha del modal Editar Pago ===== */
+.input-date-custom {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  height: 38px;
+  box-sizing: border-box;
+  background-color: white;
+  color: #333;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Ícono del calendario */
+.input-date-custom::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(35%) sepia(79%) saturate(427%) hue-rotate(180deg) brightness(92%) contrast(90%);
+}
+
+/* Hover y focus */
+.input-date-custom:hover {
+  border-color: #4299e1;
+}
+
+.input-date-custom:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
