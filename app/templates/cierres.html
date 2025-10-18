@@ -3,6 +3,7 @@
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='cierre_entre_dias.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='services.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <h3>Cierres</h3>
 <form id="form-fechas" class="form-fechas">
@@ -253,22 +254,16 @@
               <td>$${parseInt(p.pago_empleado).toLocaleString('es-AR')}</td>
               <td>$${parseInt(p.pago_propietario).toLocaleString('es-AR')}</td>
               <td>
-                ${
-                  data.role === "admin"
-                    ? `
-                      <button
-                        type="button"
-                        class="btn-edit ${p.tipo_pago === 'servicio' ? 'enabled' : 'disabled'}"
-                        title="${p.tipo_pago === 'servicio' ? 'Editar pago' : 'Solo se pueden editar pagos de servicios'}"
-                        ${p.tipo_pago === 'servicio'
-                          ? `onclick="openEditModal(${p.id}, '${p.fecha}', '${p.empleado}', '${p.metodo_pago.join(' - ')}', ${p.monto || 0}, ${p.propina || 0})"`
-                          : 'disabled'}
-                      >
-                        <img src="/static/icons/pencil.svg" alt="Editar" style="width:16px; height:16px;">
-                      </button>
-                    `
-                    : `<span style="color: gray;">—</span>`
-                }
+                <button
+                  type="button"
+                  class="edit-icon ${p.tipo_pago === 'servicio' ? 'enabled' : 'disabled'}"
+                  title="${p.tipo_pago === 'servicio' ? 'Editar pago' : 'Solo se pueden editar pagos de servicios'}"
+                  ${p.tipo_pago === 'servicio'
+                    ? `onclick="openEditModal(${p.id}, '${p.fecha}', '${p.empleado}', '${p.metodo_pago.join(' - ')}', ${p.monto || 0}, ${p.propina || 0})"`
+                    : 'disabled'}
+                >
+                  <i class="fas fa-pen"></i>
+                </button>
               </td>
             </tr>
           `).join('')}

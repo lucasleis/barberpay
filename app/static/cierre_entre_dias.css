@@ -229,11 +229,34 @@
   }
 }
 
-.btn-edit-disabled {
-  background-color: #e0e0e0;
-  color: #aaa;
-  border: 1px solid #ccc;
-  cursor: not-allowed;
-  border-radius: 5px;
-  padding: 5px 8px;
+
+
+/* ===== Botón de editar estilo membresías ===== */
+.edit-icon {
+  color: #007bff;              /* Azul normal */
+  font-size: 18px;
+  background: none !important; /* Quita el fondo verde */
+  border: none !important;     /* Quita bordes */
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.edit-icon:hover {
+  color: #0056b3;              /* Azul más oscuro al pasar el mouse */
+  background: none !important; /* Sin fondo en hover */
+}
+
+.edit-icon:focus {
+  outline: none;               /* Quita el borde de enfoque */
+  box-shadow: none !important;
+}
+
+.edit-icon.disabled {
+  color: #b5b5b5;              /* Gris para deshabilitado */
+  cursor: not-allowed;
+}
+
