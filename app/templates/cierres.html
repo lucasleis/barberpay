@@ -315,7 +315,7 @@
 
     // Método 2 / Monto 2
     document.getElementById("editMethod2").value = pago.method2_id || "";
-    document.getElementById("editAmount2").value = pago.amount2 || "";
+    document.getElementById("editAmount2").value = (pago.amount2 !== null && pago.amount2 !== undefined) ? pago.amount2 : 0;
 
     // Propina
     document.getElementById("editTip").value = pago.propina || 0;
