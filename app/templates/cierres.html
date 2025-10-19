@@ -115,22 +115,28 @@
       
     </form>
 
-    <!-- BOTONES (afuera del form, pero al mismo nivel visual) -->
-    <div class="edit-buttons-container" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
-      <!-- Botón Eliminar -->
-      <form id="deletePaymentForm" method="POST" style="margin: 0; flex-grow: 1;">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button type="submit" class="delete-button" title="Eliminar pago">
-          <i class="fas fa-trash"></i> Eliminar
-        </button>
-      </form>
-
-      <!-- Botón Guardar -->
-      <button type="submit" form="editPaymentForm" class="edit-button" style="flex-grow: 1;">
-        <i class="fas fa-check"></i> Confirmar cambios
-      </button>
+    <!-- Bloque con padding alineado al resto del modal -->
+    <div class="buttons-wrapper">
+      <div class="modal-buttons">
+        <button type="button" class="delete-button">🗑 Eliminar</button>
+        <button type="submit" class="edit-button">✔ Confirmar cambios</button>
+      </div>
     </div>
 
+    <!-- 
+      <div class="edit-buttons-container" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
+        <form id="deletePaymentForm" method="POST" style="margin: 0; flex-grow: 1;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="delete-button" title="Eliminar pago">
+            <i class="fas fa-trash"></i> Eliminar
+          </button>
+        </form>
+        <button type="submit" form="editPaymentForm" class="edit-button" style="flex-grow: 1;">
+          <i class="fas fa-check"></i> Confirmar cambios
+        </button>
+      </div>
+    -->
+      
   </div>
 </div>
 
