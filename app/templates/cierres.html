@@ -107,6 +107,12 @@
         <label for="editTip">Propina:</label>
         <input type="number" id="editTip" name="tip" step="0.01" required>
       </div>
+
+      <div class="form-group">
+        <label for="editTotalPago">Total a Pagar:</label>
+        <input type="text" name="editTotalPago" id="editTotalPago" placeholder="$" class="form-control" readonly>
+      </div>
+      
     </form>
 
     <!-- BOTONES (afuera del form, pero al mismo nivel visual) -->
@@ -373,6 +379,8 @@
         priceInput.value = price ? `$${price}` : "";
       }
     }
+
+    updateEditTotalPago();
     
   }
 
@@ -509,6 +517,27 @@
     document.getElementById("deletePaymentForm").submit(); // envía el formulario real
   });
 
+  function updateEditTotalPago() {
+    const amount1 = parseFloat(document.getElementById("editAmount1").value || "0");
+    const amount2 = parseFloat(document.getElementById("editAmount2").value || "0");
+    const tip = parseFloat(document.getElementById("editTip").value || "0");
+
+    const total = amount1 + amount2 + tip;
+    document.getElementById("editTotalPago").value = `$${total.toLocaleString("es-AR")}`;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const amount1Input = document.getElementById("editAmount1");
+    const amount2Input = document.getElementById("editAmount2");
+    const tipInput = document.getElementById("editTip");
+
+    if (amount1Input) amount1Input.addEventListener("input", updateEditTotalPago);
+    if (amount2Input) amount2Input.addEventListener("input", updateEditTotalPago);
+    if (tipInput) tipInput.addEventListener("input", updateEditTotalPago);
+
+    // calcular el total inicial al abrir el modal
+    updateEditTotalPago();
+  });
 
 </script>
 

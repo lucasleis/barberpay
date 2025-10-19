@@ -651,3 +651,32 @@ body.modal-open {
   width: 100%;
   max-width: 100%;
 }
+
+.form-control {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+
+/* === Contenedor con padding para el total === */
+.total-wrapper {
+  padding: 0 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Mantiene el mismo estilo de input que el resto */
+.total-wrapper .form-control {
+  width: 100%;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  padding: 8px 10px;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+

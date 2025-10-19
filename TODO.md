@@ -8,7 +8,7 @@
         - [ ] Hacer mismas validaciones que cuando se agrega un pago
         - [✅] Monto 2 que aparezca con 0
         - [ ] Almacenar bien el monto guardado con propina
-        - [ ] Agregar display de monto total como en add_payment
+        - [✅] Agregar display de monto total como en add_payment
     - [ ] Desarrollar para producto
     - [ ] Desarrollar para membresia
 
@@ -18,6 +18,7 @@
     - Si un dni compra una membresia y todavia tenia cantidad por usar, sumar cantidad al dni
     - En la parte de venta de membresia poner un box para poner el dni. 
         - Validar que sea un dni valido
+
 
 ## 3. Generar valeXmembresia
     - Poder poner vale x corte a una membresia para poder regalar. 
