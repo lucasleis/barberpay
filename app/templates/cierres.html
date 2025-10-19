@@ -52,10 +52,19 @@
         <label for="editService">Servicio:</label>
         <select id="editService" name="service_id" required>
           {% for s in services %}
-            <option value="{{ s.id }}">{{ s.name }}</option>
+            <option value="{{ s.id }}" data-precio="{{ s.precio }}">{{ s.name }}</option>
           {% endfor %}
         </select>
+
+        <!-- 👇 Campo para mostrar el precio del servicio -->
+        <input
+          type="text"
+          id="editServicePrice"
+          readonly
+          style="background:#f9f9f9; border:1px solid #ddd; padding:5px; margin-top:5px; width:100%;"
+        >
       </div>
+
 
       <!-- Método de pago 1 -->
       <div class="form-group">
@@ -98,9 +107,9 @@
     <!-- BOTONES (afuera del form, pero al mismo nivel visual) -->
     <div class="edit-buttons-container" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
       <!-- Botón Eliminar -->
-      <form id="deletePaymentForm" method="POST" style="margin: 0;">
+      <form id="deletePaymentForm" method="POST" style="margin: 0; flex-grow: 1;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button type="submit" class="btn btn-danger" title="Eliminar pago" style="padding: 8px 12px;">
+        <button type="submit" class="delete-button" title="Eliminar pago">
           <i class="fas fa-trash"></i> Eliminar
         </button>
       </form>
@@ -348,6 +357,18 @@
     document.getElementById("editTip").value = pago.propina || 0;
 
     document.getElementById("deletePaymentForm").action = `/payments/delete/${id}`;
+
+    // --- Mostrar automáticamente el precio del servicio seleccionado ---
+    const serviceSelect = document.getElementById("editService");
+    if (serviceSelect) {
+      const selected = serviceSelect.options[serviceSelect.selectedIndex];
+      const price = selected.getAttribute("data-precio");
+      const priceInput = document.getElementById("editServicePrice");
+      if (priceInput) {
+        priceInput.value = price ? `$${price}` : "";
+      }
+    }
+    
   }
 
   function closeEditModal() {
@@ -396,6 +417,19 @@
       errores.push("Debe ingresar al menos un monto válido en alguno de los métodos de pago.");
       valid = false;
     }
+
+    // --- Validar que si el método 2 está vacío, el monto 1 sea igual al valor del servicio ---
+    if (!method2) {
+      const serviceSelect = document.getElementById("editService");
+      const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+      const precioServicio = parseFloat(selectedOption.getAttribute("data-precio") || "0");
+
+      if (precioServicio > 0 && Math.abs(amount1 - precioServicio) > 0.01) {
+        errores.push(`El monto 1 ($${amount1.toLocaleString('es-AR')}) debe coincidir con el valor del servicio ($${precioServicio.toLocaleString('es-AR')}).`);
+        valid = false;
+      }
+    }
+
 
     // --- Validar empleado ---
     const barber = document.getElementById("editBarber").value;
