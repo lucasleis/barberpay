@@ -4,10 +4,11 @@
 - Poder editar los movimientos en la solapa de cierre. 
     - [✅] Agregar un boton a la derecha de la grilla que permita modificar el campo que quieras. similar al borrar de donde agregas pagos
     - [✅] Solo los que tengan rol de admin
-    - Desarrollar servicios
+    - [ ] Desarrollar servicios
         - [ ] Hacer mismas validaciones que cuando se agrega un pago
         - [✅] Monto 2 que aparezca con 0
         - [ ] Almacenar bien el monto guardado con propina
+        - [ ] Agregar display de monto total como en add_payment
     - [ ] Desarrollar para producto
     - [ ] Desarrollar para membresia
 

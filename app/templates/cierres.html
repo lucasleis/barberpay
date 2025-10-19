@@ -22,9 +22,14 @@
 </form>
 
 <div id="editPaymentModal" class="modal-cantidad">
-  <div class="modal-content">
+  <div class="modal-content" id="editPaymentModalContent">
     <h3>Editar Pago</h3>
     <span class="close-modal" onclick="closeEditModal()">&times;</span>
+
+    <!-- Contenedor de mensajes de error -->
+    <div class="error-wrapper">
+      <div id="editFormErrorContainer"></div>
+    </div>
 
     <!-- FORMULARIO DE EDICIÓN -->
     <form id="editPaymentForm" method="POST">
@@ -445,18 +450,28 @@
       valid = false;
     }
 
-    // --- Mostrar errores si hay ---
-    const existingError = document.getElementById("editFormError");
-    if (existingError) existingError.remove();
+    // --- Mostrar errores descriptivos en el contenedor fijo ---
+    const container = document.getElementById("editFormErrorContainer");
+    container.innerHTML = ""; // limpia errores previos
 
     if (!valid) {
       const errorBox = document.createElement("div");
-      errorBox.id = "editFormError";
-      errorBox.style.color = "red";
-      errorBox.style.marginTop = "10px";
-      errorBox.style.fontSize = "0.9rem";
-      errorBox.innerHTML = errores.map(e => `• ${e}`).join("<br>");
-      document.querySelector("#editPaymentForm .edit-button").insertAdjacentElement("beforebegin", errorBox);
+      errorBox.classList.add("error-message");
+      errorBox.innerHTML = `
+        <strong>Se encontraron los siguientes errores:</strong>
+        <ul>${errores.map(e => `<li>${e}</li>`).join("")}</ul>
+      `;
+      container.appendChild(errorBox);
+
+      errorBox.classList.add("shake");
+      setTimeout(() => errorBox.classList.remove("shake"), 400);
+
+      // 👇 Scroll suave hasta el inicio del modal
+      const modalContent = document.getElementById("editPaymentModalContent");
+      if (modalContent) {
+        modalContent.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
       return;
     }
 
