@@ -30,3 +30,5 @@
 
 ## 5. Ocultar elementos de agregar pago, cierre y administrar 
     - si no esta logueado elementos de agregar pago, cierre y administrar ocultos
+
+
