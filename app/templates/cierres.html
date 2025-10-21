@@ -421,98 +421,82 @@
     }
   };
 
-  // --- VALIDACIONES DEL FORMULARIO DE EDICIÓN ---
-  document.getElementById("editPaymentForm").addEventListener("submit", function (e) {
-    e.preventDefault();
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("editPaymentForm");
+    const modal = document.getElementById("editPaymentModal");
 
-    let valid = true;
-    const errores = [];
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
 
-    const method1 = document.getElementById("editMethod1").value;
-    const method2 = document.getElementById("editMethod2").value;
-    const amount1 = parseFloat(document.getElementById("editAmount1").value || "0");
-    const amount2 = parseFloat(document.getElementById("editAmount2").value || "0");
-    const tip = parseFloat(document.getElementById("editTip").value || "0");
+      let valid = true;
+      const errores = [];
 
-    // --- Validar duplicación de métodos ---
-    if (method1 && method2 && method1 === method2) {
-      errores.push("No puede elegir el mismo método de pago dos veces.");
-      valid = false;
-    }
+      const method1 = document.getElementById("editMethod1").value;
+      const method2 = document.getElementById("editMethod2").value;
+      const amount1 = parseFloat(document.getElementById("editAmount1").value.replace(/\D/g, "") || "0");
+      const amount2 = parseFloat(document.getElementById("editAmount2").value.replace(/\D/g, "") || "0");
+      const tip = parseFloat(document.getElementById("editTip").value.replace(/\D/g, "") || "0");
 
-    // --- Validar montos ---
-    if (amount1 < 0 || amount2 < 0 || tip < 0) {
-      errores.push("Los montos y la propina no pueden ser negativos.");
-      valid = false;
-    }
+      // --- Validar que si monto 2 es mayor a 0, se haya seleccionado un método de pago 2 distinto a "Ninguno" ---
+      if (amount2 > 0 && (!method2 || method2 === "")) {
+        errores.push("Si el monto 2 es mayor a 0, debe seleccionar un método de pago 2 distinto a 'Ninguno'.");
+        valid = false;
+      }
 
-    // --- Validar que haya al menos un monto válido ---
-    if (amount1 === 0 && amount2 === 0) {
-      errores.push("Debe ingresar al menos un monto válido en alguno de los métodos de pago.");
-      valid = false;
-    }
+      // --- Validar duplicación de métodos ---
+      if (method1 && method2 && method1 === method2) {
+        errores.push("No puede elegir el mismo método de pago dos veces.");
+        valid = false;
+      }
 
-    // --- Validar que si el método 2 está vacío, el monto 1 sea igual al valor del servicio ---
-    if (!method2) {
+      // --- Validar montos ---
+      if (amount1 < 0 || amount2 < 0 || tip < 0) {
+        errores.push("Los montos y la propina no pueden ser negativos.");
+        valid = false;
+      }
+
+      // --- Validar que amount1 + amount2 sea igual al precio total del servicio ---
       const serviceSelect = document.getElementById("editService");
       const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
       const precioServicio = parseFloat(selectedOption.getAttribute("data-precio") || "0");
-
-      if (precioServicio > 0 && Math.abs(amount1 - precioServicio) > 0.01) {
-        errores.push(`El monto 1 ($${amount1.toLocaleString('es-AR')}) debe coincidir con el valor del servicio ($${precioServicio.toLocaleString('es-AR')}).`);
+      const diferencia = Math.abs((amount1 + amount2) - precioServicio);
+      if (precioServicio > 0 && diferencia > 0.01) {
+        errores.push(`La suma de los montos ($${(amount1 + amount2).toLocaleString('es-AR')}) debe coincidir con el precio del servicio ($${precioServicio.toLocaleString('es-AR')}).`);
         valid = false;
       }
-    }
 
+      // --- Mostrar errores si existen ---
+      const container = document.getElementById("editFormErrorContainer");
+      container.innerHTML = "";
 
-    // --- Validar empleado ---
-    const barber = document.getElementById("editBarber").value;
-    if (!barber) {
-      errores.push("Debe seleccionar un empleado.");
-      valid = false;
-    }
+      if (!valid) {
+        const errorBox = document.createElement("div");
+        errorBox.classList.add("error-message");
+        errorBox.innerHTML = `
+          <strong>Se encontraron los siguientes errores:</strong>
+          <ul>${errores.map(e => `<li>${e}</li>`).join("")}</ul>
+        `;
+        container.appendChild(errorBox);
+        errorBox.classList.add("shake");
+        setTimeout(() => errorBox.classList.remove("shake"), 400);
 
-    // --- Validar servicio ---
-    const service = document.getElementById("editService").value;
-    if (!service) {
-      errores.push("Debe seleccionar un servicio.");
-      valid = false;
-    }
-
-    // --- Mostrar errores descriptivos en el contenedor fijo ---
-    const container = document.getElementById("editFormErrorContainer");
-    container.innerHTML = ""; // limpia errores previos
-
-    if (!valid) {
-      const errorBox = document.createElement("div");
-      errorBox.classList.add("error-message");
-      errorBox.innerHTML = `
-        <strong>Se encontraron los siguientes errores:</strong>
-        <ul>${errores.map(e => `<li>${e}</li>`).join("")}</ul>
-      `;
-      container.appendChild(errorBox);
-
-      errorBox.classList.add("shake");
-      setTimeout(() => errorBox.classList.remove("shake"), 400);
-
-      // 👇 Scroll suave hasta el inicio del modal
-      const modalContent = document.getElementById("editPaymentModalContent");
-      if (modalContent) {
-        modalContent.scrollTo({ top: 0, behavior: "smooth" });
+        const modalContent = document.getElementById("editPaymentModalContent");
+        if (modalContent) modalContent.scrollTo({ top: 0, behavior: "smooth" });
+        return; // Detener el envío
       }
 
-      return;
-    }
+      // --- Si todo está bien, completar fecha y enviar ---
+      const inputFecha = document.getElementById("editDate");
+      const inputHidden = document.getElementById("editDateHidden");
+      if (inputFecha && inputFecha.value) {
+        const fechaEditada = new Date(inputFecha.value);
+        fechaEditada.setHours(23, 59, 0, 0);
+        inputHidden.value = fechaEditada.toISOString().slice(0, 16);
+      }
 
-    // --- Si todo está bien, forzar hora 23:59 y enviar ---
-    const inputFecha = document.getElementById("editDate");
-    const inputHidden = document.getElementById("editDateHidden");
-    if (inputFecha && inputFecha.value) {
-      const fechaEditada = new Date(inputFecha.value);
-      fechaEditada.setHours(23, 59, 0, 0);
-      inputHidden.value = fechaEditada.toISOString().slice(0, 16);
-    }
-    e.target.submit();
+      // 👇 Forzar envío manual sólo si pasó todas las validaciones
+      form.submit();
+    });
   });
 
   document.getElementById("editService").addEventListener("change", function() {

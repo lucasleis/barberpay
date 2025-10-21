@@ -7,8 +7,8 @@
     - [ ] Desarrollar servicios
         - [✅] Monto 2 que aparezca con 0
         - [✅] Agregar display de monto total como en add_payment
-        - [ ] Hacer mismas validaciones que cuando se agrega un pago
-            - [ ] Validaciones en front
+        - [✅] Hacer mismas validaciones que cuando se agrega un pago
+        - [ ] Hay problemas enviando al back los valores
         - [ ] Almacenar bien el monto guardado con propina
     - [ ] Desarrollar para producto
     - [ ] Desarrollar para membresia
@@ -26,7 +26,11 @@
 
 
 ## 4. Fecha en formularios
-    - [ ] Las fechas en los formularios aparecen como mm/dd/aaaa. modificar para que sean dd/mm/aaaa
+    - [ ] Las fechas en lose muestra como s formularios aparecen como mm/dd/aaaa. modificar para que sean dd/mm/aaaa
+    - [ ] Revisar entonrnos. 
+        - [✅] Maquina laburo: dd/mm/aaaa. 
+        - [ ] Maquina propia
+        - [ ] Server
 
 ## 5. Ocultar elementos de agregar pago, cierre y administrar 
     - si no esta logueado elementos de agregar pago, cierre y administrar ocultos
