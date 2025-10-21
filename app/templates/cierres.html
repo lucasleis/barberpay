@@ -380,11 +380,10 @@
 
     // Método 2 / Monto 2
     document.getElementById("editMethod2").value = pago.method2_id || "";
-    document.getElementById("editAmount2").value = (pago.amount2 !== null && pago.amount2 !== undefined) ? pago.amount2 : 0;
-    //document.getElementById("editAmount2").value = `$${((pago.amount2 !== null && pago.amount2 !== undefined) ? pago.amount2 : 0).toLocaleString("es-AR")}`;
+    const monto2 = (pago.amount2 !== null && pago.amount2 !== undefined) ? pago.amount2 : 0;
+    document.getElementById("editAmount2").value = `$${parseInt(monto2).toLocaleString("es-AR")}`;
 
     // Propina
-    // document.getElementById("editTip").value = pago.propina || 0;
     document.getElementById("editTip").value = `$${(pago.propina || 0).toLocaleString("es-AR")}`;
 
     document.getElementById("deletePaymentForm").action = `/payments/delete/${id}`;
@@ -455,15 +454,33 @@
         valid = false;
       }
 
-      // --- Validar que amount1 + amount2 sea igual al precio total del servicio ---
+      // --- Validar coherencia entre montos, propina y precio del servicio ---
       const serviceSelect = document.getElementById("editService");
       const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
       const precioServicio = parseFloat(selectedOption.getAttribute("data-precio") || "0");
-      const diferencia = Math.abs((amount1 + amount2) - precioServicio);
-      if (precioServicio > 0 && diferencia > 0.01) {
-        errores.push(`La suma de los montos ($${(amount1 + amount2).toLocaleString('es-AR')}) debe coincidir con el precio del servicio ($${precioServicio.toLocaleString('es-AR')}).`);
-        valid = false;
+
+      // Tomamos también el total mostrado en el input "Total a Pagar"
+      const totalMostrado = parseFloat(
+        document.getElementById("editTotalPago").value.replace(/[^0-9,\.]/g, "").replace(/\./g, "").replace(",", ".")
+      ) || 0;
+
+      // Regla 1: monto2 == 0 → monto1 + propina = totalMostrado
+      // Regla 2: monto2 > 0  → monto1 + monto2 = precioServicio + propina
+      let diferencia = 0;
+      if (amount2 === 0) {
+        diferencia = Math.abs((amount1 + tip) - totalMostrado);
+        if (diferencia > 0.01) {
+          errores.push(`La suma de Monto 1 + Propina ($${(amount1 + tip).toLocaleString('es-AR')}) debe coincidir con el total a pagar ($${totalMostrado.toLocaleString('es-AR')}).`);
+          valid = false;
+        }
+      } else {
+        diferencia = Math.abs((amount1 + amount2) - (precioServicio + tip));
+        if (diferencia > 0.01) {
+          errores.push(`La suma de Monto 1 + Monto 2 ($${(amount1 + amount2).toLocaleString('es-AR')}) debe coincidir con el precio del servicio + propina ($${(precioServicio + tip).toLocaleString('es-AR')}).`);
+          valid = false;
+        }
       }
+
 
       // --- Mostrar errores si existen ---
       const container = document.getElementById("editFormErrorContainer");
@@ -555,7 +572,7 @@
     const amount2 = cleanValue(document.getElementById("editAmount2").value);
     const tip = cleanValue(document.getElementById("editTip").value);
 
-    const total = amount1 + amount2 + tip;
+    const total = amount1 + amount2 /* + tip */;
     document.getElementById("editTotalPago").value = `$${total.toLocaleString("es-AR")}`;
   }
 

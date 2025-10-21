@@ -19,6 +19,7 @@ from werkzeug.security import generate_password_hash
 
 from app.models import now_buenos_aires
 
+import re
 import os
 
 # Configure logging
@@ -379,7 +380,6 @@ def obtener_id_usuario_disponible(peluqueria_id):
     print(f"i: {i}")
 
     return i
-
 
 @app.context_processor
 def inject_logo():
@@ -1274,83 +1274,92 @@ def edit_payment(pago_id):
         return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
 
 
-    # barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
-    # methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
-
     if request.method == 'POST':
+        import re  # si no está ya importado arriba del archivo
+
+        def limpiar_monto(valor):
+            if not valor:
+                return 0.0
+            limpio = re.sub(r'[^0-9,\.]', '', valor)
+            limpio = limpio.replace('.', '').replace(',', '.')
+            try:
+                return float(limpio)
+            except ValueError:
+                return 0.0
+
         try:
             # --- Fecha ---
             date_str = request.form.get('date')
             if not date_str:
                 raise ValueError("La fecha es obligatoria.")
 
-            try:
-                # Puede venir como 'YYYY-MM-DD' (solo fecha)
-                if "T" in date_str:
-                    updated_date = datetime.strptime(date_str, '%Y-%m-%dT%H:%M')
-                else:
-                    updated_date = datetime.strptime(date_str, '%Y-%m-%d')
-                    # Forzar hora 23:59 para distinguir pagos editados
-                    updated_date = updated_date.replace(hour=23, minute=59)
-                
-                updated_date = updated_date.replace(tzinfo=ZoneInfo("America/Argentina/Buenos_Aires"))
-            except ValueError:
-                raise ValueError("Formato de fecha inválido.")
-
+            if "T" in date_str:
+                updated_date = datetime.strptime(date_str, '%Y-%m-%dT%H:%M')
+            else:
+                updated_date = datetime.strptime(date_str, '%Y-%m-%d')
+                updated_date = updated_date.replace(hour=23, minute=59)
+            updated_date = updated_date.replace(tzinfo=ZoneInfo("America/Argentina/Buenos_Aires"))
 
             # --- Empleado ---
             barber_id = request.form.get('barber_id')
             if not barber_id:
                 raise ValueError("Debe seleccionarse un empleado.")
 
-            # --- Método de pago principal ---
+            # --- Métodos y montos ---
             method1_id = request.form.get('method1')
+            method2_id_raw = request.form.get('method2') or ""
             if not method1_id:
-                raise ValueError("Debe seleccionarse un método de pago.")
+                raise ValueError("Debe seleccionarse un método de pago principal.")
 
-            amount1_raw = (request.form.get('amount1') or '0').replace(',', '.')
-            method2_id_raw = request.form.get('method2') or None
-            amount2_raw = (request.form.get('amount2') or '0').replace(',', '.')
-            tip_raw = (request.form.get('tip') or '0').replace(',', '.')
+            amount1 = limpiar_monto(request.form.get('amount1'))
+            amount2 = limpiar_monto(request.form.get('amount2'))
+            tip = limpiar_monto(request.form.get('tip'))
+            total_pago = limpiar_monto(request.form.get('editTotalPago'))  # ✅ nuevo campo del modal
 
-            try:
-                amount1 = float(amount1_raw)
-            except ValueError:
-                raise ValueError("El monto del método de pago es inválido.")
-            if amount1 < 0:
-                raise ValueError("El monto del método de pago no puede ser negativo.")
+            # --- Validaciones básicas ---
+            if amount1 < 0 or amount2 < 0 or tip < 0:
+                raise ValueError("Los montos y propinas no pueden ser negativos.")
 
-            if method2_id_raw:
-                try:
-                    amount2 = float(amount2_raw)
-                except ValueError:
-                    raise ValueError("El monto del segundo método de pago es inválido.")
-                if amount2 < 0:
-                    raise ValueError("El monto del segundo método de pago no puede ser negativo.")
-                method2_id = int(method2_id_raw)
+            if amount2 > 0 and not method2_id_raw:
+                raise ValueError("Si el monto 2 es mayor a 0, debe seleccionar un método de pago 2 distinto a 'Ninguno'.")
+
+            if method2_id_raw and method1_id == method2_id_raw:
+                raise ValueError("No puede elegir el mismo método de pago dos veces.")
+
+            method2_id = int(method2_id_raw) if method2_id_raw else None
+
+            # --- Obtener precio del servicio ---
+            service_id = request.form.get('service_id')
+            service = Servicio.query.get(service_id) if service_id else None
+            precio_servicio = float(service.precio) if service else 0.0
+
+            # --- Validar coherencia total ---
+            if amount2 == 0:
+                # Regla 1: monto1 + propina = total mostrado
+                diferencia = abs((amount1 + tip) - total_pago)
+                if diferencia > 0.01:
+                    raise ValueError(
+                        f"La suma de Monto 1 + Propina (${amount1 + tip:,.0f}) debe coincidir con el total a pagar (${total_pago:,.0f})."
+                    )
             else:
-                method2_id = None
-                amount2 = 0.0
+                # Regla 2: monto1 + monto2 = precio servicio + propina
+                diferencia = abs((amount1 + amount2) - (precio_servicio + tip))
+                if diferencia > 0.01:
+                    raise ValueError(
+                        f"La suma de Monto 1 + Monto 2 (${amount1 + amount2:,.0f}) debe coincidir con el precio del servicio + propina (${precio_servicio + tip:,.0f})."
+                    )
 
-            try:
-                tip = float(tip_raw)
-            except ValueError:
-                raise ValueError("La propina ingresada es inválida.")
-            if tip < 0:
-                raise ValueError("La propina no puede ser negativa.")
-
-            # --- Actualizaciones ---
+            # --- Actualizar pago ---
             pago.date = updated_date
             pago.payment_method1_id = int(method1_id)
-            pago.amount_method1 = amount1
-            pago.amount_tip = tip
             pago.payment_method2_id = method2_id
+            pago.amount_method1 = amount1
             pago.amount_method2 = amount2
+            pago.amount_tip = tip
 
-            # --- Cita asociada ---
+            # --- Actualizar cita asociada ---
             if pago.appointment:
                 pago.appointment.barber_id = int(barber_id)
-                service_id = request.form.get('service_id')
                 if service_id:
                     pago.appointment.service_id = int(service_id)
 
@@ -1360,10 +1369,6 @@ def edit_payment(pago_id):
 
         except Exception as e:
             db.session.rollback()
-            try:
-                db.session.refresh(pago)
-            except Exception:
-                pass
             flash(f"Error al actualizar el pago: {str(e)}", "danger")
             return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
 

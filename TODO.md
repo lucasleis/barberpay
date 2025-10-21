@@ -8,8 +8,8 @@
         - [✅] Monto 2 que aparezca con 0
         - [✅] Agregar display de monto total como en add_payment
         - [✅] Hacer mismas validaciones que cuando se agrega un pago
-        - [ ] Hay problemas enviando al back los valores
-        - [ ] Almacenar bien el monto guardado con propina
+        - [✅] Hay problemas enviando al back los valores
+        - [✅] Almacenar bien el monto guardado con propina
     - [ ] Desarrollar para producto
     - [ ] Desarrollar para membresia
 
