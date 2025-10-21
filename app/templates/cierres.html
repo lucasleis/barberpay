@@ -83,7 +83,7 @@
 
       <div class="form-group">
         <label for="editAmount1">Monto 1:</label>
-        <input type="number" id="editAmount1" name="amount1" step="0.01" required>
+        <input type="text" id="editAmount1" name="amount1" required>
       </div>
 
       <!-- Método de pago 2 -->
@@ -99,13 +99,13 @@
 
       <div class="form-group">
         <label for="editAmount2">Monto 2:</label>
-        <input type="number" id="editAmount2" name="amount2" step="0.01">
+        <input type="text" id="editAmount2" name="amount2">
       </div>
 
       <!-- Propina -->
       <div class="form-group">
         <label for="editTip">Propina:</label>
-        <input type="number" id="editTip" name="tip" step="0.01" required>
+        <input type="text" id="editTip" name="tip" required>
       </div>
 
       <div class="form-group">
@@ -118,10 +118,21 @@
     <!-- Bloque con padding alineado al resto del modal -->
     <div class="buttons-wrapper">
       <div class="modal-buttons">
-        <button type="button" class="delete-button">🗑 Eliminar</button>
-        <button type="submit" class="edit-button">✔ Confirmar cambios</button>
+        <!-- Botón Eliminar -->
+        <form id="deletePaymentForm" method="POST" style="margin: 0; flex: 1;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="delete-button" title="Eliminar pago">
+            <i class="fas fa-trash"></i> Eliminar
+          </button>
+        </form>
+    
+        <!-- Botón Confirmar -->
+        <button type="submit" form="editPaymentForm" class="edit-button" style="flex: 1;">
+          <i class="fas fa-check"></i> Confirmar<br>cambios
+        </button>
       </div>
     </div>
+    
 
     <!-- 
       <div class="edit-buttons-container" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
@@ -365,13 +376,16 @@
     // Método 1 / Monto 1
     document.getElementById("editMethod1").value = pago.method1_id || "";
     document.getElementById("editAmount1").value = pago.amount1 || 0;
+    document.getElementById("editAmount1").value = `$${(pago.amount1 || 0).toLocaleString("es-AR")}`;
 
     // Método 2 / Monto 2
     document.getElementById("editMethod2").value = pago.method2_id || "";
     document.getElementById("editAmount2").value = (pago.amount2 !== null && pago.amount2 !== undefined) ? pago.amount2 : 0;
+    //document.getElementById("editAmount2").value = `$${((pago.amount2 !== null && pago.amount2 !== undefined) ? pago.amount2 : 0).toLocaleString("es-AR")}`;
 
     // Propina
-    document.getElementById("editTip").value = pago.propina || 0;
+    // document.getElementById("editTip").value = pago.propina || 0;
+    document.getElementById("editTip").value = `$${(pago.propina || 0).toLocaleString("es-AR")}`;
 
     document.getElementById("deletePaymentForm").action = `/payments/delete/${id}`;
 
@@ -382,7 +396,8 @@
       const price = selected.getAttribute("data-precio");
       const priceInput = document.getElementById("editServicePrice");
       if (priceInput) {
-        priceInput.value = price ? `$${price}` : "";
+        const numericPrice = parseFloat(price) || 0;
+        priceInput.value = numericPrice ? `$${numericPrice.toLocaleString("es-AR")}` : "";
       }
     }
 
@@ -523,10 +538,38 @@
     document.getElementById("deletePaymentForm").submit(); // envía el formulario real
   });
 
+  function formatCurrencyInput(input) {
+    const value = parseFloat(input.value.replace(/\D/g, "")) || 0;
+    input.value = value ? `$${value.toLocaleString("es-AR")}` : "$0";
+  }
+
+  function attachCurrencyFormatting(id) {
+    const input = document.getElementById(id);
+    if (!input) return;
+
+    // Mostrar formato correcto al ingresar al modal
+    input.addEventListener("focus", () => {
+      const numericValue = input.value.replace(/\D/g, "");
+      input.value = numericValue ? numericValue : "";
+    });
+
+    // Mostrar formato $X.XXX al salir del input
+    input.addEventListener("blur", () => formatCurrencyInput(input));
+  }
+
+
   function updateEditTotalPago() {
-    const amount1 = parseFloat(document.getElementById("editAmount1").value || "0");
-    const amount2 = parseFloat(document.getElementById("editAmount2").value || "0");
-    const tip = parseFloat(document.getElementById("editTip").value || "0");
+    // Limpia todo lo que no sea dígito o coma/punto decimal
+    const cleanValue = (value) => {
+      if (!value) return 0;
+      // Eliminar símbolo $, puntos de miles y espacios
+      const numeric = value.replace(/[^0-9,.-]/g, "").replace(/\./g, "").replace(",", ".");
+      return parseFloat(numeric) || 0;
+    };
+
+    const amount1 = cleanValue(document.getElementById("editAmount1").value);
+    const amount2 = cleanValue(document.getElementById("editAmount2").value);
+    const tip = cleanValue(document.getElementById("editTip").value);
 
     const total = amount1 + amount2 + tip;
     document.getElementById("editTotalPago").value = `$${total.toLocaleString("es-AR")}`;
@@ -537,11 +580,19 @@
     const amount2Input = document.getElementById("editAmount2");
     const tipInput = document.getElementById("editTip");
 
-    if (amount1Input) amount1Input.addEventListener("input", updateEditTotalPago);
-    if (amount2Input) amount2Input.addEventListener("input", updateEditTotalPago);
-    if (tipInput) tipInput.addEventListener("input", updateEditTotalPago);
+    if (amount1Input) {
+      attachCurrencyFormatting("editAmount1");
+      amount1Input.addEventListener("input", updateEditTotalPago);
+    }
+    if (amount2Input) {
+      attachCurrencyFormatting("editAmount2");
+      amount2Input.addEventListener("input", updateEditTotalPago);
+    }
+    if (tipInput) {
+      attachCurrencyFormatting("editTip");
+      tipInput.addEventListener("input", updateEditTotalPago);
+    }
 
-    // calcular el total inicial al abrir el modal
     updateEditTotalPago();
   });
 

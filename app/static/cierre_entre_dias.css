@@ -683,60 +683,92 @@ body.modal-open {
 
 
 /* === Contenedor con padding para los botones === */
+/* === Alineación perfecta de ambos botones === */
 .buttons-wrapper {
-  padding: 2rem; /* igual que el resto del modal */
+  padding: 2rem;
+  padding-bottom: 3rem; 
   width: 100%;
   box-sizing: border-box;
 }
 
-/* === Contenedor de los botones === */
+
 .modal-buttons {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center; 
   gap: 1rem;
   width: 100%;
 }
 
-/* === Estilo general para ambos botones === */
-/* === Corrige herencia global en los botones del modal === */
-.modal-buttons button {
-  all: unset; /* elimina herencias globales */
+/* El form se comporta igual que el otro contenedor */
+.modal-buttons form {
+  flex: 1;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+/* === Estilo unificado para ambos botones === */
+.modal-buttons button,
+.modal-buttons form button {
+  flex: 1;
+  display: inline-flex;        
   align-items: center;
   justify-content: center;
   gap: 8px;
-  flex: 1;
-  height: 48px;
+  width: 100%;
+  height: 52px;
   font-size: 1rem;
   font-weight: 600;
   border-radius: 8px;
   cursor: pointer;
   color: white;
-  text-align: center;
-  line-height: 1;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: 1;            
+  vertical-align: middle;
   box-sizing: border-box;
+  transform: translateY(0);   
 }
 
-/* Reaplico colores después del reset */
+/* === Colores y efectos === */
 .modal-buttons .delete-button {
-  background-color: #e53e3e !important;
+  background-color: #e53e3e;
   transition: background-color 0.2s ease, transform 0.1s ease;
 }
-
 .modal-buttons .delete-button:hover {
-  background-color: #c53030 !important;
+  background-color: #c53030;
   transform: translateY(-1px);
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .modal-buttons .edit-button {
   background-color: #007bff;
   transition: background-color 0.2s ease, transform 0.1s ease;
 }
-
 .modal-buttons .edit-button:hover {
   background-color: #0069d9;
   transform: translateY(-1px);
 }
+
+/* === Íconos perfectamente centrados === */
+.modal-buttons button i {
+  font-size: 0.9em;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-buttons .delete-button,
+.modal-buttons .delete-button:hover,
+.modal-buttons .delete-button:focus {
+  color: white !important; 
+}
+
 
 
 #editPaymentForm {

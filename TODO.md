@@ -5,10 +5,11 @@
     - [✅] Agregar un boton a la derecha de la grilla que permita modificar el campo que quieras. similar al borrar de donde agregas pagos
     - [✅] Solo los que tengan rol de admin
     - [ ] Desarrollar servicios
-        - [ ] Hacer mismas validaciones que cuando se agrega un pago
         - [✅] Monto 2 que aparezca con 0
-        - [ ] Almacenar bien el monto guardado con propina
         - [✅] Agregar display de monto total como en add_payment
+        - [ ] Hacer mismas validaciones que cuando se agrega un pago
+            - [ ] Validaciones en front
+        - [ ] Almacenar bien el monto guardado con propina
     - [ ] Desarrollar para producto
     - [ ] Desarrollar para membresia
 
@@ -26,3 +27,6 @@
 
 ## 4. Fecha en formularios
     - [ ] Las fechas en los formularios aparecen como mm/dd/aaaa. modificar para que sean dd/mm/aaaa
+
+## 5. Ocultar elementos de agregar pago, cierre y administrar 
+    - si no esta logueado elementos de agregar pago, cierre y administrar ocultos
