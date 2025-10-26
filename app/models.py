@@ -86,13 +86,19 @@ class Membresia(db.Model):
     __tablename__ = 'membresias'
 
     id = db.Column(db.Integer, primary_key=True)
-    id_usuario = db.Column(db.Integer, unique=True) 
+    id_usuario = db.Column(db.Integer, unique=True)  # clientes viejos
+    dni = db.Column(db.String(20), nullable=True)     # clientes nuevos
     tipo_membresia_id = db.Column(db.Integer, db.ForeignKey('tipos_membresia.id'), nullable=False)
     usos_disponibles = db.Column(db.Integer, nullable=False)
     fecha_compra = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id', ondelete="CASCADE"), nullable=False)
     active = db.Column(db.Boolean, default=True)
 
+    __table_args__ = (
+        db.UniqueConstraint('dni', 'peluqueria_id', name='uq_dni_peluqueria'),
+    )
+
+    # Relaciones
     tipo_membresia = db.relationship('TipoMembresia', backref=db.backref('membresias', lazy=True))
     peluqueria = db.relationship('Peluqueria', backref=db.backref('membresias', lazy=True))
 

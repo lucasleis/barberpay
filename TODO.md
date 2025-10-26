@@ -36,3 +36,5 @@
     - si no esta logueado elementos de agregar pago, cierre y administrar ocultos
 
 
+## 6. Pasaje a produccion
+    - [ ] ejecutar alter table y sumar columna dni 

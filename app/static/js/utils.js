@@ -174,6 +174,28 @@ function obtenerPrecioMembresiaSeleccion() {
   return parseFloat(precio) || 0;
 }
 
+function validarDniMembresia() {
+  const dniInput = document.getElementById('dni_membresia');
+  const dniError = document.getElementById('dniError');
+
+  if (!dniInput) return true; // si no existe el campo, no validamos
+
+  const dniValor = dniInput.value.trim();
+  const dniValido = /^\d{7,8}$/.test(dniValor);
+
+  if (!dniValido) {
+    if (dniError) dniError.style.display = 'block';
+    dniInput.classList.add('input-error');
+    dniInput.focus();
+    return false;
+  } else {
+    if (dniError) dniError.style.display = 'none';
+    dniInput.classList.remove('input-error');
+    return true;
+  }
+}
+
+
 
 /// METODOS DE PAGO \\\
 
@@ -717,6 +739,13 @@ function estaSeleccionadaMembresia() {
 /// MEMBRESIA \\\
 function validarSubmitMembresia(){
   const valorMembresia = obtenerPrecioMembresiaSeleccion();
+
+  // Valido DNI antes de continuar
+  if (!validarDniMembresia()) {
+    return false;
+  }
+
+  // Valido los métodos de pago múltiples
   if (!multiplesMetodosValidos(valorMembresia)) {
     return false;
   }

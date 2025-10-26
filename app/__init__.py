@@ -110,15 +110,20 @@ def ensure_database_and_tables():
             servicio_id INTEGER NOT NULL REFERENCES servicios(id),
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE
         );
+                
+        ALTER TABLE membresias ADD COLUMN IF NOT EXISTS dni VARCHAR(20);
+
                              
         CREATE TABLE IF NOT EXISTS membresias (
             id SERIAL PRIMARY KEY,
+            id_usuario INTEGER UNIQUE,  -- clientes antiguos
+            dni VARCHAR(20),            -- clientes nuevos (puede ser NULL)
             tipo_membresia_id INTEGER NOT NULL REFERENCES tipos_membresia(id),
             usos_disponibles INTEGER NOT NULL,
             fecha_compra TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
             active BOOLEAN DEFAULT TRUE,
-            id_usuario INTEGER UNIQUE  
+            UNIQUE (dni, peluqueria_id)
         );
 
         CREATE TABLE IF NOT EXISTS turnos (

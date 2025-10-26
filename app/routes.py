@@ -3,7 +3,7 @@ from . import db
 from . import csrf
 from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno, Usuario, TurnoCliente, Cliente
 from .auth import login_required
-from sqlalchemy import desc, text, case
+from sqlalchemy import desc, text, case, nullsfirst, nullslast
 from sqlalchemy.sql import extract, func
 from sqlalchemy.orm import aliased, selectinload, joinedload
 from datetime import datetime, timedelta, time, date
@@ -404,28 +404,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-"""
-    @app.route('/login', methods=['GET', 'POST'])
-    def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        if (username == app.config['ADMIN_USERNAME'] and
-            password == app.config['ADMIN_PASSWORD']):
-            session.permanent = True
-            session['user'] = username
-            session['salon_id'] = 1 
-            return redirect(url_for('dashboard'))
-        else:
-            flash("Usuario o contraseña incorrectos.")
-            return redirect(url_for("login"))
-
-    if "user" in session:
-        return redirect(url_for("dashboard"))
-
-    return render_template('login.html')
-"""
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     next_page = request.args.get('next')
@@ -807,7 +785,7 @@ def list_memberships():
         salon_id = session.get('salon_id')
         tipos = TipoMembresia.query.filter_by(active=True, peluqueria_id=salon_id).all()
         servicios = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
-        membresias = (Membresia.query.filter_by(peluqueria_id=salon_id, active=True).order_by(desc(Membresia.id_usuario)).all())
+        membresias = (Membresia.query.filter_by(peluqueria_id=salon_id, active=True).order_by(nullsfirst(Membresia.dni.desc()), nullslast(Membresia.id_usuario.desc())).all())
         return render_template('memberships.html', tipos_membresia=tipos, servicios=servicios, membresias=membresias)
     else:
         return redirect(url_for("login"))
@@ -935,7 +913,11 @@ def update_membresia(membresia_id):
             flash(f'El ID de usuario {nueva_id_usuario} ya está en uso.', 'danger')
             return redirect(url_for('list_memberships'))
 
-        membresia.id_usuario = nueva_id_usuario
+        if nueva_id_usuario.isdigit():
+            membresia.id_usuario = int(nueva_id_usuario)
+        else:
+            membresia.dni = nueva_id_usuario
+
         membresia.usos_disponibles = usos_disponibles
         try:
             db.session.commit()
@@ -998,10 +980,14 @@ def add_payment():
                     if not membresia_id:
                         raise ValueError("Debe seleccionarse un servicio.")
                 
-                    #membresia = Membresia.query.get(id_usuario=num_membresia)
-                    membresia = Membresia.query.filter_by(id_usuario=membresia_id).first()
+                    # Buscar membresía por DNI (nuevo sistema) o por id_usuario (viejo sistema)
+                    membresia = Membresia.query.filter(
+                        (Membresia.dni == membresia_id) | (Membresia.id_usuario == membresia_id)
+                    ).first()
+
                     if not membresia:
-                        raise ValueError("Membresía no encontrada.")
+                        raise ValueError(f"No se encontró una membresía con DNI o ID {membresia_id}.")
+
                     
                     membresia_id = membresia.id
                     appointment.membresia_id = membresia_id
@@ -1074,14 +1060,23 @@ def add_payment():
                 membresia_real = Membresia(
                     tipo_membresia_id=tipo.id,
                     usos_disponibles=tipo.usos,
-                    peluqueria_id=salon_id,
+                    peluqueria_id=salon_id
                 )
+
+                # Si se pasa DNI del cliente, usarlo
+                dni_cliente = request.form.get('dni_cliente')
+                if dni_cliente:
+                    membresia_real.dni = dni_cliente
+                else:
+                    # Compatibilidad con sistema anterior
+                    num_disp = obtener_id_usuario_disponible(salon_id)
+                    membresia_real.id_usuario = num_disp
+
                 db.session.add(membresia_real)
                 db.session.flush()
 
-                # Generar el ID de usuario amigable
-                num_disp = obtener_id_usuario_disponible(salon_id)
-                membresia_real.id_usuario = num_disp
+                # Asignar la FK real (clave primaria)
+                appointment.membresia_id = membresia_real.id
                 print(f"membresia_real.id_usuario = {membresia_real.id_usuario}")
 
                 db.session.flush()  # Se asegura de que membresia_real.id esté disponible
@@ -1171,7 +1166,11 @@ def add_payment():
             flash("Pago registrado con éxito.", "success")
 
             if membresia_real:
-                flash(f"Numero de membresia: {membresia_real.id_usuario}", "success")
+                if membresia_real.dni:
+                    flash(f"Membresía registrada para DNI {membresia_real.dni}", "success")
+                else:
+                    flash(f"Número de membresía: {membresia_real.id_usuario}", "success")
+
 
             return redirect(url_for('add_payment'))
 

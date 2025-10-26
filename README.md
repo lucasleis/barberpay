@@ -37,6 +37,8 @@ SELECT * FROM empleados;
 
 SELECT * FROM turnos ORDER BY date DESC LIMIT 5;
 
+SELECT * FROM membresias ORDER BY id DESC LIMIT 5;
+
 ```
 
 5. Hacer un INSERT

@@ -107,6 +107,7 @@
 
   <!-- Selector de membresía -->
   <div id="membresiaSection" class="form-group" style="display: none;">
+
     <label for="membresia_id">Membresía y precio:</label>
     <div style="display: flex; gap: 1rem;">
       <select name="membresia_id" id="membresiaSelect">
@@ -118,6 +119,24 @@
       </select>
       <input type="text" id="membresiaPrice" disabled placeholder="$" style="width: 100px;">
     </div>
+
+    <!-- INPUT DNI -->
+    <div style="display: flex; gap: 1rem; align-items: center; margin-top: 10px;">
+      <label for="dni_cliente" style="white-space: nowrap;">DNI del cliente:</label>
+      <input 
+        type="text" 
+        id="dni_cliente" 
+        name="dni_cliente" 
+        placeholder="Ej: 40123456" 
+        pattern="\d{7,8}" 
+        inputmode="numeric"
+        placeholder="Ej: 12345678"
+        class="form-control"
+        style="width: 200px;"
+      >
+      <small id="dniError" class="text-danger" style="display: none;">Ingrese un DNI válido (7 u 8 números)</small>
+    </div>
+
   </div>
 
   <!-- Metodo de Pago -->
@@ -265,10 +284,13 @@
           -
         {% endif %}
       </td>
-      <td>  <!-- Id Membresia -->
+      <td>  <!-- DNI o ID Membresía -->
         {% if pago.appointment.membresia %}
+          {% set dni = pago.appointment.membresia.dni %}
+          {% set id_usuario = pago.appointment.membresia.id_usuario %}
+          
           {% if not pago.membresia_comprada %}
-            {{ pago.appointment.membresia.id_usuario }} (uso) 
+            {{ dni if dni else id_usuario }} (uso)
             {% set contadores.cortes = contadores.cortes + 1 %}
             {% set barbero = pago.appointment.barber.name %}
             {% if barbero in servicios_barbero.data %}
@@ -277,7 +299,7 @@
               {% set _ = servicios_barbero.data.update({barbero: 1}) %}
             {% endif %}
           {% else %}
-            {{ pago.appointment.membresia.id_usuario }}
+            {{ dni if dni else id_usuario }}
           {% endif %}
         {% else %}
           -
