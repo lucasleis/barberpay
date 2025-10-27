@@ -15,14 +15,17 @@
 
 
 ## 2. Numeros de membresias con nro de dni
-    - Poder vincular los numeros de membresias a un nro de dni, ya que menpaso que perdieron la tarjetita y se olvidan el nro. 
-    - Si un dni compra una membresia y todavia tenia cantidad por usar, sumar cantidad al dni
-    - En la parte de venta de membresia poner un box para poner el dni. 
-        - Validar que sea un dni valido
+    - [✅] Poder vincular los numeros de membresias a un nro de dni, ya que menpaso que perdieron la tarjetita y se olvidan el nro. 
+    - [ ] Si un dni compra una membresia y todavia tenia cantidad por usar, sumar cantidad al dni
+    - [✅] En la parte de venta de membresia poner un box para poner el dni. 
+        - [✅] Validar que sea un dni valido
+    - [ ] Usa membresia:
+        - [ ] Buscar num de dni y sino id_usuario 
+        - [✅] Validar que sea un dni valido
 
 
 ## 3. Generar valeXmembresia
-    - Poder poner vale x corte a una membresia para poder regalar. 
+    - [ ] Poder poner vale x corte a una membresia para poder regalar. 
 
 
 ## 4. Fecha en formularios
@@ -33,7 +36,7 @@
         - [ ] Server
 
 ## 5. Ocultar elementos de agregar pago, cierre y administrar 
-    - si no esta logueado elementos de agregar pago, cierre y administrar ocultos
+    - [ ] si no esta logueado elementos de agregar pago, cierre y administrar ocultos
 
 
 ## 6. Pasaje a produccion

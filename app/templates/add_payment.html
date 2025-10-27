@@ -109,7 +109,9 @@
   <div id="membresiaSection" class="form-group" style="display: none;">
 
     <label for="membresia_id">Membresía y precio:</label>
+
     <div style="display: flex; gap: 1rem;">
+      
       <select name="membresia_id" id="membresiaSelect">
         {% for membresia in membresias %}
           <option value="{{ membresia.id }}" data-usos="{{ membresia.usos_disponibles }}" data-precio="{{ membresia.precio }}">
@@ -118,23 +120,16 @@
         {% endfor %}
       </select>
       <input type="text" id="membresiaPrice" disabled placeholder="$" style="width: 100px;">
+
     </div>
 
     <!-- INPUT DNI -->
-    <div style="display: flex; gap: 1rem; align-items: center; margin-top: 10px;">
-      <label for="dni_cliente" style="white-space: nowrap;">DNI del cliente:</label>
-      <input 
-        type="text" 
-        id="dni_cliente" 
-        name="dni_cliente" 
-        placeholder="Ej: 40123456" 
-        pattern="\d{7,8}" 
-        inputmode="numeric"
-        placeholder="Ej: 12345678"
-        class="form-control"
-        style="width: 200px;"
-      >
+    <div class="display: flex; gap: 1rem;" >
+
+      <label for="dni_cliente" style="margin-top: 0.7rem;">DNI del cliente:</label>
+      <input type="text" id="dni_cliente" name="dni_cliente" placeholder="Ej: 40123456" pattern="\d{7,8}" inputmode="numeric"placeholder="Ej: 12345678"class="form-control">
       <small id="dniError" class="text-danger" style="display: none;">Ingrese un DNI válido (7 u 8 números)</small>
+    
     </div>
 
   </div>
