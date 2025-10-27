@@ -932,15 +932,12 @@ def update_membresia(membresia_id):
 
 
 ### Pagos ###
-
 @app.route('/payments/new', methods=['GET', 'POST'])
 def add_payment():
     if "user" not in session:
         return redirect(url_for("login", next=request.path))
 
-    #session['salon_id'] = 1
     raw_salon_id = request.form.get("salon_id") or session.get("salon_id")
-
     try:
         salon_id = int(str(raw_salon_id).strip("{} "))
     except (ValueError, TypeError):
@@ -962,25 +959,20 @@ def add_payment():
             toggle_producto = 'toggle_producto' in request.form
             toggle_membresia = 'toggle_membresia' in request.form
 
-            if not toggle_servicio and not toggle_producto and not toggle_membresia:
+            if not (toggle_servicio or toggle_producto or toggle_membresia):
                 raise ValueError("Debe seleccionarse al menos un servicio o producto.")
 
-            # Crear appointment
-            appointment = Appointment(
-                barber_id=barber_id,
-                peluqueria_id=salon_id
-            )
+            # Crear turno (appointment)
+            appointment = Appointment(barber_id=barber_id, peluqueria_id=salon_id)
 
+            # ---- SERVICIO ----
             if toggle_servicio:
-
-                check_membresia = request.form.get('membresiaCheckbox') 
+                check_membresia = request.form.get('membresiaCheckbox')
                 if check_membresia == 'on':
-
                     membresia_id = request.form.get('check_membresia')
                     if not membresia_id:
-                        raise ValueError("Debe seleccionarse un servicio.")
-                
-                    # Buscar membresía por DNI (nuevo sistema) o por id_usuario (viejo sistema)
+                        raise ValueError("Debe ingresarse un número de membresía.")
+
                     membresia = Membresia.query.filter(
                         (Membresia.dni == membresia_id) | (Membresia.id_usuario == membresia_id)
                     ).first()
@@ -988,165 +980,113 @@ def add_payment():
                     if not membresia:
                         raise ValueError(f"No se encontró una membresía con DNI o ID {membresia_id}.")
 
-                    
-                    membresia_id = membresia.id
-                    appointment.membresia_id = membresia_id
-
                     if membresia.usos_disponibles <= 0:
-                        raise ValueError("No hay usos disponibles para descontar en esta membresía.")
+                        raise ValueError("No hay usos disponibles en esta membresía.")
 
                     membresia.usos_disponibles -= 1
+                    appointment.membresia_id = membresia.id
                     db.session.add(membresia)
-                    flash(f"Membresía #{membresia.id_usuario}: Quedan {membresia.usos_disponibles} usos disponibles.", "success")
+                    flash(f"Membresía {membresia.dni or membresia.id_usuario}: quedan {membresia.usos_disponibles} usos.", "success")
 
                 else:
                     service_id = request.form.get('service_id')
                     if not service_id:
                         raise ValueError("Debe seleccionarse un servicio.")
+
                     appointment.service_id = service_id
-                    
+                    servicio = Servicio.query.get(service_id)
+                    if not servicio:
+                        raise ValueError("Servicio no encontrado.")
+
                     if request.form.get('precioDescuentoCheckbox') == 'on':
-                        # Obtén el objeto Servicio según el servicio seleccionado en el formulario
-                        servicio = Servicio.query.get(service_id)
-                        if not servicio:
-                            flash('Servicio no encontrado.', 'error')
-                            return redirect(url_for('add_payment'))
-
-                        # Valida que exista un precio de descuento
                         if servicio.precio_descuento == 0:
-                            flash('Este servicio no tiene precio de descuento disponible.', 'danger')
+                            flash("Este servicio no tiene descuento disponible.", "danger")
                             return redirect(url_for('add_payment'))
-
                         appointment.tipo_precio_servicio = "descuento"
                     elif request.form.get('precioAmigoCheckbox') == 'on':
                         appointment.tipo_precio_servicio = "amigo"
                     else:
                         appointment.tipo_precio_servicio = "comun"
 
+            # ---- PRODUCTO ----
             total_producto = 0.0
             if toggle_producto:
                 product_ids = request.form.getlist('product_id[]')
-                product_quantities = request.form.getlist('product_quantity[]')
-                product_quantities = list(map(int, product_quantities))
+                product_quantities = [int(q) for q in request.form.getlist('product_quantity[]')]
 
                 for pid, qty in zip(product_ids, product_quantities):
                     product = Producto.query.get(pid)
                     if not product:
                         raise ValueError(f"Producto con ID {pid} no encontrado.")
-
                     if product.cantidad < qty:
-                        raise ValueError(f"No hay suficiente stock del producto {product.nombre} (stock actual: {product.cantidad})")
+                        raise ValueError(f"No hay suficiente stock de {product.nombre} (stock actual: {product.cantidad}).")
 
-                    turno_producto = AppointmentTurno(
-                        turno=appointment,
-                        producto=product,
-                        cantidad=qty,
-                        precio_unitario=product.precio
-                    )
+                    turno_producto = AppointmentTurno(turno=appointment, producto=product, cantidad=qty, precio_unitario=product.precio)
                     db.session.add(turno_producto)
                     product.cantidad -= qty
                     total_producto += product.precio * qty
 
+            # ---- MEMBRESÍA ----
             membresia_real = None
             if toggle_membresia:
                 membresia_id = request.form.get('membresia_id')
                 if not membresia_id:
-                    raise ValueError("Debe seleccionarse un servicio.")
+                    raise ValueError("Debe seleccionarse un tipo de membresía.")
 
                 tipo = TipoMembresia.query.get(membresia_id)
                 if not tipo:
                     raise ValueError("Tipo de membresía no encontrado.")
 
-                membresia_real = Membresia(
-                    tipo_membresia_id=tipo.id,
-                    usos_disponibles=tipo.usos,
-                    peluqueria_id=salon_id
-                )
-
-                # Si se pasa DNI del cliente, usarlo
-                dni_cliente = request.form.get('dni_cliente')
+                dni_cliente = (request.form.get('dni_cliente') or "").strip()
                 if dni_cliente:
-                    membresia_real.dni = dni_cliente
+                    membresia_existente = Membresia.query.filter_by(dni=dni_cliente, peluqueria_id=salon_id, active=True).first()
+                    if membresia_existente:
+                        membresia_existente.usos_disponibles += tipo.usos
+                        membresia_real = membresia_existente
+                        flash(f"Cliente con DNI {dni_cliente} ya tenía una membresía. Se sumaron {tipo.usos} usos (total: {membresia_existente.usos_disponibles}).", "info")
+                    else:
+                        membresia_real = Membresia(dni=dni_cliente, tipo_membresia_id=tipo.id, usos_disponibles=tipo.usos, peluqueria_id=salon_id)
+                        db.session.add(membresia_real)
+                        flash(f"Se creó una nueva membresía para DNI {dni_cliente}.", "success")
                 else:
-                    # Compatibilidad con sistema anterior
                     num_disp = obtener_id_usuario_disponible(salon_id)
-                    membresia_real.id_usuario = num_disp
+                    membresia_real = Membresia(id_usuario=num_disp, tipo_membresia_id=tipo.id, usos_disponibles=tipo.usos, peluqueria_id=salon_id)
+                    db.session.add(membresia_real)
+                    flash(f"Se creó una membresía para el sistema anterior (ID {num_disp}).", "warning")
 
-                db.session.add(membresia_real)
                 db.session.flush()
-
-                # Asignar la FK real (clave primaria)
                 appointment.membresia_id = membresia_real.id
-                print(f"membresia_real.id_usuario = {membresia_real.id_usuario}")
-
-                db.session.flush()  # Se asegura de que membresia_real.id esté disponible
-
-                # ✅ Asignar la FK real (clave primaria, no el id_usuario)
-                appointment.membresia_id = membresia_real.id
-                print(f"appointment.membresia_id = {appointment.membresia_id}")
 
             db.session.add(appointment)
-            db.session.commit()
+            db.session.flush()
 
-
-
-
+            # ---- PAGOS ----
             multipagos = 'togglemultiPayment' in request.form
-
             method_simple_service = int(request.form.get('methodSimple') or 0)
-            # amount_simple_service = float(request.form.get('amount_simple') or 0)
-
             method_multiple_1 = int(request.form.get('method_multiple_1') or 0)
             method_multiple_2 = int(request.form.get('method_multiple_2') or 0)
             amount_method_multi_1 = float(request.form.get('amount_method_multi_1') or 0)
             amount_method_multi_2 = float(request.form.get('amount_method_multi_2') or 0)
 
-            total_real = 0.0
-            total_pagado = 0.0
-
-            if toggle_servicio:
-
-                if check_membresia == 'on':
-                    total_real = 0 
-                else:  
-                    precio = request.form.get('servicePrice')
-                    precio = precio.split("$")
-                    service_price = int(precio[1].replace('.', '') or 0)
-                    total_real += service_price
-
-            if toggle_producto:
-                total_real += total_producto
-
-            if toggle_membresia:   
-                membresia = TipoMembresia.query.get(membresia_id)
-                total_real += float(membresia.precio) if membresia else 0
+            total_real = total_producto + tip
+            if toggle_servicio and check_membresia != 'on':
+                precio_str = request.form.get('servicePrice', '$0').replace('$', '').replace('.', '')
+                total_real += int(precio_str or 0)
+            if toggle_membresia:
+                membresia_tipo = TipoMembresia.query.get(membresia_id)
+                total_real += float(membresia_tipo.precio) if membresia_tipo else 0
 
             if multipagos:
-                total_real += tip
                 if method_multiple_1 == method_multiple_2:
-                    flash(f"No se puede repetir el mismo método de pago.")
-                    #raise ValueError("No se puede repetir el mismo método de pago.")
-                if not method_multiple_1 or not method_multiple_2:
+                    raise ValueError("No se puede repetir el mismo método de pago.")
+                if not (method_multiple_1 and method_multiple_2):
                     raise ValueError("Faltan datos del segundo método de pago.")
-                total_pagado = amount_method_multi_1 + amount_method_multi_2
+                total_pagado = amount_method_multi_1 + amount_method_multi_2 + tip
             else:
-                if toggle_servicio or toggle_producto or toggle_membresia:
-                    total_pagado = total_real + tip
-                    total_real += tip
-                    
-            if abs(total_pagado - total_real) > 0.01:
-                # flash(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).", "danger")
-                raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
+                total_pagado = total_real
 
-            # Validar que al menos haya un método de pago seleccionado
-            if not multipagos:
-                if not method_simple_service:
-                    flash("Debe seleccionarse al menos un método de pago.", "danger")
-                    return redirect(url_for('add_payment'))
-            else:
-                if not method_multiple_1 or not method_multiple_2:
-                    flash("Debe seleccionarse al menos un método de pago en ambas opciones.", "danger")
-                    return redirect(url_for('add_payment'))
+            if abs(total_pagado - total_real) > 0.01:
+                raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
 
             pago = Pago(
                 appointment_id=appointment.id,
@@ -1158,20 +1098,15 @@ def add_payment():
                 peluqueria_id=salon_id,
                 date=datetime.now(ZoneInfo("America/Argentina/Buenos_Aires")),
                 membresia_comprada_id=membresia_real.id if membresia_real else None
-                #membresia_comprada_id=membresia_real.id_usuario if membresia_real else None
             )
 
             db.session.add(pago)
             db.session.commit()
+
+            # if membresia_real:
+            #     flash(f"Membresía registrada para {'DNI ' + membresia_real.dni if membresia_real.dni else 'ID ' + str(membresia_real.id_usuario)}.", "success")
+
             flash("Pago registrado con éxito.", "success")
-
-            if membresia_real:
-                if membresia_real.dni:
-                    flash(f"Membresía registrada para DNI {membresia_real.dni}", "success")
-                else:
-                    flash(f"Número de membresía: {membresia_real.id_usuario}", "success")
-
-
             return redirect(url_for('add_payment'))
 
         except Exception as e:
@@ -1192,40 +1127,50 @@ def add_payment():
 
 @app.route('/payments/delete/<int:pago_id>', methods=['POST'])
 def delete_payment(pago_id):
-    #session['salon_id'] = 1
     salon_id = session.get("salon_id")
-
     pago = Pago.query.get_or_404(pago_id)
 
     try:
         appointment = Appointment.query.get(pago.appointment_id)
 
-        # Si el turno tenía productos, devolver cantidad al stock
+        # --- 1. Si el turno tenía productos, devolver cantidad al stock ---
         if appointment and appointment.productos_turno:
             for pt in appointment.productos_turno:
                 producto = Producto.query.get(pt.producto_id)
                 if producto:
-                    producto.cantidad += pt.cantidad  # Devolver al stock
-                db.session.delete(pt)  
+                    producto.cantidad += pt.cantidad  # devolver stock
+                db.session.delete(pt)
 
-        # Manejar membresías
+        # --- 2. Manejar membresías ---
         if appointment and appointment.membresia:
             membresia = Membresia.query.get(appointment.membresia_id)
             if membresia:
-                # Si el pago era por una membresía comprada (nueva)
-                if pago.membresia_comprada_id and pago.membresia_comprada_id == membresia.id:
-                    tipo = TipoMembresia.query.get(membresia.tipo_membresia_id)
-                    if tipo and membresia.usos_disponibles == tipo.usos:
-                        # Nunca fue usada → se puede eliminar
-                        db.session.delete(membresia)
-                    else:
-                        flash("No se puede eliminar la compra de una membresía que ya fue usada.", "warning")
-                        return redirect(url_for('add_payment'))
-                else:
-                    # Si se usó una membresía existente, devolver 1 uso
-                    membresia.usos_disponibles += 1
+                tipo = TipoMembresia.query.get(membresia.tipo_membresia_id)
 
-        # Eliminar el pago y el turno
+                # Caso A: pago corresponde a la compra de una membresía
+                if pago.membresia_comprada_id and pago.membresia_comprada_id == membresia.id:
+                    if tipo:
+                        # Si fue una membresía NUEVA (sus usos coinciden con el tipo base)
+                        if membresia.usos_disponibles == tipo.usos:
+                            db.session.delete(membresia)
+                            flash(f"Se eliminó la membresía (DNI {membresia.dni or membresia.id_usuario}) creada por este pago.", "info")
+
+                        # Si fue una membresía EXISTENTE a la que se sumaron usos
+                        elif membresia.usos_disponibles > tipo.usos:
+                            membresia.usos_disponibles -= tipo.usos
+                            flash(f"Se eliminaron {tipo.usos} usos de la membresía (DNI {membresia.dni or membresia.id_usuario}). Nuevo total: {membresia.usos_disponibles}.", "info")
+
+                        # Si la membresía ya fue usada y no alcanza con restar → no eliminar
+                        else:
+                            flash("No se puede eliminar la compra de una membresía que ya fue parcialmente usada.", "warning")
+                            return redirect(url_for('add_payment'))
+
+                # Caso B: si el pago usaba una membresía existente (no una compra)
+                else:
+                    membresia.usos_disponibles += 1
+                    flash(f"Se devolvió 1 uso a la membresía (DNI {membresia.dni or membresia.id_usuario}).", "info")
+
+        # --- 3. Eliminar el pago y el turno ---
         db.session.delete(pago)
         if appointment:
             db.session.delete(appointment)
@@ -1237,6 +1182,7 @@ def delete_payment(pago_id):
         db.session.rollback()
         flash(f"Error al eliminar el pago: {str(e)}", "danger")
 
+    # --- 4. Redirección ---
     referrer = request.referrer or ""
     if "cierre" in referrer:
         return redirect(url_for('cierre_entre_dias', salon_id=1))

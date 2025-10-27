@@ -16,12 +16,13 @@
 
 ## 2. Numeros de membresias con nro de dni
     - [✅] Poder vincular los numeros de membresias a un nro de dni, ya que menpaso que perdieron la tarjetita y se olvidan el nro. 
-    - [ ] Si un dni compra una membresia y todavia tenia cantidad por usar, sumar cantidad al dni
+    - [✅] Si un dni compra una membresia y todavia tenia cantidad por usar, sumar cantidad al dni
     - [✅] En la parte de venta de membresia poner un box para poner el dni. 
         - [✅] Validar que sea un dni valido
-    - [ ] Usa membresia:
-        - [ ] Buscar num de dni y sino id_usuario 
+    - [✅] Usa membresia:
+        - [✅] Buscar num de dni y sino id_usuario 
         - [✅] Validar que sea un dni valido
+    - [ ] Separar de alguna forma el tipo de membresia para almacenar varios tipos para el mismo user
 
 
 ## 3. Generar valeXmembresia
