@@ -26,7 +26,8 @@
 
 
 ## 3. Generar valeXmembresia
-    - [ ] Poder poner vale x corte a una membresia para poder regalar. 
+    - [✅] Poder poner vale x corte a una membresia para poder regalar. 
+    - [ ] Validar que en backend funcione como debe
 
 
 ## 4. Fecha en formularios

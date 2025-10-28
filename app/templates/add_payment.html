@@ -107,8 +107,27 @@
 
   <!-- Selector de membresía -->
   <div id="membresiaSection" class="form-group" style="display: none;">
+    <div class="form-row-flex">
+      <label for="membresia_id">Membresía y precio:</label>
+      <div class="checkbox-group metodo-pago">
 
-    <label for="membresia_id">Membresía y precio:</label>
+        <div class="checkbox-left">
+          <label style="display: flex;">
+            <input type="checkbox" id="membresiaCheckboxDummy" name="membresiaCheckboxDummy" >
+            <span id="membresiaTextDummy" name="membresiaTextDummy"></span>
+          </label>
+        </div>
+
+        <div class="checkbox-right">
+          <label class="checkbox-label" id="labelValeMembresia" name="labelValeMembresia">
+            <input type="checkbox" id="valeMembresiaCheckbox" name="valeMembresiaCheckbox">
+            <span class="checkbox-text">¿Vale por Membresía?</span>
+          </label>
+        </div>
+
+      </div>
+
+    </div>
 
     <div style="display: flex; gap: 1rem;">
       
@@ -563,7 +582,11 @@
   }
 
   function initMembresiaSection() {
-    membresiaSelected.addEventListener('change', updatePriceTotal);           // Actualiza el precio cada vez que se cambia la membresia seleccionada
+    membresiaSelected.addEventListener('change', updatePriceTotal);
+    const valeCheckbox = document.getElementById('valeMembresiaCheckbox');
+    if (valeCheckbox) {
+      valeCheckbox.addEventListener('change', updatePriceTotal);
+    }
   }
 
   function initFuncionalidadesBotones(){

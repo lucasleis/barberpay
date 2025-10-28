@@ -170,9 +170,16 @@ function setValorMembresia() {
 
 function obtenerPrecioMembresiaSeleccion() {
   const selectedOption = membresiaSelect.options[membresiaSelect.selectedIndex];
-  const precio = selectedOption.getAttribute('data-precio');
-  return parseFloat(precio) || 0;
+  const precio = parseFloat(selectedOption.getAttribute('data-precio')) || 0;
+
+  const valeMembresiaCheckbox = document.getElementById('valeMembresiaCheckbox');
+  if (valeMembresiaCheckbox && valeMembresiaCheckbox.checked) {
+    return 0; // si está marcado "Vale por Membresía", precio es $0
+  }
+
+  return precio;
 }
+
 
 function validarDniMembresia() {
   const dniInput = document.getElementById('dni_membresia');
@@ -195,6 +202,27 @@ function validarDniMembresia() {
   }
 }
 
+function mostrarLabelValeMembresia() {
+  mostrarElemento('labelValeMembresia');
+}
+function ocultarLabelValeMembresia() {
+  ocultarElemento('labelValeMembresia');
+}
+
+function mostrarMembresiaCheckboxDummy() {
+  mostrarElemento('membresiaCheckboxDummy');
+}
+
+function ocultarMembresiaCheckboxDummy() {
+  ocultarElemento('membresiaCheckboxDummy');
+}
+function ocultarMembresiaTextDummy() {
+  ocultarElemento('membresiaCheckboxDummy');
+}
+function ocultarMembresiaDummys() {
+  ocultarMembresiaCheckboxDummy();
+  ocultarMembresiaTextDummy;
+}
 
 
 /// METODOS DE PAGO \\\
@@ -365,6 +393,8 @@ function updateToggleSections(e = null) {
     if (source === 'toggleMembresia') {   // inserto valor inicial de cant cuando selecciono el toggle de membresia
       setValorMembresia();
       desmarcarPrecioDescuentoAmigo();    // si salgo de servicio desmarco precio descuento y amigo
+      const checkboxValeMembresia = document.getElementById('valeMembresiaCheckbox');
+      if (checkboxValeMembresia) checkboxValeMembresia.checked = false;
     }
     ocultarMensajeErrorToggle();
   }
@@ -395,6 +425,8 @@ function updateToggleSections(e = null) {
       }
     }
   }
+
+  ocultarMembresiaDummys();
 
 
   resetTip(); // hace updatePriceTotal(); dentro de reset
