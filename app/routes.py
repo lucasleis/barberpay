@@ -374,10 +374,10 @@ def obtener_id_usuario_disponible(peluqueria_id):
     while i in usados_set:
         i += 1
 
-    print(f"ids: {ids}")
-    print(f"id_usuarios: {id_usuarios}")
-    print(f"usados_set: {usados_set}")
-    print(f"i: {i}")
+    # print(f"ids: {ids}")
+    # print(f"id_usuarios: {id_usuarios}")
+    # print(f"usados_set: {usados_set}")
+    # print(f"i: {i}")
 
     return i
 

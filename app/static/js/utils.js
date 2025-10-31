@@ -182,10 +182,10 @@ function obtenerPrecioMembresiaSeleccion() {
 
 
 function validarDniMembresia() {
-  const dniInput = document.getElementById('dni_membresia');
+  const dniInput = document.getElementById('dni_cliente');
   const dniError = document.getElementById('dniError');
 
-  if (!dniInput) return true; // si no existe el campo, no validamos
+  if (!dniInput) return true;
 
   const dniValor = dniInput.value.trim();
   const dniValido = /^\d{7,8}$/.test(dniValor);
@@ -201,6 +201,22 @@ function validarDniMembresia() {
     return true;
   }
 }
+
+function verificarCampoDniMembresia() {
+  const toggleMembresia = document.getElementById('toggleMembresia');
+  const dniInput = document.getElementById('dni_cliente');
+
+  if (!toggleMembresia || !dniInput) return;
+
+  // Seteo inicial
+  dniInput.required = toggleMembresia.checked;
+
+  // Actualizo cada vez que cambia el toggle
+  toggleMembresia.addEventListener('change', function () {
+    dniInput.required = this.checked;
+  });
+}
+
 
 function mostrarLabelValeMembresia() {
   mostrarElemento('labelValeMembresia');
@@ -427,7 +443,7 @@ function updateToggleSections(e = null) {
   }
 
   ocultarMembresiaDummys();
-
+  verificarCampoDniMembresia();
 
   resetTip(); // hace updatePriceTotal(); dentro de reset
 }

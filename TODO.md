@@ -34,8 +34,8 @@
     - [ ] Las fechas en lose muestra como s formularios aparecen como mm/dd/aaaa. modificar para que sean dd/mm/aaaa
     - [ ] Revisar entonrnos. 
         - [✅] Maquina laburo: dd/mm/aaaa. 
-        - [ ] Maquina propia
-        - [ ] Server
+        - [ ] Maquina propia: mm/dd/aaaa
+        - [ ] Server: mm/dd/aaaa
 
 ## 5. Ocultar elementos de agregar pago, cierre y administrar 
     - [ ] si no esta logueado elementos de agregar pago, cierre y administrar ocultos
