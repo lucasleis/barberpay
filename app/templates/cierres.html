@@ -310,13 +310,45 @@
                   ? p.montos_productos.map(m => '$' + parseInt(m).toLocaleString('es-AR')).join(' - ')
                   : '-'}
               </td>
-              <td>${p.membresia || '-'}</td>
-              <td>${p.valor_membresia === 0 ? '-' : '$' + parseInt(p.valor_membresia).toLocaleString('es-AR')}</td>
-              <td>${p.metodo_pago.join(' - ')}</td>
+              <td>
+                ${
+                  p.membresia
+                    ? (
+                        (parseFloat(p.amount1 || 0) === 0)
+                          ? `Vale (${p.membresia})`
+                          : p.membresia
+                      )
+                    : '-'
+                }
+              </td>
+              <td>
+                ${
+                  p.membresia && parseFloat(p.monto || 0) === 0
+                    ? '$0'
+                    : (
+                        p.valor_membresia === 0
+                          ? '-'
+                          : '$' + parseInt(p.valor_membresia).toLocaleString('es-AR')
+                      )
+                }
+              </td>
+              <td>
+                ${
+                  (p.membresia && parseFloat(p.amount1 || 0) === 0)
+                    ? '-'
+                    : (Array.isArray(p.metodo_pago) ? p.metodo_pago.join(' - ') : p.metodo_pago || '-')
+                }
+              </td>
               <td>${p.metodos_pago_str}</td>
               <td>$${parseInt(p.propina).toLocaleString('es-AR')}</td>
               <td>$${parseInt(p.pago_empleado).toLocaleString('es-AR')}</td>
-              <td>$${parseInt(p.pago_propietario).toLocaleString('es-AR')}</td>
+              <td>
+                ${
+                  (p.membresia && parseFloat(p.amount1 || 0) === 0)
+                    ? '$0'
+                    : `$${parseInt(p.pago_propietario).toLocaleString('es-AR')}`
+                }
+              </td>
               <td>
                 <button
                   type="button"
