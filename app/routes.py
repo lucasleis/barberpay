@@ -252,7 +252,15 @@ def calcular_pagos_entre_fechas(start_date, end_date):
         if pago.membresia_comprada:
             empleado = pago.appointment.barber
             tipo = pago.membresia_comprada.tipo_membresia
-            monto = float(tipo.precio)
+
+            vale_membresia = request.form.get('valeMembresiaCheckbox')
+            if vale_membresia == 'on':
+                # Vale por membresía activado
+                monto = 0
+            else:
+                # Compra membresía
+                monto = float(tipo.precio)
+
             pago_dict.update({
                 "empleado": empleado.name,
                 "membresia": tipo.nombre,
@@ -1068,13 +1076,22 @@ def add_payment():
             amount_method_multi_1 = float(request.form.get('amount_method_multi_1') or 0)
             amount_method_multi_2 = float(request.form.get('amount_method_multi_2') or 0)
 
+            vale_membresia = request.form.get('valeMembresiaCheckbox')
+            if vale_membresia == 'on':
+                print("✅ Vale por membresía activado")
+            else:
+                print("❌ No es vale por membresía")
+
             total_real = total_producto + tip
             if toggle_servicio and check_membresia != 'on':
                 precio_str = request.form.get('servicePrice', '$0').replace('$', '').replace('.', '')
                 total_real += int(precio_str or 0)
             if toggle_membresia:
                 membresia_tipo = TipoMembresia.query.get(membresia_id)
-                total_real += float(membresia_tipo.precio) if membresia_tipo else 0
+                if vale_membresia == 'on':
+                    total_real += 0
+                else:
+                    total_real += float(membresia_tipo.precio) if membresia_tipo else 0
 
             if multipagos:
                 if method_multiple_1 == method_multiple_2:

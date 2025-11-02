@@ -302,7 +302,8 @@
         {% if pago.appointment.membresia %}
           {% set dni = pago.appointment.membresia.dni %}
           {% set id_usuario = pago.appointment.membresia.id_usuario %}
-          
+          {% set monto_total = (pago.amount_method1 or 0) + (pago.amount_method2 or 0) %}
+
           {% if not pago.membresia_comprada %}
             {{ dni if dni else id_usuario }} (uso)
             {% set contadores.cortes = contadores.cortes + 1 %}
@@ -313,14 +314,20 @@
               {% set _ = servicios_barbero.data.update({barbero: 1}) %}
             {% endif %}
           {% else %}
-            {{ dni if dni else id_usuario }}
+            {% if monto_total == 0 %}
+              Vale ({{ dni if dni else id_usuario }})
+            {% else %}
+              {{ dni if dni else id_usuario }}
+            {% endif %}
           {% endif %}
         {% else %}
           -
         {% endif %}
       </td>
       <td> <!-- Métodos de pago -->
-        {% if pago.method2 %}
+        {% if pago.membresia_comprada and (pago.amount_method1 + (pago.amount_method2 or 0)) == 0 %}
+          -
+        {% elif pago.method2 %}
           {{ pago.method1.nombre }} - {{ pago.method2.nombre }}
         {% elif pago.appointment.service %}
           {% if pago.appointment.tipo_precio_servicio == 'amigo' %}
@@ -346,7 +353,9 @@
           ${{ "{:,.0f}".format((pago.amount_method1 or 0) - (pago.amount_tip or 0)).replace(",", ".") }}
         {% endif %}
       </td>      
-      <td>${{ "{:,.0f}".format(pago.amount_tip)|replace(",", ".") }}</td> <!-- Propina -->
+      <td> <!-- Propina -->
+        ${{ "{:,.0f}".format(pago.amount_tip)|replace(",", ".") }}
+      </td> 
       <td>  <!-- Monto -->
         {% if pago.appointment and pago.appointment.tipo_precio_servicio == 'amigo' %}
           ${{ "{:,.0f}".format((pago.amount_method1 or 0)+ (pago.amount_method2 or 0)).replace(",", ".") }}
