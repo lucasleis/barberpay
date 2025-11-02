@@ -253,13 +253,14 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             empleado = pago.appointment.barber
             tipo = pago.membresia_comprada.tipo_membresia
 
-            vale_membresia = request.form.get('valeMembresiaCheckbox')
-            if vale_membresia == 'on':
-                # Vale por membresía activado
+            monto_pagado = (pago.amount_method1 or 0) + (pago.amount_method2 or 0)
+            if monto_pagado == 0:
                 monto = 0
+                pago_propietario = 0
             else:
                 # Compra membresía
                 monto = float(tipo.precio)
+                pago_propietario = monto
 
             pago_dict.update({
                 "empleado": empleado.name,
