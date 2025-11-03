@@ -11,6 +11,8 @@ import {
   Facebook,
   Mail,
   ArrowRight,
+  CreditCard,
+  DollarSign,
   Check,
   Navigation
 } from 'lucide-react';
@@ -145,7 +147,7 @@ function App() {
       {/* Hero Section */}
       <section id="inicio" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800">
         <div className="absolute inset-0 bg-black/30"></div>
-        
+
         {/* Subtle geometric patterns */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 border border-white rounded-full"></div>
@@ -158,26 +160,27 @@ function App() {
               <Scissors className="h-12 w-12 text-white" />
             </div>
           </div>
-          
+
+          {/* Nuevo título */}
           <h1 className="text-6xl md:text-8xl font-extralight text-white mb-8 leading-none tracking-tight">
-            CRAFT
+            BARBA<span className="font-thin text-gray-300">&CO</span>
             <span className="block font-thin text-gray-300 text-5xl md:text-7xl mt-2">
-              & PRECISION
+              ESTILO Y PRECISIÓN
             </span>
           </h1>
-          
+
+          {/* Nueva frase de bienvenida */}
           <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
-            Una experiencia de barbería que trasciende lo ordinario. 
-            Donde cada corte es una obra de arte y cada detalle importa.
+            Tu barbería en Avellaneda. Donde el estilo se perfecciona con técnica, precisión y pasión.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <button className="group bg-white text-black px-10 py-4 rounded-full font-light tracking-wide hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
-              <span>Reservar Experiencia</span>
+              <span>Reservar Turno</span>
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </button>
             <button className="border border-white/30 text-white px-10 py-4 rounded-full font-light tracking-wide hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
-              Explorar Servicios
+              Ver Servicios
             </button>
           </div>
         </div>
@@ -199,7 +202,11 @@ function App() {
               Servicios
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light leading-relaxed">
-              Cada servicio está diseñado para ofrecer una experiencia única y personalizada
+              Cada servicio está diseñado para ofrecer una experiencia única y personalizada.
+              <br />
+              <span className="block mt-3 text-gray-500">
+                Hacemos cortes para adultos, niños y grupos.
+              </span>
             </p>
           </div>
 
@@ -238,6 +245,59 @@ function App() {
           </div>
         </div>
       </section>
+
+      {/* Membership Section */}
+      <section id="membresias" className="py-32 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+          <div className="inline-block p-3 rounded-full bg-black/5 mb-6">
+            <CreditCard className="h-8 w-8 text-gray-600" />
+          </div>
+
+          <h2 className="text-5xl md:text-6xl font-extralight text-black mb-6 tracking-tight">
+            ¿Cómo funciona una membresía?
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light leading-relaxed mb-16">
+            Disfrutá de beneficios exclusivos y más flexibilidad en tus servicios.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto">
+            {/* Paso 1 */}
+            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-gray-200">
+              <div className="flex justify-center mb-6">
+                <DollarSign className="h-10 w-10 text-gray-700" />
+              </div>
+              <h3 className="text-2xl font-light text-black mb-3 tracking-wide">1. Comprás la membresía</h3>
+              <p className="text-gray-600 font-light leading-relaxed">
+                Elegí tu plan y pagalo por anticipado en el local o mediante nuestros métodos de pago.
+              </p>
+            </div>
+
+            {/* Paso 2 */}
+            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-gray-200">
+              <div className="flex justify-center mb-6">
+                <Scissors className="h-10 w-10 text-gray-700" />
+              </div>
+              <h3 className="text-2xl font-light text-black mb-3 tracking-wide">2. Recibís 4 servicios</h3>
+              <p className="text-gray-600 font-light leading-relaxed">
+                Usalos cuando quieras dentro de los 45 días desde tu primer turno.
+              </p>
+            </div>
+
+            {/* Paso 3 */}
+            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-gray-200">
+              <div className="flex justify-center mb-6">
+                <Star className="h-10 w-10 text-gray-700" />
+              </div>
+              <h3 className="text-2xl font-light text-black mb-3 tracking-wide">3. Disfrutá tu membresía</h3>
+              <p className="text-gray-600 font-light leading-relaxed">
+                Mantené tu look siempre impecable con la comodidad de ser parte de Barba Company. <br />
+                <span className="block mt-4 text-black font-light">Solicitalo en el local.</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       {/* Experience Section */}
       <section id="experiencia" className="py-32 bg-white">
@@ -345,14 +405,17 @@ function App() {
                 {[
                   { icon: MapPin, text: 'Zona segura y céntrica' },
                   { icon: Clock, text: 'Fácil acceso en horarios laborales' }
-                ].map((feature, index) => (
-                  <div key={index} className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-2xl bg-black/5 flex items-center justify-center">
-                      <feature.icon className="h-4 w-4 text-gray-600" />
+                ].map((feature, index) => {
+                  const Icon = feature.icon;  // ✅ definir el componente
+                  return (
+                    <div key={index} className="flex items-center space-x-4">
+                      <div className="w-10 h-10 rounded-2xl bg-black/5 flex items-center justify-center">
+                        <Icon className="h-4 w-4 text-gray-600" />  {/* ✅ usar el componente */}
+                      </div>
+                      <span className="text-gray-700 font-light">{feature.text}</span>
                     </div>
-                    <span className="text-gray-700 font-light">{feature.text}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               
               <div className="grid grid-cols-2 gap-8 mt-12 pt-8 border-t border-gray-100">
