@@ -27,7 +27,7 @@
 
 ## 3. Generar valeXmembresia
     - [✅] Poder poner vale x corte a una membresia para poder regalar. 
-    - [ ] Validar que en backend funcione como debe
+    - [✅] Validar que en backend funcione como debe
 
 
 ## 4. Fecha en formularios
@@ -37,9 +37,10 @@
         - [ ] Maquina propia: mm/dd/aaaa
         - [ ] Server: mm/dd/aaaa
 
+
 ## 5. Ocultar elementos de agregar pago, cierre y administrar 
     - [ ] si no esta logueado elementos de agregar pago, cierre y administrar ocultos
 
 
 ## 6. Pasaje a produccion
-    - [ ] ejecutar alter table y sumar columna dni 
+    - [✅] ejecutar alter table y sumar columna dni 

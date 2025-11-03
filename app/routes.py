@@ -1496,7 +1496,7 @@ def turnos():
 ### Metricas ### 
 
 
-@app.route('/metricas')
+@app.route('/admin/metricas')
 def metricas():
     fecha_limite = datetime.now() - timedelta(days=30)
 
