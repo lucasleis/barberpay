@@ -14,7 +14,9 @@ import {
   CreditCard,
   DollarSign,
   Check,
-  Navigation
+  Navigation,
+  Smartphone,
+  Calendar
 } from 'lucide-react';
 
 function App() {
@@ -145,14 +147,7 @@ function App() {
       </nav>
 
       {/* Hero Section */}
-      <section id="inicio" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800">
-        <div className="absolute inset-0 bg-black/30"></div>
-
-        {/* Subtle geometric patterns */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 border border-white rounded-full"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 border border-white rounded-full"></div>
-        </div>
+      <section id="inicio" className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-black via-gray-900 to-gray-50">
 
         <div className="relative z-10 text-center px-6 lg:px-8 max-w-5xl mx-auto">
           <div className="mb-8">
@@ -298,326 +293,197 @@ function App() {
         </div>
       </section>
 
+      {/* Payment Methods Section */}
+      <section id="pagos" className="py-32 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+          <div className="inline-block p-3 rounded-full bg-black/5 mb-6">
+            <CreditCard className="h-8 w-8 text-gray-600" />
+          </div>
 
-      {/* Experience Section */}
-      <section id="experiencia" className="py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div>
-              <div className="inline-block p-3 rounded-full bg-black/5 mb-8">
-                <Star className="h-8 w-8 text-gray-600" />
+          <h2 className="text-5xl md:text-6xl font-extralight text-black mb-6 tracking-tight">
+            Métodos de pago
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light leading-relaxed mb-16">
+            Elegí la forma de pago que más te convenga. Rápido, simple y sin complicaciones.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto">
+            {/* Efectivo */}
+            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-gray-200">
+              <div className="flex justify-center mb-6">
+                <DollarSign className="h-10 w-10 text-gray-700" />
               </div>
-              
-              <h2 className="text-5xl md:text-6xl font-extralight text-black mb-8 tracking-tight leading-tight">
-                Más que una
-                <span className="block">barbería</span>
-              </h2>
-              
-              <p className="text-xl text-gray-600 mb-8 font-light leading-relaxed">
-                Creamos experiencias memorables donde la tradición artesanal se encuentra 
-                con la innovación moderna. Cada visita es un momento de relajación y 
-                transformación personal.
+              <h3 className="text-2xl font-light text-black mb-3 tracking-wide">Efectivo</h3>
+              <p className="text-gray-600 font-light leading-relaxed">
+                Pagá directamente en el local y obtené el mejor precio disponible.
               </p>
-              
-              <div className="space-y-6">
-                {[
-                  'Consulta personalizada de estilo',
-                  'Productos premium seleccionados',
-                  'Ambiente relajante y sofisticado',
-                  'Atención al detalle excepcional'
-                ].map((feature, index) => (
-                  <div key={index} className="flex items-center space-x-4">
-                    <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center">
-                      <Check className="h-3 w-3 text-gray-600" />
-                    </div>
-                    <span className="text-gray-700 font-light">{feature}</span>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="grid grid-cols-3 gap-8 mt-12 pt-8 border-t border-gray-100">
-                <div className="text-center">
-                  <div className="text-4xl font-extralight text-black mb-2">15+</div>
-                  <div className="text-gray-500 text-sm font-light tracking-wide">Años</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl font-extralight text-black mb-2">2.5K+</div>
-                  <div className="text-gray-500 text-sm font-light tracking-wide">Clientes</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl font-extralight text-black mb-2">98%</div>
-                  <div className="text-gray-500 text-sm font-light tracking-wide">Satisfacción</div>
-                </div>
-              </div>
             </div>
-            
-            <div className="relative">
-              <div className="bg-gradient-to-br from-gray-100 to-gray-200 h-96 lg:h-[500px] rounded-3xl flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-black/5 to-transparent"></div>
-                <Scissors className="h-24 w-24 text-gray-400" />
+
+            {/* Tarjetas */}
+            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-gray-200">
+              <div className="flex justify-center mb-6">
+                <CreditCard className="h-10 w-10 text-gray-700" />
               </div>
-              
-              {/* Floating elements */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-white rounded-2xl shadow-lg flex items-center justify-center">
-                <Star className="h-8 w-8 text-gray-600" />
+              <h3 className="text-2xl font-light text-black mb-3 tracking-wide">Tarjetas</h3>
+              <p className="text-gray-600 font-light leading-relaxed">
+                Aceptamos todas las tarjetas de crédito y débito. <br />
+                <span className="text-gray-500 text-sm">(10% de recargo)</span>
+              </p>
+            </div>
+
+            {/* Mercado Pago */}
+            <div className="bg-white p-10 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-gray-200">
+              <div className="flex justify-center mb-6">
+                <Smartphone className="h-10 w-10 text-gray-700" />
               </div>
-              <div className="absolute -bottom-6 -left-6 w-32 h-20 bg-black rounded-2xl flex items-center justify-center">
-                <span className="text-white font-light text-sm tracking-wider">PREMIUM</span>
-              </div>
+              <h3 className="text-2xl font-light text-black mb-3 tracking-wide">Mercado Pago</h3>
+              <p className="text-gray-600 font-light leading-relaxed">
+                Pagá con QR o transferencia desde la app de Mercado Pago. Simple y rápido.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Location Section */}
-      <section id="ubicación" className="py-32 bg-white">
+      <section id="ubicación" className="py-32 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div>
-              <div className="inline-block p-3 rounded-full bg-black/5 mb-8">
-                <MapPin className="h-8 w-8 text-gray-600" />
+            <div className="space-y-8">
+
+              <div className="flex items-center space-x-4 mb-8">
+                <div className="p-3 rounded-full bg-black/5 flex items-center justify-center">
+                  <MapPin className="h-8 w-8 text-gray-600" />
+                </div>
+                <h2 className="text-5xl md:text-6xl font-extralight text-black tracking-tight leading-tight">
+                  Encontranos
+                </h2>
               </div>
-              
-              <h2 className="text-5xl md:text-6xl font-extralight text-black mb-8 tracking-tight leading-tight">
-                Encuéntranos
-              </h2>
-              
-              <p className="text-xl text-gray-600 mb-8 font-light leading-relaxed">
-                Ubicados en el corazón de Avellaneda, nuestro atelier es fácilmente accesible 
-                desde cualquier punto de la ciudad. Un espacio diseñado para tu comodidad 
-                y conveniencia.
-              </p>
-              
-              <div className="bg-gray-50 p-8 rounded-3xl mb-8">
-                <h3 className="text-2xl font-light text-black mb-6 tracking-wide">Dirección</h3>
-                <p className="text-lg text-gray-700 font-light mb-4">
-                  Av. Presidente Masaryk 456<br />
-                  Avellaneda V Sección<br />
-                  11560 Ciudad de México, CDMX
-                </p>
-                <button className="flex items-center space-x-2 text-black hover:opacity-60 transition-opacity">
-                  <Navigation className="h-4 w-4" />
-                  <span className="text-sm font-light tracking-wide">Ver en Google Maps</span>
-                </button>
-              </div>
-              
-              <div className="space-y-6">
-                {[
-                  { icon: MapPin, text: 'Zona segura y céntrica' },
-                  { icon: Clock, text: 'Fácil acceso en horarios laborales' }
-                ].map((feature, index) => {
-                  const Icon = feature.icon;  // ✅ definir el componente
-                  return (
-                    <div key={index} className="flex items-center space-x-4">
-                      <div className="w-10 h-10 rounded-2xl bg-black/5 flex items-center justify-center">
-                        <Icon className="h-4 w-4 text-gray-600" />  {/* ✅ usar el componente */}
+
+              <div className="space-y-8">
+
+                <div className="bg-gray-100 p-8 rounded-3xl mb-8 shadow-sm">
+                  <h3 className="text-2xl font-light text-black mb-6 tracking-wide">Dirección</h3>
+                  <p className="text-lg text-gray-700 font-light mb-4">
+                    Av. Pres. Bernardino Rivadavia 215<br />
+                    Avellaneda, Buenos Aires, Argentina
+                  </p>
+                  <a
+                    href="https://www.google.com/maps/place/Av.+Pres.+Bernardino+Rivadavia+215,+Avellaneda,+Provincia+de+Buenos+Aires"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-2 text-black hover:opacity-60 transition-opacity"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    <span className="text-sm font-light tracking-wide">Ver en Google Maps</span>
+                  </a>
+                </div>
+
+                <div className="space-y-6">
+                  {[
+                    /*{ icon: MapPin, text: 'Zona céntrica y segura' }, */
+                    { icon: Clock, text: 'Horario de atención: Lun a Sáb, 11 a 20 hs' }
+                  ].map((feature, index) => {
+                    const Icon = feature.icon;
+                    return (
+                      <div key={index} className="flex items-center space-x-4">
+                        <div className="w-10 h-10 rounded-2xl bg-black/5 flex items-center justify-center">
+                          <Icon className="h-4 w-4 text-gray-600" />
+                        </div>
+                        <span className="text-gray-700 font-light text-lg">{feature.text}</span>
                       </div>
-                      <span className="text-gray-700 font-light">{feature.text}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              <div className="grid grid-cols-2 gap-8 mt-12 pt-8 border-t border-gray-100">
-                <div>
-                  <div className="text-3xl font-extralight text-black mb-2">5 min</div>
-                  <div className="text-gray-500 text-sm font-light tracking-wide">Desde Reforma</div>
+                    );
+                  })}
                 </div>
-                <div>
-                  <div className="text-3xl font-extralight text-black mb-2">2 min</div>
-                  <div className="text-gray-500 text-sm font-light tracking-wide">Desde Antara</div>
-                </div>
+
               </div>
+
+
             </div>
-            
-            <div className="relative">
-              <div className="bg-gradient-to-br from-gray-100 to-gray-200 h-96 lg:h-[500px] rounded-3xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-black/5 to-transparent"></div>
-                
-                {/* Mapa simulado */}
-                <div className="absolute inset-4 bg-white rounded-2xl shadow-inner flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500 font-light text-sm">Mapa Interactivo</p>
-                    <p className="text-gray-400 font-light text-xs mt-1">Click para abrir</p>
-                  </div>
-                </div>
-                
-                {/* Puntos de referencia */}
-                <div className="absolute top-8 left-8 bg-black/80 backdrop-blur-sm text-white px-3 py-2 rounded-xl text-xs font-light">
-                  Avellaneda
-                </div>
-                <div className="absolute bottom-8 right-8 bg-white/90 backdrop-blur-sm text-black px-3 py-2 rounded-xl text-xs font-light">
-                  Metro Avellaneda
-                </div>
-              </div>
-              
-              {/* Floating elements */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-white rounded-2xl shadow-lg flex items-center justify-center">
-                <Navigation className="h-8 w-8 text-gray-600" />
-              </div>
-              <div className="absolute -bottom-6 -left-6 w-32 h-20 bg-black rounded-2xl flex items-center justify-center">
-                <span className="text-white font-light text-sm tracking-wider">Avellaneda</span>
-              </div>
+
+            {/* Mapa interactivo real */}
+            <div className="bg-white rounded-3xl shadow-inner overflow-hidden h-96 lg:h-[500px]">
+              <iframe
+                title="Ubicación Barbería"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3283.876930184992!2d-58.36650822425733!3d-34.60726947295395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccd5d9d68cc5b%3A0xb7eec6b2b558cd1f!2sAv.%20Pres.%20Bernardino%20Rivadavia%20215%2C%20B1870CBE%20Avellaneda%2C%20Provincia%20de%20Buenos%20Aires!5e0!3m2!1ses-419!2sar!4v1730739000000!5m2!1ses-419!2sar"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
             </div>
+
           </div>
+
         </div>
-      </section>
 
-
-      {/* Testimonials */}
-      <section className="py-32 bg-gray-900">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <div className="inline-block p-3 rounded-full bg-white/10 mb-6">
-              <Star className="h-8 w-8 text-white" />
-            </div>
-            <h2 className="text-5xl md:text-6xl font-extralight text-white mb-6 tracking-tight">
-              Testimonios
-            </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto font-light">
-              La opinión de nuestros clientes es nuestro mayor reconocimiento
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-3xl border border-gray-700/50 hover:bg-gray-800/70 transition-all duration-300">
-                <div className="flex mb-6">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-white fill-current" />
-                  ))}
-                </div>
-                
-                <p className="text-gray-300 mb-6 font-light leading-relaxed italic">
-                  "{testimonial.text}"
-                </p>
-                
-                <div className="border-t border-gray-700 pt-6">
-                  <p className="text-white font-light text-lg">{testimonial.name}</p>
-                  <p className="text-gray-400 text-sm font-light">{testimonial.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </section>
 
       {/* Contact Section */}
-      <section id="contacto" className="py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
-            <div>
-              <div className="inline-block p-3 rounded-full bg-black/5 mb-8">
-                <MapPin className="h-8 w-8 text-gray-600" />
-              </div>
-              
-              <h2 className="text-5xl md:text-6xl font-extralight text-black mb-8 tracking-tight">
-                Visítanos
-              </h2>
-              
-              <div className="space-y-8">
-                <div className="flex items-start space-x-6">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="h-5 w-5 text-gray-600" />
-                  </div>
-                  <div>
-                    <p className="font-light text-black text-lg mb-1">Ubicación</p>
-                    <p className="text-gray-600 font-light">Av. Reforma 456, Avellaneda<br />Ciudad de México</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-6">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <Phone className="h-5 w-5 text-gray-600" />
-                  </div>
-                  <div>
-                    <p className="font-light text-black text-lg mb-1">Contacto</p>
-                    <p className="text-gray-600 font-light">+52 55 1234 5678</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-6">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <Clock className="h-5 w-5 text-gray-600" />
-                  </div>
-                  <div>
-                    <p className="font-light text-black text-lg mb-1">Horarios</p>
-                    <p className="text-gray-600 font-light">
-                      Lunes - Viernes: 10:00 - 20:00<br />
-                      Sábado: 9:00 - 19:00<br />
-                      Domingo: Cerrado
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-12 pt-8 border-t border-gray-100">
-                <p className="text-gray-500 font-light mb-6">Síguenos</p>
-                <div className="flex space-x-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer">
-                    <Instagram className="h-5 w-5 text-gray-600" />
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer">
-                    <Facebook className="h-5 w-5 text-gray-600" />
-                  </div>
-                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer">
-                    <Mail className="h-5 w-5 text-gray-600" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 p-10 rounded-3xl">
-              <h3 className="text-3xl font-light text-black mb-8 tracking-wide">
-                Reserva tu cita
-              </h3>
-              
-              <form className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <input 
-                    type="text" 
-                    placeholder="Nombre" 
-                    className="w-full p-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-400 transition-colors font-light"
-                  />
-                  <input 
-                    type="tel" 
-                    placeholder="Teléfono" 
-                    className="w-full p-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-400 transition-colors font-light"
-                  />
-                </div>
-                
-                <select className="w-full p-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-400 transition-colors font-light">
-                  <option>Selecciona un servicio</option>
-                  {services.map((service, index) => (
-                    <option key={index}>{service.name}</option>
-                  ))}
-                </select>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <input 
-                    type="date" 
-                    className="w-full p-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-400 transition-colors font-light"
-                  />
-                  <input 
-                    type="time" 
-                    className="w-full p-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-400 transition-colors font-light"
-                  />
-                </div>
-                
-                <textarea 
-                  placeholder="Notas adicionales (opcional)"
-                  rows={4}
-                  className="w-full p-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-400 transition-colors font-light resize-none"
-                ></textarea>
-                
-                <button className="w-full bg-black text-white py-4 rounded-2xl font-light tracking-wide hover:bg-gray-800 transition-colors duration-300 flex items-center justify-center space-x-2">
-                  <span>Confirmar Reserva</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </form>
-            </div>
+      <section id="contacto" className="py-32 bg-gray-50 text-center">
+        <div className="max-w-3xl mx-auto px-6">
+          <div className="inline-block p-3 rounded-full bg-black/5 mb-6">
+            <Phone className="h-8 w-8 text-gray-600" />
           </div>
+
+          <h2 className="text-5xl md:text-6xl font-extralight text-black mb-6 tracking-tight">
+            Contactanos
+          </h2>
+
+          <p className="text-xl text-gray-600 mb-10 font-light leading-relaxed">
+            Escribinos si tenés dudas o querés más información sobre nuestros servicios.
+          </p>
+
+          <div className="flex justify-center space-x-6">
+            <a
+              href="https://www.instagram.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors"
+            >
+              <Instagram className="h-6 w-6 text-gray-700" />
+            </a>
+
+            <a
+              href="https://wa.me/5491123456789"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors"
+            >
+              <Phone className="h-6 w-6 text-gray-700" />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Pase suave de color entre secciones */}
+      <div className="h-24 bg-gradient-to-b from-gray-50 to-white"></div>
+
+      {/* Booking Section */}
+      <section id="turnos" className="py-32 bg-white text-center">
+        <div className="max-w-3xl mx-auto px-6">
+          <div className="inline-block p-3 rounded-full bg-black/5 mb-6">
+            <Calendar className="h-8 w-8 text-gray-600" />
+          </div>
+
+          <h2 className="text-5xl md:text-6xl font-extralight text-black mb-6 tracking-tight">
+            Reservá tu turno online
+          </h2>
+
+          <p className="text-xl text-gray-600 mb-10 font-light leading-relaxed">
+            Accedé a nuestro sistema de reservas y elegí el horario que más te convenga.
+          </p>
+
+          <a
+            href="https://www.tusitiodeturnos.com"  // ← reemplazá con la URL real
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-black text-white px-12 py-5 rounded-full font-light tracking-wide hover:bg-gray-800 transition-all duration-300"
+          >
+            Ir a la agenda
+          </a>
         </div>
       </section>
 
