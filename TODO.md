@@ -33,4 +33,8 @@
 
 ## 5. Arreglar Corte y perfilado
 
+## 6. Landing
+    - [ ] Crear clases para todos los elementos
+    - [ ] Poner bordes al mapa
+    - [ ] Achicar margin en turnos
 

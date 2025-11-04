@@ -8,16 +8,15 @@ import {
   Menu, 
   X,
   Instagram,
-  Facebook,
-  Mail,
   ArrowRight,
   CreditCard,
   DollarSign,
-  Check,
-  Navigation,
   Smartphone,
   Calendar
 } from 'lucide-react';
+
+import logo from "./Barba&Co_logo.png";
+
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -72,24 +71,29 @@ function App() {
           <div className="flex justify-between items-center py-6">
             {/* Logo / Brand */}
             <div className="flex items-center space-x-3">
-              <div className="relative">
-                <Scissors
-                  className={`h-7 w-7 transition-colors duration-300 ${
-                    scrollY > 50 ? 'text-black' : 'text-white'
+              {/* Ícono decorativo opcional (podés quitarlo si el logo ya lo incluye) 
+                <div className="relative">
+                  <Scissors
+                    className={`h-7 w-7 transition-colors duration-300 ${
+                      scrollY > 50 ? 'text-black' : 'text-white'
+                    }`}
+                  />
+                  <div className="absolute -inset-2 bg-gradient-to-r from-gray-600 to-black rounded-full opacity-20 blur-sm"></div>
+                </div>
+              */}
+
+              {/* Logo con link al inicio */}
+              <a href="#inicio" className="flex items-center hover:opacity-80 transition-opacity">
+                <img
+                  src={logo}
+                  alt="BARBA&CO Logo"
+                  className={`h-8 md:h-10 object-contain transition-all duration-300 ${
+                    scrollY > 50 ? 'brightness-0' : 'brightness-100'
                   }`}
                 />
-                <div className="absolute -inset-2 bg-gradient-to-r from-gray-600 to-black rounded-full opacity-20 blur-sm"></div>
-              </div>
-              <a
-                href="#inicio"
-                className={`font-light text-xl tracking-wider transition-colors duration-300 ${
-                  scrollY > 50 ? 'text-black' : 'text-white'
-                } hover:opacity-80`}
-              >
-                BARBA&Co
               </a>
-
             </div>
+
 
             {/* Desktop Menu */}
             <div className="hidden md:flex space-x-10">
@@ -163,12 +167,19 @@ function App() {
           </div>
 
           {/* Nuevo título */}
-          <h1 className="text-6xl md:text-8xl font-extralight text-white mb-8 leading-none tracking-tight">
-            BARBA<span className="font-thin text-gray-300">&CO</span>
-            <span className="block font-thin text-gray-300 text-5xl md:text-7xl mt-2">
-              ESTILO Y PRECISIÓN
-            </span>
-          </h1>
+          {/*
+            <h1 className="text-6xl md:text-8xl font-extralight text-white mb-8 leading-none tracking-tight">
+              BARBA<span className="font-thin text-gray-300">&CO</span>
+              <span className="block font-thin text-gray-300 text-5xl md:text-7xl mt-2">
+                ESTILO Y PRECISIÓN
+              </span>
+            </h1>
+          */}
+
+          {/* Nuevo título */}
+          <div className="mb-8 flex flex-col items-center">
+            <img src={logo} alt="BARBA&CO Logo" className="h-24 md:h-32 mb-4 object-contain" />
+          </div>
 
           {/* Nueva frase de bienvenida */}
           <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
@@ -522,11 +533,15 @@ function App() {
             {/* Logo */}
             <a
               href="#inicio"
-              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+              className="flex items-center hover:opacity-80 transition-opacity"
             >
-              <Scissors className="h-8 w-8 text-white" />
-              <span className="font-light text-xl tracking-wider">BARBA&CO</span>
+              <img
+                src={logo}
+                alt="BARBA&CO Logo"
+                className="h-10 md:h-12 object-contain"
+              />
             </a>
+
 
             {/* Iconos */}
             <div className="flex space-x-6">
@@ -550,14 +565,14 @@ function App() {
           </div>
 
           {/* Línea divisoria + texto inferior */}
-          <div className="border-t border-gray-800 pt-8 text-center space-y-2">
-            <p className="text-gray-600 font-light text-xs">
+          <div className="border-t border-gray-800 pt-8 text-center">
+            <p className="text-gray-300 font-light text-sm md:text-base">
               © 2025 BARBA&CO — Developed by{" "}
               <a
                 href="https://www.instagram.com/nivalis.techlab/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors underline underline-offset-2"
+                className="text-gray-200 hover:text-white transition-colors underline underline-offset-2"
               >
                 Nivalis
               </a>
