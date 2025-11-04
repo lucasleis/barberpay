@@ -56,29 +56,10 @@ function App() {
     }
   ];
 
-  const testimonials = [
-    { 
-      name: 'Alexander Chen', 
-      rating: 5, 
-      text: 'Atención impecable y resultados excepcionales. La experiencia completa supera cualquier expectativa.',
-      role: 'CEO, Tech Startup'
-    },
-    { 
-      name: 'Marcus Rodriguez', 
-      rating: 5, 
-      text: 'Profesionalismo de primer nivel. Cada detalle está cuidadosamente pensado para la excelencia.',
-      role: 'Creative Director'
-    },
-    { 
-      name: 'James Morrison', 
-      rating: 5, 
-      text: 'Un oasis de calma y sofisticación. El servicio personalizado hace toda la diferencia.',
-      role: 'Investment Banker'
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
+
       {/* Navigation */}
       <nav className={`fixed w-full z-50 transition-all duration-500 ${
         scrollY > 50 
@@ -170,7 +151,13 @@ function App() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <button className="group bg-white text-black px-10 py-4 rounded-full font-light tracking-wide hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
+            <button
+              onClick={() => window.open(
+                "https://www.fresha.com/es/a/barba-co-pineyro-avenida-presidente-bernardino-rivadavia-215-o1ukwtm0/all-offer?menu=true&pId=1429418",
+                "_blank"
+              )}
+              className="group bg-white text-black px-10 py-4 rounded-full font-light tracking-wide hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
+            >
               <span>Reservar Turno</span>
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </button>
@@ -345,114 +332,130 @@ function App() {
         </div>
       </section>
 
-      {/* Location Section */}
-      <section id="ubicación" className="py-32 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div className="space-y-8">
+{/* Location Section */}
+<section id="ubicación" className="py-32 bg-gray-50">
+  <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
 
-              <div className="flex items-center space-x-4 mb-8">
-                <div className="p-3 rounded-full bg-black/5 flex items-center justify-center">
-                  <MapPin className="h-8 w-8 text-gray-600" />
-                </div>
-                <h2 className="text-5xl md:text-6xl font-extralight text-black tracking-tight leading-tight">
-                  Encontranos
-                </h2>
-              </div>
-
-              <div className="space-y-8">
-
-                <div className="bg-gray-100 p-8 rounded-3xl mb-8 shadow-sm">
-                  <h3 className="text-2xl font-light text-black mb-6 tracking-wide">Dirección</h3>
-                  <p className="text-lg text-gray-700 font-light mb-4">
-                    Av. Pres. Bernardino Rivadavia 215<br />
-                    Avellaneda, Buenos Aires, Argentina
-                  </p>
-                  <a
-                    href="https://www.google.com/maps/place/Av.+Pres.+Bernardino+Rivadavia+215,+Avellaneda,+Provincia+de+Buenos+Aires"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center space-x-2 text-black hover:opacity-60 transition-opacity"
-                  >
-                    <MapPin className="h-4 w-4" />
-                    <span className="text-sm font-light tracking-wide">Ver en Google Maps</span>
-                  </a>
-                </div>
-
-                <div className="space-y-6">
-                  {[
-                    /*{ icon: MapPin, text: 'Zona céntrica y segura' }, */
-                    { icon: Clock, text: 'Horario de atención: Lun a Sáb, 11 a 20 hs' }
-                  ].map((feature, index) => {
-                    const Icon = feature.icon;
-                    return (
-                      <div key={index} className="flex items-center space-x-4">
-                        <div className="w-10 h-10 rounded-2xl bg-black/5 flex items-center justify-center">
-                          <Icon className="h-4 w-4 text-gray-600" />
-                        </div>
-                        <span className="text-gray-700 font-light text-lg">{feature.text}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-              </div>
-
-
+      {/* Columna izquierda */}
+      <div className="space-y-16">
+        {/* Bloque Encontranos */}
+        <div>
+          <div className="flex items-center space-x-4 mb-8">
+            <div className="p-3 rounded-full bg-black/5 flex items-center justify-center">
+              <MapPin className="h-8 w-8 text-gray-600" />
             </div>
-
-            {/* Mapa interactivo real */}
-            <div className="bg-white rounded-3xl shadow-inner overflow-hidden h-96 lg:h-[500px]">
-              <iframe
-                title="Ubicación Barbería"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3283.876930184992!2d-58.36650822425733!3d-34.60726947295395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccd5d9d68cc5b%3A0xb7eec6b2b558cd1f!2sAv.%20Pres.%20Bernardino%20Rivadavia%20215%2C%20B1870CBE%20Avellaneda%2C%20Provincia%20de%20Buenos%20Aires!5e0!3m2!1ses-419!2sar!4v1730739000000!5m2!1ses-419!2sar"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
-            </div>
-
+            <h2 className="text-5xl md:text-6xl font-extralight text-black tracking-tight leading-tight">
+              Encontranos
+            </h2>
           </div>
 
+          <div className="bg-gray-100 p-8 rounded-3xl shadow-sm border border-gray-200">
+            <h3 className="text-2xl font-light text-black mb-6 tracking-wide">Dirección</h3>
+            <p className="text-lg text-gray-700 font-light mb-4">
+              Av. Pres. Bernardino Rivadavia 215<br />
+              Avellaneda, Buenos Aires, Argentina
+            </p>
+            <a
+              href="https://www.google.com/maps/place/Av.+Pres.+Bernardino+Rivadavia+215,+Avellaneda,+Provincia+de+Buenos+Aires"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 text-black hover:opacity-60 transition-opacity"
+            >
+              <MapPin className="h-4 w-4" />
+              <span className="text-sm font-light tracking-wide">Ver en Google Maps</span>
+            </a>
+          </div>
         </div>
 
-      </section>
+        {/* Bloque Horarios */}
+        <div>
+          <div className="flex items-center space-x-4 mb-8">
+            <div className="p-3 rounded-full bg-black/5 flex items-center justify-center">
+              <Clock className="h-8 w-8 text-gray-600" />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-extralight text-black tracking-tight leading-tight">
+              Horarios de atención
+            </h2>
+          </div>
+
+          <div className="bg-gray-100 p-8 rounded-3xl shadow-sm border border-gray-200">
+            <h3 className="text-2xl font-light text-black mb-4 tracking-wide">Lunes a Sábado</h3>
+            <p className="text-lg text-gray-700 font-light">
+              11:00 a 20:00 hs
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Columna derecha - Mapa */}
+      <div className="bg-white rounded-3xl shadow-inner overflow-hidden h-96 lg:h-[500px]">
+        <iframe
+          title="Ubicación Barbería"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3283.876930184992!2d-58.36650822425733!3d-34.60726947295395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccd5d9d68cc5b%3A0xb7eec6b2b558cd1f!2sAv.%20Pres.%20Bernardino%20Rivadavia%20215%2C%20B1870CBE%20Avellaneda%2C%20Provincia%20de%20Buenos%20Aires!5e0!3m2!1ses-419!2sar!4v1730739000000!5m2!1ses-419!2sar"
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
 
       {/* Contact Section */}
-      <section id="contacto" className="py-32 bg-gray-50 text-center">
-        <div className="max-w-3xl mx-auto px-6">
+      <section id="contacto" className="py-32 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center">
           <div className="inline-block p-3 rounded-full bg-black/5 mb-6">
             <Phone className="h-8 w-8 text-gray-600" />
           </div>
 
           <h2 className="text-5xl md:text-6xl font-extralight text-black mb-6 tracking-tight">
-            Contactanos
+            Contáctanos
           </h2>
 
-          <p className="text-xl text-gray-600 mb-10 font-light leading-relaxed">
-            Escribinos si tenés dudas o querés más información sobre nuestros servicios.
+          <p className="text-xl text-gray-600 mb-16 font-light leading-relaxed max-w-2xl mx-auto">
+            Elegí el medio que prefieras para comunicarte con nosotros o agendar tu próximo turno.
           </p>
 
-          <div className="flex justify-center space-x-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl mx-auto">
+            {/* Instagram */}
             <a
-              href="https://www.instagram.com/"
+              href="https://www.instagram.com/barba.company/"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors"
+              className="group bg-white p-12 rounded-3xl shadow-md border border-gray-100 hover:shadow-xl transition-all duration-500 flex flex-col items-center justify-center space-y-6 hover:border-gray-200"
             >
-              <Instagram className="h-6 w-6 text-gray-700" />
+              <div className="w-20 h-20 rounded-2xl bg-gray-50 flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                <Instagram className="h-10 w-10 text-gray-700" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-light text-black mb-2 tracking-wide">Instagram</h3>
+                <p className="text-gray-600 font-light">
+                  Seguinos para ver los últimos cortes, estilos y promociones.
+                </p>
+              </div>
             </a>
 
+            {/* WhatsApp */}
             <a
               href="https://wa.me/5491123456789"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors"
+              className="group bg-white p-12 rounded-3xl shadow-md border border-gray-100 hover:shadow-xl transition-all duration-500 flex flex-col items-center justify-center space-y-6 hover:border-gray-200"
             >
-              <Phone className="h-6 w-6 text-gray-700" />
+              <div className="w-20 h-20 rounded-2xl bg-gray-50 flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                <Phone className="h-10 w-10 text-gray-700" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-light text-black mb-2 tracking-wide">WhatsApp</h3>
+                <p className="text-gray-600 font-light">
+                  Escribinos para consultas rápidas o reservar directamente desde el chat.
+                </p>
+              </div>
             </a>
           </div>
         </div>
@@ -477,7 +480,7 @@ function App() {
           </p>
 
           <a
-            href="https://www.tusitiodeturnos.com"  // ← reemplazá con la URL real
+            href="https://www.fresha.com/es/a/barba-co-pineyro-avenida-presidente-bernardino-rivadavia-215-o1ukwtm0/all-offer?menu=true&pId=1429418" 
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-black text-white px-12 py-5 rounded-full font-light tracking-wide hover:bg-gray-800 transition-all duration-300"
