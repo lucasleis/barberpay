@@ -61,45 +61,62 @@ function App() {
     <div className="min-h-screen bg-white overflow-x-hidden">
 
       {/* Navigation */}
-      <nav className={`fixed w-full z-50 transition-all duration-500 ${
-        scrollY > 50 
-          ? 'bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100' 
-          : 'bg-transparent'
-      }`}>
+      <nav
+        className={`fixed w-full z-50 transition-all duration-500 ${
+          scrollY > 50
+            ? 'bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100'
+            : 'bg-transparent'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
+            {/* Logo / Brand */}
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <Scissors className={`h-7 w-7 transition-colors duration-300 ${
-                  scrollY > 50 ? 'text-black' : 'text-white'
-                }`} />
+                <Scissors
+                  className={`h-7 w-7 transition-colors duration-300 ${
+                    scrollY > 50 ? 'text-black' : 'text-white'
+                  }`}
+                />
                 <div className="absolute -inset-2 bg-gradient-to-r from-gray-600 to-black rounded-full opacity-20 blur-sm"></div>
               </div>
-              <span className={`font-light text-xl tracking-wider transition-colors duration-300 ${
-                scrollY > 50 ? 'text-black' : 'text-white'
-              }`}>
+              <a
+                href="#inicio"
+                className={`font-light text-xl tracking-wider transition-colors duration-300 ${
+                  scrollY > 50 ? 'text-black' : 'text-white'
+                } hover:opacity-80`}
+              >
                 BARBA&Co
-              </span>
+              </a>
+
             </div>
-            
+
             {/* Desktop Menu */}
-            <div className="hidden md:flex space-x-12">
-              {['Inicio', 'Servicios', 'Experiencia', 'Contacto'].map((item) => (
-                <a 
-                  key={item}
-                  href={`#${item.toLowerCase()}`} 
+            <div className="hidden md:flex space-x-10">
+              {[
+                { label: 'Inicio', href: '#inicio' },
+                { label: 'Servicios', href: '#servicios' },
+                { label: 'Membresías', href: '#membresias' },
+                { label: 'Métodos de Pago', href: '#pagos' },
+                { label: 'Ubicación', href: '#ubicación' },
+                { label: 'Contacto', href: '#contacto' },
+                { label: 'Turnos Online', href: '#turnos' },
+              ].map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
                   className={`text-sm font-light tracking-wide transition-all duration-300 hover:opacity-60 relative group ${
                     scrollY > 50 ? 'text-gray-700' : 'text-gray-200'
                   }`}
                 >
-                  {item}
+                  {item.label}
                   <span className="absolute -bottom-1 left-0 w-0 h-px bg-current transition-all duration-300 group-hover:w-full"></span>
                 </a>
               ))}
             </div>
 
             {/* Mobile Menu Button */}
-            <button 
+            <button
               className={`md:hidden transition-colors duration-300 ${
                 scrollY > 50 ? 'text-black' : 'text-white'
               }`}
@@ -112,14 +129,22 @@ function App() {
           {/* Mobile Menu */}
           {isMenuOpen && (
             <div className="md:hidden bg-white/95 backdrop-blur-xl rounded-2xl mt-4 py-8 px-6 shadow-xl border border-gray-100">
-              {['Inicio', 'Servicios', 'Experiencia', 'Contacto'].map((item) => (
-                <a 
-                  key={item}
-                  href={`#${item.toLowerCase()}`} 
+              {[
+                { label: 'Inicio', href: '#inicio' },
+                { label: 'Servicios', href: '#servicios' },
+                { label: 'Membresías', href: '#membresias' },
+                { label: 'Métodos de Pago', href: '#pagos' },
+                { label: 'Ubicación', href: '#ubicación' },
+                { label: 'Contacto', href: '#contacto' },
+                { label: 'Turnos Online', href: '#turnos' },
+              ].map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
                   className="block py-3 text-gray-700 font-light tracking-wide hover:opacity-60 transition-opacity"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {item}
+                  {item.label}
                 </a>
               ))}
             </div>
@@ -332,79 +357,78 @@ function App() {
         </div>
       </section>
 
-{/* Location Section */}
-<section id="ubicación" className="py-32 bg-gray-50">
-  <div className="max-w-7xl mx-auto px-6 lg:px-8">
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+      {/* Location Section */}
+      <section id="ubicación" className="py-32 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
 
-      {/* Columna izquierda */}
-      <div className="space-y-16">
-        {/* Bloque Encontranos */}
-        <div>
-          <div className="flex items-center space-x-4 mb-8">
-            <div className="p-3 rounded-full bg-black/5 flex items-center justify-center">
-              <MapPin className="h-8 w-8 text-gray-600" />
+            {/* Columna izquierda */}
+            <div className="space-y-16">
+              {/* Bloque Encontranos */}
+              <div>
+                <div className="flex items-center space-x-4 mb-8">
+                  <div className="p-3 rounded-full bg-black/5 flex items-center justify-center">
+                    <MapPin className="h-8 w-8 text-gray-600" />
+                  </div>
+                  <h2 className="text-5xl md:text-6xl font-extralight text-black tracking-tight leading-tight">
+                    Encontranos
+                  </h2>
+                </div>
+
+                <div className="bg-gray-100 p-8 rounded-3xl shadow-sm border border-gray-200">
+                  <h3 className="text-2xl font-light text-black mb-6 tracking-wide">Dirección</h3>
+                  <p className="text-lg text-gray-700 font-light mb-4">
+                    Av. Pres. Bernardino Rivadavia 215<br />
+                    Avellaneda, Buenos Aires, Argentina
+                  </p>
+                  <a
+                    href="https://www.google.com/maps/place/Av.+Pres.+Bernardino+Rivadavia+215,+Avellaneda,+Provincia+de+Buenos+Aires"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-2 text-black hover:opacity-60 transition-opacity"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    <span className="text-sm font-light tracking-wide">Ver en Google Maps</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Bloque Horarios */}
+              <div>
+                <div className="flex items-center space-x-4 mb-8">
+                  <div className="p-3 rounded-full bg-black/5 flex items-center justify-center">
+                    <Clock className="h-8 w-8 text-gray-600" />
+                  </div>
+                  <h2 className="text-4xl md:text-5xl font-extralight text-black tracking-tight leading-tight">
+                    Horarios de atención
+                  </h2>
+                </div>
+
+                <div className="bg-gray-100 p-8 rounded-3xl shadow-sm border border-gray-200">
+                  <h3 className="text-2xl font-light text-black mb-4 tracking-wide">Lunes a Sábado</h3>
+                  <p className="text-lg text-gray-700 font-light">
+                    11:00 a 20:00 hs
+                  </p>
+                </div>
+              </div>
             </div>
-            <h2 className="text-5xl md:text-6xl font-extralight text-black tracking-tight leading-tight">
-              Encontranos
-            </h2>
-          </div>
 
-          <div className="bg-gray-100 p-8 rounded-3xl shadow-sm border border-gray-200">
-            <h3 className="text-2xl font-light text-black mb-6 tracking-wide">Dirección</h3>
-            <p className="text-lg text-gray-700 font-light mb-4">
-              Av. Pres. Bernardino Rivadavia 215<br />
-              Avellaneda, Buenos Aires, Argentina
-            </p>
-            <a
-              href="https://www.google.com/maps/place/Av.+Pres.+Bernardino+Rivadavia+215,+Avellaneda,+Provincia+de+Buenos+Aires"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center space-x-2 text-black hover:opacity-60 transition-opacity"
-            >
-              <MapPin className="h-4 w-4" />
-              <span className="text-sm font-light tracking-wide">Ver en Google Maps</span>
-            </a>
+            {/* Columna derecha - Mapa */}
+            <div className="bg-white rounded-3xl shadow-inner overflow-hidden h-96 lg:h-[500px]">
+              <iframe
+                title="Ubicación Barbería"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3283.876930184992!2d-58.36650822425733!3d-34.60726947295395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccd5d9d68cc5b%3A0xb7eec6b2b558cd1f!2sAv.%20Pres.%20Bernardino%20Rivadavia%20215%2C%20B1870CBE%20Avellaneda%2C%20Provincia%20de%20Buenos%20Aires!5e0!3m2!1ses-419!2sar!4v1730739000000!5m2!1ses-419!2sar"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
           </div>
         </div>
-
-        {/* Bloque Horarios */}
-        <div>
-          <div className="flex items-center space-x-4 mb-8">
-            <div className="p-3 rounded-full bg-black/5 flex items-center justify-center">
-              <Clock className="h-8 w-8 text-gray-600" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-extralight text-black tracking-tight leading-tight">
-              Horarios de atención
-            </h2>
-          </div>
-
-          <div className="bg-gray-100 p-8 rounded-3xl shadow-sm border border-gray-200">
-            <h3 className="text-2xl font-light text-black mb-4 tracking-wide">Lunes a Sábado</h3>
-            <p className="text-lg text-gray-700 font-light">
-              11:00 a 20:00 hs
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Columna derecha - Mapa */}
-      <div className="bg-white rounded-3xl shadow-inner overflow-hidden h-96 lg:h-[500px]">
-        <iframe
-          title="Ubicación Barbería"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3283.876930184992!2d-58.36650822425733!3d-34.60726947295395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccd5d9d68cc5b%3A0xb7eec6b2b558cd1f!2sAv.%20Pres.%20Bernardino%20Rivadavia%20215%2C%20B1870CBE%20Avellaneda%2C%20Provincia%20de%20Buenos%20Aires!5e0!3m2!1ses-419!2sar!4v1730739000000!5m2!1ses-419!2sar"
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        ></iframe>
-      </div>
-    </div>
-  </div>
-</section>
-
+      </section>
 
       {/* Contact Section */}
       <section id="contacto" className="py-32 bg-gray-50">
@@ -493,36 +517,55 @@ function App() {
       {/* Footer */}
       <footer className="bg-black text-white py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-3 mb-8 md:mb-0">
+          {/* Logo e iconos en una misma línea */}
+          <div className="flex justify-between items-center mb-12">
+            {/* Logo */}
+            <a
+              href="#inicio"
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+            >
               <Scissors className="h-8 w-8 text-white" />
               <span className="font-light text-xl tracking-wider">BARBA&CO</span>
-            </div>
-            
-            <div className="flex space-x-12 mb-8 md:mb-0">
-              {['Inicio', 'Servicios', 'Experiencia', 'Contacto'].map((item) => (
-                <a 
-                  key={item}
-                  href={`#${item.toLowerCase()}`} 
-                  className="text-gray-400 hover:text-white transition-colors font-light tracking-wide"
-                >
-                  {item}
-                </a>
-              ))}
-            </div>
-            
-            <div className="text-gray-500 text-sm font-light">
-              © 2025 Nivalis
+            </a>
+
+            {/* Iconos */}
+            <div className="flex space-x-6">
+              <a
+                href="https://www.instagram.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <Instagram className="h-6 w-6" />
+              </a>
+              <a
+                href="https://wa.me/5491123456789"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <Phone className="h-6 w-6" />
+              </a>
             </div>
           </div>
-          
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center">
-            <p className="text-gray-500 font-light text-sm">
-              Crafted with precision and passion
+
+          {/* Línea divisoria + texto inferior */}
+          <div className="border-t border-gray-800 pt-8 text-center space-y-2">
+            <p className="text-gray-600 font-light text-xs">
+              © 2025 BARBA&CO — Developed by{" "}
+              <a
+                href="https://www.instagram.com/nivalis.techlab/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors underline underline-offset-2"
+              >
+                Nivalis
+              </a>
             </p>
           </div>
         </div>
       </footer>
+
     </div>
   );
 }
