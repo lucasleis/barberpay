@@ -62,7 +62,7 @@
           {% endfor %}
         </select>
 
-        <!-- 👇 Campo para mostrar el precio del servicio -->
+        <!-- Campo para mostrar el precio del servicio -->
         <input
           type="text"
           id="editServicePrice"
@@ -134,21 +134,6 @@
       </div>
     </div>
     
-
-    <!-- 
-      <div class="edit-buttons-container" style="display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;">
-        <form id="deletePaymentForm" method="POST" style="margin: 0; flex-grow: 1;">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="delete-button" title="Eliminar pago">
-            <i class="fas fa-trash"></i> Eliminar
-          </button>
-        </form>
-        <button type="submit" form="editPaymentForm" class="edit-button" style="flex-grow: 1;">
-          <i class="fas fa-check"></i> Confirmar cambios
-        </button>
-      </div>
-    -->
-      
   </div>
 </div>
 
@@ -324,7 +309,7 @@
               </td>
               <td>
                 ${
-                  p.membresia && parseFloat(p.monto || 0) === 0
+                  p.membresia && parseFloat(p.valor_membresia || 0) === 0
                     ? '$0'
                     : (
                         p.valor_membresia === 0

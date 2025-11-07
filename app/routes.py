@@ -1099,11 +1099,11 @@ def add_payment():
             else:
                 total_pagado = total_real
 
-            print(f"amount_method_multi_1 (${amount_method_multi_1})")
-            print(f"amount_method_multi_2 (${amount_method_multi_2})")
-            print(f"Tip (${tip})")
-            print(f"Total pagado (${total_pagado})")
-            print(f"Total real: (${total_real})")
+            # print(f"amount_method_multi_1 (${amount_method_multi_1})")
+            # print(f"amount_method_multi_2 (${amount_method_multi_2})")
+            # print(f"Tip (${tip})")
+            # print(f"Total pagado (${total_pagado})")
+            # print(f"Total real: (${total_real})")
 
             if abs(total_pagado - total_real) > 0.01:
                 raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
