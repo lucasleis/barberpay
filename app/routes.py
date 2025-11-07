@@ -1078,10 +1078,6 @@ def add_payment():
             amount_method_multi_2 = float(request.form.get('amount_method_multi_2') or 0)
 
             vale_membresia = request.form.get('valeMembresiaCheckbox')
-            if vale_membresia == 'on':
-                print("✅ Vale por membresía activado")
-            else:
-                print("❌ No es vale por membresía")
 
             total_real = total_producto + tip
             if toggle_servicio and check_membresia != 'on':
@@ -1099,9 +1095,15 @@ def add_payment():
                     raise ValueError("No se puede repetir el mismo método de pago.")
                 if not (method_multiple_1 and method_multiple_2):
                     raise ValueError("Faltan datos del segundo método de pago.")
-                total_pagado = amount_method_multi_1 + amount_method_multi_2 + tip
+                total_pagado = amount_method_multi_1 + amount_method_multi_2 
             else:
                 total_pagado = total_real
+
+            print(f"amount_method_multi_1 (${amount_method_multi_1})")
+            print(f"amount_method_multi_2 (${amount_method_multi_2})")
+            print(f"Tip (${tip})")
+            print(f"Total pagado (${total_pagado})")
+            print(f"Total real: (${total_real})")
 
             if abs(total_pagado - total_real) > 0.01:
                 raise ValueError(f"El total abonado (${total_pagado}) no coincide con el total real (${total_real}).")
