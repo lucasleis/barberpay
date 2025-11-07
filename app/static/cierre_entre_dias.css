@@ -581,7 +581,7 @@ body.modal-open {
 
 /* ===== Errores dentro del modal de edición ===== */
 .error-wrapper {
-  padding: 0 2rem 20px 2rem;
+  padding: 0 0 20px 0;
   width: 100%;
   box-sizing: border-box;
 }
