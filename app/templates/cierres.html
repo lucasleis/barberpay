@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='cierre_entre_dias.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='services.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="{{ url_for('static', filename='../static/js/utils.js') }}" defer></script>
 
 <h3>Cierres</h3>
 <form id="form-fechas" class="form-fechas">
@@ -570,26 +571,6 @@
     document.getElementById("confirmDeleteModal").classList.remove("active");
     document.getElementById("deletePaymentForm").submit(); // envía el formulario real
   });
-
-  function formatCurrencyInput(input) {
-    const value = parseFloat(input.value.replace(/\D/g, "")) || 0;
-    input.value = value ? `$${value.toLocaleString("es-AR")}` : "$0";
-  }
-
-  function attachCurrencyFormatting(id) {
-    const input = document.getElementById(id);
-    if (!input) return;
-
-    // Mostrar formato correcto al ingresar al modal
-    input.addEventListener("focus", () => {
-      const numericValue = input.value.replace(/\D/g, "");
-      input.value = numericValue ? numericValue : "";
-    });
-
-    // Mostrar formato $X.XXX al salir del input
-    input.addEventListener("blur", () => formatCurrencyInput(input));
-  }
-
 
   function updateEditTotalPago() {
     // Limpia todo lo que no sea dígito o coma/punto decimal

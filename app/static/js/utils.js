@@ -563,8 +563,6 @@ function obtenerPrecioProductoRow(row) {
   return { total: 0, item: null };
 }
 
-
-
 function updatePrice() {
   const precio = obtenerPrecioServicioSeleccion();
   const precioRedondeado = Math.round(precio);
@@ -610,6 +608,25 @@ function updatePriceTotal() {
   // console.log("updatePriceTotal totalConPropina: ",totalConPropina);
 
   document.getElementById('totalPago').value = formatearMoneda(totalConPropina);
+}
+
+function formatCurrencyInput(input) {
+  const value = parseFloat(input.value.replace(/\D/g, "")) || 0;
+  input.value = value ? `$${value.toLocaleString("es-AR")}` : "$0";
+}
+
+function attachCurrencyFormatting(id) {
+  const input = document.getElementById(id);
+  if (!input) return;
+
+  // Mostrar formato correcto al ingresar al modal
+  input.addEventListener("focus", () => {
+    const numericValue = input.value.replace(/\D/g, "");
+    input.value = numericValue ? numericValue : "";
+  });
+
+  // Mostrar formato $X.XXX al salir del input
+  input.addEventListener("blur", () => formatCurrencyInput(input));
 }
 
 
