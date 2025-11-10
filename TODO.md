@@ -12,9 +12,10 @@
     - [ ] Desarrollar para producto
         - [ ] Solo los que tengan rol de admin
     - [ ] Desarrollar para membresia
-        - [ ] Solo los que tengan rol de admin
+        - [✅] Solo los que tengan rol de admin
         - [✅] Mostrar valor en tabla y columna Valor Membresia
         - [✅] Permitir modificar
+        - [✅] Permitir Eliminar
 
 ## 2. valeXmembresia - Numeros de membresias con nro de dni
     - [ ] Separar de alguna forma el tipo de membresia para almacenar varios tipos para el mismo user

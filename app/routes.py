@@ -1157,6 +1157,13 @@ def add_payment():
 @app.route('/payments/delete/<int:pago_id>', methods=['POST'])
 def delete_payment(pago_id):
     salon_id = session.get("salon_id")
+
+    # --- Validar permisos ---
+    user_role = session.get('rol')
+    if user_role != 'admin':
+        flash("No tienes permiso para editar pagos.", "danger")
+        return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+    
     pago = Pago.query.get_or_404(pago_id)
 
     try:
@@ -1182,7 +1189,7 @@ def delete_payment(pago_id):
                         # Si fue una membresía NUEVA (sus usos coinciden con el tipo base)
                         if membresia.usos_disponibles == tipo.usos:
                             db.session.delete(membresia)
-                            flash(f"Se eliminó la membresía (DNI {membresia.dni or membresia.id_usuario}) creada por este pago.", "info")
+                            flash(f"Se eliminó la membresía (DNI {membresia.dni or membresia.id_usuario}).", "info")
 
                         # Si fue una membresía EXISTENTE a la que se sumaron usos
                         elif membresia.usos_disponibles > tipo.usos:
@@ -1349,6 +1356,128 @@ def edit_payment(pago_id):
     # --- Si es GET, redirigir directamente al dashboard ---
     return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
 
+@app.route('/pagos/editar_membresia/<int:pago_id>', methods=['POST'])
+def edit_payment_membership(pago_id):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    import re
+
+    if "user" not in session:
+        return redirect(url_for("login", next=request.path))
+
+    salon_id = session.get("salon_id")
+    pago = Pago.query.options(joinedload(Pago.appointment)).get_or_404(pago_id)
+
+    # --- Validar permisos ---
+    if session.get("rol") != "admin":
+        flash("No tienes permiso para editar pagos.", "danger")
+        return redirect(url_for("cierre_entre_dias", salon_id=salon_id))
+
+    # --- Validar que el pago sea de membresía ---
+    if not (pago.membresia_comprada_id or (pago.appointment and pago.appointment.membresia_id)):
+        flash("Solo se pueden editar pagos correspondientes a membresías.", "danger")
+        return redirect(url_for("cierre_entre_dias", salon_id=salon_id))
+
+    # --- Función auxiliar para limpiar montos ---
+    def limpiar_monto(valor):
+        if not valor:
+            return 0.0
+        limpio = re.sub(r'[^0-9,\.]', '', valor)
+        limpio = limpio.replace('.', '').replace(',', '.')
+        try:
+            return float(limpio)
+        except ValueError:
+            return 0.0
+
+    try:
+        # --- Fecha ---
+        date_str = request.form.get('date')
+        if not date_str:
+            raise ValueError("La fecha es obligatoria.")
+
+        if "T" in date_str:
+            updated_date = datetime.strptime(date_str, '%Y-%m-%dT%H:%M')
+        else:
+            updated_date = datetime.strptime(date_str, '%Y-%m-%d')
+            updated_date = updated_date.replace(hour=23, minute=59)
+        updated_date = updated_date.replace(tzinfo=ZoneInfo("America/Argentina/Buenos_Aires"))
+
+        # --- Empleado ---
+        barber_id = request.form.get('barber_id')
+        if not barber_id:
+            raise ValueError("Debe seleccionarse un empleado.")
+
+        # --- Métodos y montos ---
+        method1_id = request.form.get('method1')
+        method2_id_raw = request.form.get('method2') or ""
+        if not method1_id:
+            raise ValueError("Debe seleccionarse un método de pago principal.")
+
+        amount1 = limpiar_monto(request.form.get('amount1'))
+        amount2 = limpiar_monto(request.form.get('amount2'))
+        tip = limpiar_monto(request.form.get('tip'))
+
+        if amount1 < 0 or amount2 < 0 or tip < 0:
+            raise ValueError("Los montos y propinas no pueden ser negativos.")
+        if amount2 > 0 and not method2_id_raw:
+            raise ValueError("Si el monto 2 es mayor a 0, debe seleccionar un método de pago 2 distinto a 'Ninguno'.")
+        if method2_id_raw and method1_id == method2_id_raw:
+            raise ValueError("No puede elegir el mismo método de pago dos veces.")
+
+        method2_id = int(method2_id_raw) if method2_id_raw else None
+
+        # --- Tipo de membresía ---
+        membresia_tipo_id = request.form.get("membresia_id")
+        tipo_membresia = TipoMembresia.query.get(membresia_tipo_id)
+        if not tipo_membresia:
+            raise ValueError("Tipo de membresía no encontrado.")
+
+        precio_membresia = float(tipo_membresia.precio)
+
+        # --- Validar coherencia con montos ---
+        diferencia = abs((amount1 + amount2) - (precio_membresia + tip))
+        if diferencia > 1:  # tolerancia de 1 peso
+            raise ValueError(
+                f"La suma de Monto 1 + Monto 2 (${amount1 + amount2:,.0f}) debe coincidir con el precio de la membresía + propina (${precio_membresia + tip:,.0f})."
+            )
+
+        # --- Actualizar el pago ---
+        pago.date = updated_date
+        pago.payment_method1_id = int(method1_id)
+        pago.payment_method2_id = method2_id
+        pago.amount_method1 = amount1
+        pago.amount_method2 = amount2
+        pago.amount_tip = tip
+
+        # --- Actualizar turno y barbero asociado ---
+        if pago.appointment:
+            pago.appointment.barber_id = int(barber_id)
+
+        # --- Determinar si es compra o uso de membresía ---
+        if pago.membresia_comprada_id:
+            membresia = Membresia.query.get(pago.membresia_comprada_id)
+            if membresia:
+                membresia.tipo_membresia_id = tipo_membresia.id
+                membresia.usos_disponibles = tipo_membresia.usos
+                membresia.active = True
+                membresia.peluqueria_id = salon_id
+
+        elif pago.appointment and pago.appointment.membresia_id:
+            membresia = Membresia.query.get(pago.appointment.membresia_id)
+            if membresia:
+                membresia.tipo_membresia_id = tipo_membresia.id
+                membresia.usos_disponibles = tipo_membresia.usos
+                membresia.active = True
+                membresia.peluqueria_id = salon_id
+
+        db.session.commit()
+        flash("Pago de membresía actualizado correctamente.", "success")
+        return redirect(url_for("cierre_entre_dias", salon_id=salon_id))
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error al actualizar el pago de membresía: {str(e)}", "danger")
+        return redirect(url_for("cierre_entre_dias", salon_id=salon_id))
 
 
 ### Cierres ###

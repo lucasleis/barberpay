@@ -140,13 +140,13 @@
         <form id="deletePaymentForm" method="POST" style="margin: 0; flex: 1;">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <button type="submit" class="delete-button" title="Eliminar pago">
-            <i class="fas fa-trash"></i> Eliminar
+            <i class="fas fa-trash"></i> Eliminar<br>Pago
           </button>
         </form>
     
         <!-- Botón Confirmar -->
         <button type="submit" form="editPaymentForm" class="edit-button" style="flex: 1;">
-          <i class="fas fa-check"></i> Confirmar<br>cambios
+          <i class="fas fa-check"></i> Confirmar<br>Cambios
         </button>
       </div>
     </div>
@@ -444,22 +444,38 @@
     const membresiaGroup = document.getElementById('editMembresiaGroup');
 
     if (pago.tipo_pago === 'membresia') {
+      form.action = `/pagos/editar_membresia/${id}`;
+
       // Ocultar servicio y mostrar membresía
-      if (serviceGroup) serviceGroup.style.display = 'none';
-      if (membresiaGroup) membresiaGroup.style.display = 'block';
+      if (serviceGroup) {
+        serviceGroup.style.display = 'none';
+        document.getElementById('editService').removeAttribute('required');
+      }
+      if (membresiaGroup) {
+        membresiaGroup.style.display = 'block';
+        document.getElementById('editMembresia').setAttribute('required', 'required');
+      }
 
       // Preseleccionar membresía correspondiente
       if (pago.membresia_id) {
         document.getElementById('editMembresia').value = pago.membresia_id;
         const selectedM = document.getElementById('editMembresia').selectedOptions[0];
         const precioM = selectedM.getAttribute('data-precio');
-        document.getElementById('editMembresiaPrice').value = precioM ? `$${parseFloat(precioM).toLocaleString('es-AR')}` : '';
+        document.getElementById('editMembresiaPrice').value = precioM
+          ? `$${parseFloat(precioM).toLocaleString('es-AR')}`
+          : '';
       }
 
     } else {
       // Mostrar servicio y ocultar membresía
-      if (serviceGroup) serviceGroup.style.display = 'block';
-      if (membresiaGroup) membresiaGroup.style.display = 'none';
+      if (serviceGroup) {
+        serviceGroup.style.display = 'block';
+        document.getElementById('editService').setAttribute('required', 'required');
+      }
+      if (membresiaGroup) {
+        membresiaGroup.style.display = 'none';
+        document.getElementById('editMembresia').removeAttribute('required');
+      }
     }
 
     updateEditTotalPago();
@@ -518,8 +534,14 @@
 
       // --- Validar coherencia entre montos, propina y precio del servicio ---
       const serviceSelect = document.getElementById("editService");
-      const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
-      const precioServicio = parseFloat(selectedOption.getAttribute("data-precio") || "0");
+      let precioServicio = 0;
+      if (serviceSelect && serviceSelect.selectedIndex >= 0) {
+        const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+        if (selectedOption) {
+          precioServicio = parseFloat(selectedOption.getAttribute("data-precio") || "0");
+        }
+      }
+
 
       // Tomamos también el total mostrado en el input "Total a Pagar"
       const totalMostrado = parseFloat(
