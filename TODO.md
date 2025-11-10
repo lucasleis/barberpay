@@ -41,6 +41,9 @@
     - [ ] Achicar margin en turnos
 
 
-## 7. Multiples peluquerias
+7. calcular_pagos_entre_fechas
+    - [ ] Factorizar funcion
+
+## 8. Multiples peluquerias
     - [ ] Cambiar logo dependiendo de donde venga
     - [ ] Testear un poco mas todo
