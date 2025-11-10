@@ -6,9 +6,9 @@ app = create_app()
 
 with app.app_context():
     nuevo = Usuario(
-        username='admin',
+        username='admin_Pel_Sec',
         password=generate_password_hash('admin'),
-        salon_id=1,
+        salon_id=2,
         rol="admin"
     )
     db.session.add(nuevo)

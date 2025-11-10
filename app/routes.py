@@ -756,7 +756,8 @@ def delete_product(id):
 @app.route('/admin/payment_methods')
 def list_payment_methods():
     if "user" in session:
-        methods = MetodoPago.query.filter_by(active=True).all()
+        salon_id = session.get('salon_id')
+        methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
         #methods = MetodoPago.query.all()
         return render_template('payment_methods.html', methods=methods)
     else:
@@ -1162,7 +1163,7 @@ def delete_payment(pago_id):
     user_role = session.get('rol')
     if user_role != 'admin':
         flash("No tienes permiso para editar pagos.", "danger")
-        return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+        return redirect(url_for('cierre_entre_dias', salon_id=salon_id))
     
     pago = Pago.query.get_or_404(pago_id)
 
@@ -1228,7 +1229,8 @@ def delete_payment(pago_id):
 
 @app.route('/pagos/editar/<int:pago_id>', methods=['GET', 'POST'])
 def edit_payment(pago_id):
-    session.setdefault('salon_id', 1)
+    #session.setdefault('salon_id', 1)
+    salon_id = session.get('salon_id')
 
     pago = Pago.query.options(joinedload(Pago.appointment)).get_or_404(pago_id)
     # salon_id = session.get('salon_id') or pago.peluqueria_id
@@ -1237,22 +1239,22 @@ def edit_payment(pago_id):
     user_role = session.get('rol')
     if user_role != 'admin':
         flash("No tienes permiso para editar pagos.", "danger")
-        return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+        return redirect(url_for('cierre_entre_dias', salon_id=salon_id))
 
     # --- Validar que el pago sea de servicio ---
     if not (pago.appointment and pago.appointment.service_id):
         flash("Solo se pueden editar pagos correspondientes a servicios.", "danger")
-        return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+        return redirect(url_for('cierre_entre_dias', salon_id=salon_id))
 
     # Si tiene productos asociados, también bloquear
     if pago.appointment and pago.appointment.productos_turno:
         flash("No se pueden editar pagos correspondientes a productos.", "danger")
-        return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+        return redirect(url_for('cierre_entre_dias', salon_id=salon_id))
 
     # Si tiene membresía comprada o usada, bloquear también
     if pago.membresia_comprada_id or (pago.appointment and pago.appointment.membresia_id):
         flash("No se pueden editar pagos correspondientes a membresías.", "danger")
-        return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+        return redirect(url_for('cierre_entre_dias', salon_id=salon_id))
 
 
     if request.method == 'POST':
@@ -1295,7 +1297,7 @@ def edit_payment(pago_id):
             amount1 = limpiar_monto(request.form.get('amount1'))
             amount2 = limpiar_monto(request.form.get('amount2'))
             tip = limpiar_monto(request.form.get('tip'))
-            total_pago = limpiar_monto(request.form.get('editTotalPago'))  # ✅ nuevo campo del modal
+            total_pago = limpiar_monto(request.form.get('editTotalPago'))  
 
             # --- Validaciones básicas ---
             if amount1 < 0 or amount2 < 0 or tip < 0:
@@ -1346,15 +1348,15 @@ def edit_payment(pago_id):
 
             db.session.commit()
             flash("Pago actualizado correctamente.", "success")
-            return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+            return redirect(url_for('cierre_entre_dias', salon_id=salon_id))
 
         except Exception as e:
             db.session.rollback()
             flash(f"Error al actualizar el pago: {str(e)}", "danger")
-            return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+            return redirect(url_for('cierre_entre_dias', salon_id=salon_id))
 
     # --- Si es GET, redirigir directamente al dashboard ---
-    return redirect(url_for('cierre_entre_dias', salon_id=session.get('salon_id')))
+    return redirect(url_for('cierre_entre_dias', salon_id=salon_id))
 
 @app.route('/pagos/editar_membresia/<int:pago_id>', methods=['POST'])
 def edit_payment_membership(pago_id):
@@ -1640,6 +1642,9 @@ def turnos():
 
 @app.route('/admin/metricas')
 def metricas():
+    if "user" not in session:
+        return redirect(url_for("login", next=request.path))
+
     fecha_limite = datetime.now() - timedelta(days=30)
 
     servicios_mas_vendidos = obtener_servicios_mas_vendidos(fecha_limite)
@@ -1658,6 +1663,8 @@ def metricas():
 
 
 def obtener_servicios_mas_vendidos(fecha_limite):
+    salon_id = session.get('salon_id')
+
     # Parte 1: servicios pagados
     resultados = (
         db.session.query(
@@ -1668,6 +1675,7 @@ def obtener_servicios_mas_vendidos(fecha_limite):
         .join(Appointment, Appointment.id == Pago.appointment_id)
         .join(Servicio, Servicio.id == Appointment.service_id)
         .filter(Pago.date >= fecha_limite)
+        .filter(Pago.peluqueria_id == salon_id)
         .group_by(Servicio.name, Appointment.tipo_precio_servicio)
         .all()
     )
@@ -1680,7 +1688,7 @@ def obtener_servicios_mas_vendidos(fecha_limite):
                 "comun": 0,
                 "amigo": 0,
                 "descuento": 0,
-                "membresia": 0  # este campo se llenará abajo
+                "membresia": 0
             }
         servicios[nombre][tipo_precio] += cantidad
         servicios[nombre]["total"] += cantidad
@@ -1689,6 +1697,7 @@ def obtener_servicios_mas_vendidos(fecha_limite):
     pagos = (
         db.session.query(Pago)
         .filter(Pago.date >= fecha_limite)
+        .filter(Pago.peluqueria_id == 2)  # ← filtro agregado
         .all()
     )
 
@@ -1727,6 +1736,8 @@ def obtener_servicios_mas_vendidos(fecha_limite):
 
 
 def obtener_productos_mas_vendidos(fecha_limite):
+    salon_id = session.get('salon_id')
+
     resultados = (
         db.session.query(
             Producto.name,
@@ -1735,18 +1746,18 @@ def obtener_productos_mas_vendidos(fecha_limite):
         .join(AppointmentTurno.producto)  
         .join(Appointment, Appointment.id == AppointmentTurno.turno_id)
         .filter(Appointment.date >= fecha_limite)
+        .filter(Appointment.peluqueria_id == salon_id)  
         .group_by(Producto.name)
         .order_by(func.sum(AppointmentTurno.cantidad).desc())
         .all()
     )
 
-    return [
-        {"nombre": nombre, "cantidad": int(cantidad)}
-        for nombre, cantidad in resultados
-    ]
+    return [{"nombre": nombre, "cantidad": int(cantidad)} for nombre, cantidad in resultados]
 
 
 def obtener_horas_pico_por_media_hora(fecha_limite):
+    salon_id = session.get('salon_id')
+
     media_hora_case = case(
         (extract('minute', Appointment.date) < 30, 0),
         else_=30
@@ -1759,18 +1770,18 @@ def obtener_horas_pico_por_media_hora(fecha_limite):
             func.count().label('cantidad')
         )
         .filter(Appointment.date >= fecha_limite)
+        .filter(Appointment.peluqueria_id == salon_id)  
         .group_by('hora', 'media_hora')
         .order_by(func.count().desc())
         .all()
     )
 
-    return [
-        (int(row.hora), int(row.media_hora), row.cantidad)
-        for row in resultados
-    ]
+    return [(int(r.hora), int(r.media_hora), r.cantidad) for r in resultados]
 
 
 def obtener_membresias_vendidas(fecha_limite):
+    salon_id = session.get('salon_id')
+
     resultados = (
         db.session.query(
             TipoMembresia.nombre,
@@ -1780,15 +1791,13 @@ def obtener_membresias_vendidas(fecha_limite):
         .join(TipoMembresia, TipoMembresia.id == Membresia.tipo_membresia_id)
         .filter(Pago.date >= fecha_limite)
         .filter(Pago.membresia_comprada_id.isnot(None))
+        .filter(Pago.peluqueria_id == salon_id) 
         .group_by(TipoMembresia.nombre)
         .order_by(func.count(Pago.id).desc())
         .all()
     )
 
-    return [
-        {"nombre": nombre, "cantidad": cantidad}
-        for nombre, cantidad in resultados
-    ]
+    return [{"nombre": nombre, "cantidad": cantidad} for nombre, cantidad in resultados]
 
 
 

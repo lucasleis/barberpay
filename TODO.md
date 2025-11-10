@@ -40,3 +40,7 @@
     - [ ] Poner bordes al mapa
     - [ ] Achicar margin en turnos
 
+
+## 6. Multiples peluquerias
+    - [ ] Cambiar logo dependiendo de donde venga
+    - [ ] Testear un poco mas todo
