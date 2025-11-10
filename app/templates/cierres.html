@@ -71,6 +71,23 @@
         >
       </div>
 
+      <!-- Membresía -->
+      <div class="form-group" id="editMembresiaGroup" style="display:none;">
+        <label for="editMembresia">Membresía:</label>
+        <select id="editMembresia" name="membresia_id">
+          {% for m in membresias %}
+            <option value="{{ m.id }}" data-precio="{{ m.precio }}">{{ m.nombre }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- Campo para mostrar el precio del membresia -->
+        <input
+          type="text"
+          id="editMembresiaPrice"
+          readonly
+          style="background:#f9f9f9; border:1px solid #ddd; padding:5px; margin-top:5px; width:100%;"
+        >
+      </div>
 
       <!-- Método de pago 1 -->
       <div class="form-group">
@@ -338,9 +355,11 @@
               <td>
                 <button
                   type="button"
-                  class="edit-icon ${p.tipo_pago === 'servicio' ? 'enabled' : 'disabled'}"
-                  title="${p.tipo_pago === 'servicio' ? 'Editar pago' : 'Solo se pueden editar pagos de servicios'}"
-                  ${p.tipo_pago === 'servicio'
+                  class="edit-icon ${['servicio', 'membresia'].includes(p.tipo_pago) ? 'enabled' : 'disabled'}"
+                  title="${['servicio', 'membresia'].includes(p.tipo_pago)
+                    ? 'Editar pago'
+                    : 'Solo se pueden editar pagos de servicios o membresías'}"
+                  ${['servicio', 'membresia'].includes(p.tipo_pago)
                     ? `onclick="openEditModal(${p.id}, '${p.fecha}', '${p.empleado}', '${p.metodo_pago.join(' - ')}', ${p.monto || 0}, ${p.propina || 0})"`
                     : 'disabled'}
                 >
@@ -374,7 +393,7 @@
     modal.offsetHeight;
     modal.classList.add("active");
 
-    // ✅ Mostrar solo la fecha, pero luego se setea 23:59 al guardar
+    // Mostrar solo la fecha, pero luego se setea 23:59 al guardar
     if (pago.fecha_completa) {
       const fechaOriginal = new Date(pago.fecha_completa);
       const fechaLocal = fechaOriginal.toISOString().slice(0, 10); // solo yyyy-mm-dd
@@ -408,14 +427,39 @@
 
     // --- Mostrar automáticamente el precio del servicio seleccionado ---
     const serviceSelect = document.getElementById("editService");
-    if (serviceSelect) {
+    if (serviceSelect && serviceSelect.selectedIndex >= 0) {
       const selected = serviceSelect.options[serviceSelect.selectedIndex];
-      const price = selected.getAttribute("data-precio");
-      const priceInput = document.getElementById("editServicePrice");
-      if (priceInput) {
-        const numericPrice = parseFloat(price) || 0;
-        priceInput.value = numericPrice ? `$${numericPrice.toLocaleString("es-AR")}` : "";
+      if (selected) {
+        const price = selected.getAttribute("data-precio");
+        const priceInput = document.getElementById("editServicePrice");
+        if (priceInput) {
+          const numericPrice = parseFloat(price) || 0;
+          priceInput.value = numericPrice ? `$${numericPrice.toLocaleString("es-AR")}` : "";
+        }
       }
+    }
+
+    // Mostrar/ocultar secciones según tipo de pago
+    const serviceGroup = document.querySelector('.form-group label[for="editService"]').closest('.form-group');
+    const membresiaGroup = document.getElementById('editMembresiaGroup');
+
+    if (pago.tipo_pago === 'membresia') {
+      // Ocultar servicio y mostrar membresía
+      if (serviceGroup) serviceGroup.style.display = 'none';
+      if (membresiaGroup) membresiaGroup.style.display = 'block';
+
+      // Preseleccionar membresía correspondiente
+      if (pago.membresia_id) {
+        document.getElementById('editMembresia').value = pago.membresia_id;
+        const selectedM = document.getElementById('editMembresia').selectedOptions[0];
+        const precioM = selectedM.getAttribute('data-precio');
+        document.getElementById('editMembresiaPrice').value = precioM ? `$${parseFloat(precioM).toLocaleString('es-AR')}` : '';
+      }
+
+    } else {
+      // Mostrar servicio y ocultar membresía
+      if (serviceGroup) serviceGroup.style.display = 'block';
+      if (membresiaGroup) membresiaGroup.style.display = 'none';
     }
 
     updateEditTotalPago();
@@ -538,6 +582,12 @@
     const selected = this.options[this.selectedIndex];
     const price = selected.getAttribute("data-precio");
     document.getElementById("editServicePrice").value = price ? `$${price}` : "";
+  });
+
+  document.getElementById("editMembresia").addEventListener("change", function() {
+    const selected = this.options[this.selectedIndex];
+    const price = selected.getAttribute("data-precio");
+    document.getElementById("editMembresiaPrice").value = price ? `$${price}` : "";
   });
 
   // Abrir modal de confirmación
