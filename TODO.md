@@ -41,6 +41,6 @@
     - [ ] Achicar margin en turnos
 
 
-## 6. Multiples peluquerias
+## 7. Multiples peluquerias
     - [ ] Cambiar logo dependiendo de donde venga
     - [ ] Testear un poco mas todo

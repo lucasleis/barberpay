@@ -74,16 +74,26 @@ def get_payment_page_data(salon_id):
     return pagos_data, barbers, services, methods
 
 def calcular_pagos_entre_fechas(start_date, end_date):
+    salon_id = session.get('salon_id')
 
-    pagos = Pago.query.options(
-        joinedload(Pago.appointment).joinedload(Appointment.productos_turno).joinedload(AppointmentTurno.producto),
-        joinedload(Pago.appointment).joinedload(Appointment.barber),
-        joinedload(Pago.appointment).joinedload(Appointment.service),
-        joinedload(Pago.membresia_comprada).joinedload(Membresia.tipo_membresia),
-        joinedload(Pago.appointment).joinedload(Appointment.membresia).joinedload(Membresia.tipo_membresia),
-        joinedload(Pago.method1),
-        joinedload(Pago.method2)
-    ).filter(Pago.date >= start_date, Pago.date <= end_date).order_by(desc(Pago.date)).all()
+    pagos = (
+        Pago.query.options(
+            joinedload(Pago.appointment).joinedload(Appointment.productos_turno).joinedload(AppointmentTurno.producto),
+            joinedload(Pago.appointment).joinedload(Appointment.barber),
+            joinedload(Pago.appointment).joinedload(Appointment.service),
+            joinedload(Pago.membresia_comprada).joinedload(Membresia.tipo_membresia),
+            joinedload(Pago.appointment).joinedload(Appointment.membresia).joinedload(Membresia.tipo_membresia),
+            joinedload(Pago.method1),
+            joinedload(Pago.method2)
+        )
+        .filter(
+            Pago.date >= start_date,
+            Pago.date <= end_date,
+            Pago.peluqueria_id == salon_id
+        )
+        .order_by(desc(Pago.date))
+        .all()
+    )
     
     total_general = 0
     total_propietario = 0
