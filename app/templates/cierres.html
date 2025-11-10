@@ -581,13 +581,15 @@
   document.getElementById("editService").addEventListener("change", function() {
     const selected = this.options[this.selectedIndex];
     const price = selected.getAttribute("data-precio");
-    document.getElementById("editServicePrice").value = price ? `$${price}` : "";
+    // document.getElementById("editServicePrice").value = price ? `$${price}` : "";
+    document.getElementById("editServicePrice").value = price ? formatearMoneda(price) : "";
   });
 
   document.getElementById("editMembresia").addEventListener("change", function() {
     const selected = this.options[this.selectedIndex];
     const price = selected.getAttribute("data-precio");
-    document.getElementById("editMembresiaPrice").value = price ? `$${price}` : "";
+    // document.getElementById("editMembresiaPrice").value = price ? `$${price}` : "";
+    document.getElementById("editMembresiaPrice").value = price ? formatearMoneda(price) : "";
   });
 
   // Abrir modal de confirmación

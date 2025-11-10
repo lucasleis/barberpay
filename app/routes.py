@@ -121,6 +121,15 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             "valor_producto": 0,
             "membresia": "",
             "valor_membresia": 0,
+            "membresia_id": (
+                pago.membresia_comprada.tipo_membresia.id
+                if pago.membresia_comprada and pago.membresia_comprada.tipo_membresia
+                else (
+                    pago.appointment.membresia.tipo_membresia.id
+                    if pago.appointment and pago.appointment.membresia and pago.appointment.membresia.tipo_membresia
+                    else None
+                )
+            ),
             "tipo_pago": tipo_pago,
             "metodo_pago": [],
             "method1_id": pago.payment_method1_id,
@@ -1389,10 +1398,11 @@ def cierre_entre_dias(salon_id):
     fechaInicio = last_sunday.strftime('%Y-%m-%d')
     fechaFinal = next_sunday.strftime('%Y-%m-%d')
 
-    # ✅ Agregar datos necesarios para los selects del modal
+    # Agregar datos necesarios para los selects del modal
     barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
     services = Servicio.query.filter_by(active=True, peluqueria_id=salon_id).all()
     methods = MetodoPago.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    membresias = TipoMembresia.query.filter_by(active=True, peluqueria_id=salon_id).all()
 
     return render_template(
         'cierres.html',
@@ -1402,7 +1412,8 @@ def cierre_entre_dias(salon_id):
         role=role,
         barbers=barbers,
         services=services,
-        methods=methods
+        methods=methods,
+        membresias=membresias 
     )
 
 

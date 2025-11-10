@@ -13,7 +13,7 @@
         - [ ] Solo los que tengan rol de admin
     - [ ] Desarrollar para membresia
         - [ ] Solo los que tengan rol de admin
-        - [ ] Mostrar valor en tabla y columna Valor Membresia
+        - [✅] Mostrar valor en tabla y columna Valor Membresia
         - [✅] Permitir modificar
 
 ## 2. valeXmembresia - Numeros de membresias con nro de dni
