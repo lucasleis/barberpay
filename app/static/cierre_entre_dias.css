@@ -775,3 +775,11 @@ body.modal-open {
   padding: 0;
   margin-bottom: 0;
 }
+
+.dni-display {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 5px;
+  margin-top: 5px;
+  width: 100%;
+}

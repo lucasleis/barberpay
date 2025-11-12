@@ -200,6 +200,15 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 )
             ),
             "tipo_pago": tipo_pago,
+            "dni": (
+                pago.membresia_comprada.dni
+                if pago.membresia_comprada and pago.membresia_comprada.dni
+                else (
+                    pago.appointment.membresia.dni
+                    if pago.appointment and pago.appointment.membresia and pago.appointment.membresia.dni
+                    else None
+                )
+            ),
             "metodo_pago": [],
             "method1_id": pago.payment_method1_id,
             "method2_id": pago.payment_method2_id,

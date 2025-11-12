@@ -89,6 +89,12 @@
         >
       </div>
 
+      <!-- Display del DNI (solo visible para membresías) -->
+      <div class="form-group" id="editDniDisplay" style="display:none;">
+        <label for="dniDisplay">DNI asociado:</label>
+        <input type="text" id="dniDisplay" readonly class="dni-display">
+      </div>
+
       <!-- Método de pago 1 -->
       <div class="form-group">
         <label for="editMethod1">Método de Pago 1:</label>
@@ -442,9 +448,16 @@
     // Mostrar/ocultar secciones según tipo de pago
     const serviceGroup = document.querySelector('.form-group label[for="editService"]').closest('.form-group');
     const membresiaGroup = document.getElementById('editMembresiaGroup');
+    const dniDisplay = document.getElementById("editDniDisplay");
 
     if (pago.tipo_pago === 'membresia') {
       form.action = `/pagos/editar_membresia/${id}`;
+
+        // Mostrar el dni y setear el valor
+        if (dniDisplay) {
+          dniDisplay.style.display = "block";
+          document.getElementById("dniDisplay").value = pago.dni || "Sin DNI";
+        }
 
       // Ocultar servicio y mostrar membresía
       if (serviceGroup) {
@@ -467,6 +480,9 @@
       }
 
     } else {
+
+      if (dniDisplay) dniDisplay.style.display = "none";
+
       // Mostrar servicio y ocultar membresía
       if (serviceGroup) {
         serviceGroup.style.display = 'block';
