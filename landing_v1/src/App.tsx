@@ -210,7 +210,7 @@ function App() {
       </section>
 
       {/* Services Section */}
-      <section id="servicios" className="py-32 bg-gray-50">
+      <section id="servicios" className="pt-32 pb-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-20">
             <div className="inline-block p-3 rounded-full bg-black/5 mb-6">
@@ -265,7 +265,7 @@ function App() {
       </section>
 
       {/* Membership Section */}
-      <section id="membresias" className="py-32 bg-gray-50">
+      <section id="membresias" className="pt-32 pb-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
           <div className="inline-block p-3 rounded-full bg-black/5 mb-6">
             <CreditCard className="h-8 w-8 text-gray-600" />
@@ -317,7 +317,7 @@ function App() {
       </section>
 
       {/* Payment Methods Section */}
-      <section id="pagos" className="py-32 bg-gray-50">
+      <section id="pagos" className="pt-32 pb-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
           <div className="inline-block p-3 rounded-full bg-black/5 mb-6">
             <CreditCard className="h-8 w-8 text-gray-600" />
@@ -369,7 +369,7 @@ function App() {
       </section>
 
       {/* Location Section */}
-      <section id="ubicación" className="py-32 bg-gray-50">
+      <section id="ubicación" className="pt-32 pb-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
 
@@ -442,7 +442,7 @@ function App() {
       </section>
 
       {/* Contact Section */}
-      <section id="contacto" className="py-32 bg-gray-50">
+      <section id="contacto" className="pt-32 pb-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center">
           <div className="inline-block p-3 rounded-full bg-black/5 mb-6">
             <Phone className="h-8 w-8 text-gray-600" />
@@ -500,7 +500,7 @@ function App() {
       <div className="h-24 bg-gradient-to-b from-gray-50 to-white"></div>
 
       {/* Booking Section */}
-      <section id="turnos" className="py-32 bg-white text-center">
+      <section id="turnos" className="pt-32 pb-16 bg-white text-center">
         <div className="max-w-3xl mx-auto px-6">
           <div className="inline-block p-3 rounded-full bg-black/5 mb-6">
             <Calendar className="h-8 w-8 text-gray-600" />
