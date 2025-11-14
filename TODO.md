@@ -37,8 +37,9 @@
 
 ## 6. Landing
     - [ ] Crear clases para todos los elementos
-    - [ ] Poner bordes al mapa
+    - [✅] Poner bordes al mapa
     - [ ] Achicar margin en turnos
+    - [ ] Oscurecer la letra de las secciones en el header
 
 
 7. calcular_pagos_entre_fechas

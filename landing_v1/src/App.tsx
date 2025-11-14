@@ -31,26 +31,26 @@ function App() {
   const services = [
     { 
       name: 'Corte', 
-      price: '$45', 
-      duration: '45 min',
+      price: '$11.000', 
+      duration: '30 min',
       description: 'Corte personalizado con consulta de estilo incluida'
     },
     { 
       name: 'Corte + Barba', 
-      price: '$35', 
-      duration: '30 min',
+      price: '$13.000', 
+      duration: '45 min',
       description: 'Afeitado tradicional con toalla caliente y aceites premium'
     },
     { 
       name: 'Arreglo Barba', 
-      price: '$30', 
+      price: '$6.500', 
       duration: '25 min',
       description: 'Diseño y mantenimiento profesional de barba'
     },
     { 
       name: 'Perfilado de cejas', 
-      price: '$75', 
-      duration: '60 min',
+      price: '$4.000', 
+      duration: '25 min',
       description: 'Corte + afeitado + tratamiento facial completo'
     }
   ];
@@ -425,7 +425,7 @@ function App() {
             </div>
 
             {/* Columna derecha - Mapa */}
-            <div className="bg-white rounded-3xl shadow-inner overflow-hidden h-96 lg:h-[500px]">
+            <div className="bg-white rounded-3xl shadow-inner overflow-hidden h-96 lg:h-[500px] border border-gray-300">
               <iframe
                 title="Ubicación Barbería"
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3283.876930184992!2d-58.36650822425733!3d-34.60726947295395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccd5d9d68cc5b%3A0xb7eec6b2b558cd1f!2sAv.%20Pres.%20Bernardino%20Rivadavia%20215%2C%20B1870CBE%20Avellaneda%2C%20Provincia%20de%20Buenos%20Aires!5e0!3m2!1ses-419!2sar!4v1730739000000!5m2!1ses-419!2sar"
