@@ -480,6 +480,101 @@ def inject_logo():
         'logo_url': logos_por_dominio.get(dominio, '')  # Retorna vacío si no está
     }
 
+
+# Fecha
+def validar_fecha(date_str):
+    # --- Fecha ---
+    # date_str = request.form.get('date')
+    if not date_str:
+        raise ValueError("La fecha es obligatoria.")
+
+    if "T" in date_str:
+        updated_date = datetime.strptime(date_str, '%Y-%m-%dT%H:%M')
+    else:
+        updated_date = datetime.strptime(date_str, '%Y-%m-%d')
+        updated_date = updated_date.replace(hour=23, minute=59)
+    updated_date = updated_date.replace(tzinfo=ZoneInfo("America/Argentina/Buenos_Aires"))
+
+    return updated_date
+
+
+# Barbero
+def validar_barber(barber_id):
+    if not barber_id:
+        raise ValueError("Debe seleccionarse un empleado.")
+
+
+# Metodos y Montos  
+def limpiar_monto(valor):
+    if not valor:
+        return 0.0
+    limpio = re.sub(r'[^0-9,\.]', '', valor)
+    limpio = limpio.replace('.', '').replace(',', '.')
+    try:
+        return float(limpio)
+    except ValueError:
+        return 0.0
+
+
+def validar_metodos_de_pago(metodo1, metodo2):
+
+    if not metodo1:
+        raise ValueError("Debe seleccionarse un método de pago principal.")
+
+    # validar que sean metodos existentes
+
+    if metodo1 == metodo2:
+        raise ValueError("No puede elegir el mismo método de pago dos veces.")
+    
+
+def validar_montos_de_pago(metodo1, metodo2, monto1, monto2, tip, precio_servicio ):
+
+    """
+    print(f"request: {request}")
+    print(f"metodo1: {metodo1}")
+    print(f"metodo2: {metodo2}")
+    print(f"monto1: {monto1}")
+    print(f"monto2: {monto2}")
+    print(f"tip: {tip}")
+    print(f"precio_servicio: {precio_servicio}" )
+    """
+
+    if monto1 < 0 or monto2 < 0 or tip < 0:
+        raise ValueError("Los montos y propinas no pueden ser negativos.")
+    
+    if monto2 > 0 and not metodo2:
+        raise ValueError("Si el monto 2 es mayor a 0, debe seleccionar un método de pago 2 distinto a 'Ninguno'.")
+    
+    if metodo1 == metodo2:
+        raise ValueError("No puede elegir el mismo método de pago dos veces.")
+
+    # --- Validar Montos en Pagos ---
+    if monto2 == 0:
+        # Metodo de Pago Simple
+        if tip > 0:
+            diferencia = abs((monto1 - tip) - precio_servicio)
+        else:
+            diferencia = abs(monto1 - precio_servicio)
+
+        if diferencia > 0.01:
+            raise ValueError(
+                f"La suma de Monto 1 + Propina (${monto1 + tip:,.0f}) debe coincidir con el total a pagar (${precio_pago:,.0f})."
+            )
+    else:
+        # Metodo de Pago Multiple
+        diferencia = abs((monto1 + monto2) - (precio_servicio + tip))
+        if diferencia > 0.01:
+            raise ValueError(
+                f"La suma de Monto 1 + Monto 2 (${monto1 + monto2:,.0f}) debe coincidir con el precio del servicio + propina (${precio_servicio + tip:,.0f})."
+            )
+
+
+def validar_metodos_y_montos(metodo1, metodo2, amount1, amount2, tip, precio_pago ):
+
+    validar_metodos_de_pago(metodo1, metodo2)
+    validar_montos_de_pago(metodo1, metodo2, amount1, amount2, tip, precio_pago)
+
+
 ### Administrador ###
 
 def login_required(f):
@@ -1342,6 +1437,7 @@ def edit_payment(pago_id):
         try:
             # --- Fecha ---
             date_str = request.form.get('date')
+            """
             if not date_str:
                 raise ValueError("La fecha es obligatoria.")
 
@@ -1351,15 +1447,33 @@ def edit_payment(pago_id):
                 updated_date = datetime.strptime(date_str, '%Y-%m-%d')
                 updated_date = updated_date.replace(hour=23, minute=59)
             updated_date = updated_date.replace(tzinfo=ZoneInfo("America/Argentina/Buenos_Aires"))
+            """
+            updated_date = validar_fecha(date_str)
 
             # --- Empleado ---
             barber_id = request.form.get('barber_id')
+            """
             if not barber_id:
                 raise ValueError("Debe seleccionarse un empleado.")
+            """
+            validar_barber(barber_id)
 
             # --- Métodos y montos ---
             method1_id = request.form.get('method1')
             method2_id_raw = request.form.get('method2') or ""
+            method2_id = int(method2_id_raw) if method2_id_raw else None
+            
+            amount1 = limpiar_monto(request.form.get('amount1'))
+            amount2 = limpiar_monto(request.form.get('amount2'))
+            tip = limpiar_monto(request.form.get('tip'))
+            # total_pago = limpiar_monto(request.form.get('editTotalPago')) 
+
+            # --- Obtener precio del servicio ---
+            service_id = request.form.get('service_id')
+            service = Servicio.query.get(service_id) if service_id else None
+            precio_servicio = float(service.precio) if service else 0.0 
+
+            """
             if not method1_id:
                 raise ValueError("Debe seleccionarse un método de pago principal.")
 
@@ -1391,7 +1505,7 @@ def edit_payment(pago_id):
                 diferencia = abs((amount1 + tip) - total_pago)
                 if diferencia > 0.01:
                     raise ValueError(
-                        f"La suma de Monto 1 + Propina (${amount1 + tip:,.0f}) debe coincidir con el total a pagar (${total_pago:,.0f})."
+                        f"La suma de Monto 1 + Propina (${amount1 + tip:,.0f}) debe coincidir con el total a pagar (${total_pago:,.0f}).\n amount1: ({amount1}) tip: ({tip}) total_pago: ({total_pago})"
                     )
             else:
                 # Regla 2: monto1 + monto2 = precio servicio + propina
@@ -1400,6 +1514,10 @@ def edit_payment(pago_id):
                     raise ValueError(
                         f"La suma de Monto 1 + Monto 2 (${amount1 + amount2:,.0f}) debe coincidir con el precio del servicio + propina (${precio_servicio + tip:,.0f})."
                     )
+
+            """
+            
+            validar_montos_de_pago(method1_id, method2_id_raw, amount1, amount2, tip, precio_servicio )
 
             # --- Actualizar pago ---
             pago.date = updated_date
