@@ -73,12 +73,13 @@ def get_payment_page_data(salon_id):
 
     return pagos_data, barbers, services, methods
 
+"""
 def pagos_entre_fechas_metodos_pago(pago, total_por_metodo_pago, pago_dict):
-    """
+    
     Actualiza el dict de métodos de pago (pago_dict['metodo_pago']),
     suma los montos correspondientes en total_por_metodo_pago,
     y devuelve un string legible con los importes de cada método.
-    """
+    
 
     # Aseguramos que exista la clave en el dict
     if "metodo_pago" not in pago_dict:
@@ -130,7 +131,7 @@ def pagos_entre_fechas_metodos_pago(pago, total_por_metodo_pago, pago_dict):
                 metodos_pago_str = f"${monto2:,.0f}".replace(",", ".")
 
     return metodos_pago_str
-
+"""
 
 def calcular_pagos_entre_fechas(start_date, end_date):
     salon_id = session.get('salon_id')
@@ -200,15 +201,6 @@ def calcular_pagos_entre_fechas(start_date, end_date):
                 )
             ),
             "tipo_pago": tipo_pago,
-            "dni": (
-                pago.membresia_comprada.dni
-                if pago.membresia_comprada and pago.membresia_comprada.dni
-                else (
-                    pago.appointment.membresia.dni
-                    if pago.appointment and pago.appointment.membresia and pago.appointment.membresia.dni
-                    else None
-                )
-            ),
             "metodo_pago": [],
             "method1_id": pago.payment_method1_id,
             "method2_id": pago.payment_method2_id,
@@ -392,8 +384,38 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             total_general += pago.amount_tip
 
         metodos_pago_str = ""
-        metodos_pago_str = pagos_entre_fechas_metodos_pago(pago, total_por_metodo_pago, pago_dict)
-        
+
+        if pago.method1:
+            if (pago.appointment and pago.appointment.service) and not (pago.appointment.service):
+                tipo_precio = pago.appointment.tipo_precio_servicio
+                # monto_metodo1 = pago.amount_method1 or 0
+                if tipo_precio == 'amigo':
+                    total_por_metodo_pago[pago.method1.nombre] += 0
+                    if pago.amount_tip != 0:
+                        pago_dict["metodo_pago"].append(pago.method1.nombre)
+                        total_por_metodo_pago[pago.method1.nombre] += pago.amount_tip
+                        metodos_pago_str = "$" + "{:,.0f}".format(pago.amount_method1).replace(",", ".")
+                    else: 
+                        pago_dict["metodo_pago"].append("-")
+                        metodos_pago_str = "$0"
+                else: 
+                    total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
+                    pago_dict["metodo_pago"].append(pago.method1.nombre)
+                    # metodos_pago_str = "$"+str(int(pago.amount_method1))
+                    metodos_pago_str = "$" + "{:,.0f}".format(pago.amount_method1).replace(",", ".")
+            else:
+                total_por_metodo_pago[pago.method1.nombre] += pago.amount_method1 or 0
+                pago_dict["metodo_pago"].append(pago.method1.nombre)
+                # metodos_pago_str = "$"+str(int(pago.amount_method1))
+                metodos_pago_str = "$" + "{:,.0f}".format(pago.amount_method1).replace(",", ".")
+
+        if pago.method2:
+            total_por_metodo_pago[pago.method2.nombre] += pago.amount_method2 or 0
+            # metodos_pago_str += " - $"+str(int(pago.amount_method2))
+            if pago.amount_method2 > 0:
+                pago_dict["metodo_pago"].append(pago.method2.nombre)
+                metodos_pago_str += " - $" + "{:,.0f}".format(pago.amount_method2).replace(",", ".")
+
         pago_dict["metodos_pago_str"] = metodos_pago_str
 
         lista_pagos.append(pago_dict)
@@ -408,7 +430,6 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             "forma_metodos_pagos": "",
         }
     }
-
 
 @app.template_filter('moneda')
 def moneda(valor):
