@@ -558,23 +558,39 @@
         }
       }
 
+      const membresiaSelect = document.getElementById("editMembresia");
+      let precioMembresia = 0;
+      if (membresiaSelect && membresiaSelect.selectedIndex >= 0) {
+        const selectedOption = membresiaSelect.options[membresiaSelect.selectedIndex];
+        if (selectedOption) {
+          precioServicio = parseFloat(selectedOption.getAttribute("data-precio") || "0");
+        }
+      } 
 
       // Tomamos también el total mostrado en el input "Total a Pagar"
       const totalMostrado = parseFloat(
         document.getElementById("editTotalPago").value.replace(/[^0-9,\.]/g, "").replace(/\./g, "").replace(",", ".")
       ) || 0;
 
-      // Regla 1: monto2 == 0 → monto1 + propina = totalMostrado
+      // Regla 1: monto2 == 0 → monto1 + propina = totalMostrado + propina
       // Regla 2: monto2 > 0  → monto1 + monto2 = precioServicio + propina
       let diferencia = 0;
       if (amount2 === 0) {
-        diferencia = Math.abs((amount1 + tip) - totalMostrado);
+        diferencia = Math.abs((amount1 + tip) - (totalMostrado + tip));
+        // console.log("amount1 + tip: ", amount1 + tip)
+        // console.log("totalMostrado +tip: ", totalMostrado + tip )
         if (diferencia > 0.01) {
           errores.push(`La suma de Monto 1 + Propina ($${(amount1 + tip).toLocaleString('es-AR')}) debe coincidir con el total a pagar ($${totalMostrado.toLocaleString('es-AR')}).`);
           valid = false;
         }
       } else {
         diferencia = Math.abs((amount1 + amount2) - (precioServicio + tip));
+        
+        console.log("amount1: ",amount1)
+        console.log("amount2: ",amount2)
+        console.log("tip: ",tip)
+        console.log("precioServicio: ",precioServicio)
+
         if (diferencia > 0.01) {
           errores.push(`La suma de Monto 1 + Monto 2 ($${(amount1 + amount2).toLocaleString('es-AR')}) debe coincidir con el precio del servicio + propina ($${(precioServicio + tip).toLocaleString('es-AR')}).`);
           valid = false;

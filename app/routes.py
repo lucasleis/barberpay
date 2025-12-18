@@ -481,6 +481,9 @@ def inject_logo():
     }
 
 
+
+### Validaciones ###
+
 # Fecha
 def validar_fecha(date_str):
     # --- Fecha ---
@@ -497,14 +500,12 @@ def validar_fecha(date_str):
 
     return updated_date
 
-
 # Barbero
 def validar_barber(barber_id):
     if not barber_id:
         raise ValueError("Debe seleccionarse un empleado.")
 
-
-# Metodos y Montos  
+# Metodos de pago
 def limpiar_monto(valor):
     if not valor:
         return 0.0
@@ -515,7 +516,6 @@ def limpiar_monto(valor):
     except ValueError:
         return 0.0
 
-
 def validar_metodos_de_pago(metodo1, metodo2):
 
     if not metodo1:
@@ -525,9 +525,9 @@ def validar_metodos_de_pago(metodo1, metodo2):
 
     if metodo1 == metodo2:
         raise ValueError("No puede elegir el mismo método de pago dos veces.")
-    
 
-def validar_montos_de_pago(metodo1, metodo2, monto1, monto2, tip, precio_servicio ):
+# Montos  
+def validar_montos_de_pago(metodo1, metodo2, monto1, monto2, tip, valor_pago ):
 
     """
     print(f"request: {request}")
@@ -536,7 +536,7 @@ def validar_montos_de_pago(metodo1, metodo2, monto1, monto2, tip, precio_servici
     print(f"monto1: {monto1}")
     print(f"monto2: {monto2}")
     print(f"tip: {tip}")
-    print(f"precio_servicio: {precio_servicio}" )
+    print(f"valor_pago: {valor_pago}" )
     """
 
     if monto1 < 0 or monto2 < 0 or tip < 0:
@@ -552,27 +552,27 @@ def validar_montos_de_pago(metodo1, metodo2, monto1, monto2, tip, precio_servici
     if monto2 == 0:
         # Metodo de Pago Simple
         if tip > 0:
-            diferencia = abs((monto1 - tip) - precio_servicio)
+            diferencia = abs((monto1 - tip) - valor_pago)
         else:
-            diferencia = abs(monto1 - precio_servicio)
+            diferencia = abs(monto1 - valor_pago)
 
         if diferencia > 0.01:
             raise ValueError(
-                f"La suma de Monto 1 + Propina (${monto1 + tip:,.0f}) debe coincidir con el total a pagar (${precio_pago:,.0f})."
+                f"La suma de Monto 1 + Propina (${monto1 + tip:,.0f}) debe coincidir con el total a pagar (${valor_pago:,.0f})."
             )
     else:
         # Metodo de Pago Multiple
-        diferencia = abs((monto1 + monto2) - (precio_servicio + tip))
+        diferencia = abs((monto1 + monto2) - (valor_pago + tip))
         if diferencia > 0.01:
             raise ValueError(
-                f"La suma de Monto 1 + Monto 2 (${monto1 + monto2:,.0f}) debe coincidir con el precio del servicio + propina (${precio_servicio + tip:,.0f})."
+                f"La suma de Monto 1 + Monto 2 + Propina(${monto1 + monto2 + tip:,.0f}) debe coincidir con el total a pagar (${valor_pago + tip:,.0f})."
             )
 
-
-def validar_metodos_y_montos(metodo1, metodo2, amount1, amount2, tip, precio_pago ):
+# Metodos y Montos  
+def validar_metodos_y_montos(metodo1, metodo2, amount1, amount2, tip, valor_pago ):
 
     validar_metodos_de_pago(metodo1, metodo2)
-    validar_montos_de_pago(metodo1, metodo2, amount1, amount2, tip, precio_pago)
+    validar_montos_de_pago(metodo1, metodo2, amount1, amount2, tip, valor_pago)
 
 
 ### Administrador ###
@@ -1458,11 +1458,14 @@ def edit_payment(pago_id):
             """
             validar_barber(barber_id)
 
-            # --- Métodos y montos ---
+            # --- Métodos del Pago ---
             method1_id = request.form.get('method1')
+            if not method1_id:
+                raise ValueError("Debe seleccionarse un método de pago principal.")
             method2_id_raw = request.form.get('method2') or ""
             method2_id = int(method2_id_raw) if method2_id_raw else None
             
+            # --- Montos del Pago ---
             amount1 = limpiar_monto(request.form.get('amount1'))
             amount2 = limpiar_monto(request.form.get('amount2'))
             tip = limpiar_monto(request.form.get('tip'))
@@ -1471,6 +1474,8 @@ def edit_payment(pago_id):
             # --- Obtener precio del servicio ---
             service_id = request.form.get('service_id')
             service = Servicio.query.get(service_id) if service_id else None
+            if not service:
+                raise ValueError("Tipo de servicio no encontrado.")
             precio_servicio = float(service.precio) if service else 0.0 
 
             """
@@ -1517,7 +1522,7 @@ def edit_payment(pago_id):
 
             """
             
-            validar_montos_de_pago(method1_id, method2_id_raw, amount1, amount2, tip, precio_servicio )
+            validar_montos_de_pago(method1_id, method2_id_raw, amount1, amount2, tip, precio_servicio)
 
             # --- Actualizar pago ---
             pago.date = updated_date
@@ -1581,31 +1586,32 @@ def edit_payment_membership(pago_id):
     try:
         # --- Fecha ---
         date_str = request.form.get('date')
-        if not date_str:
-            raise ValueError("La fecha es obligatoria.")
-
-        if "T" in date_str:
-            updated_date = datetime.strptime(date_str, '%Y-%m-%dT%H:%M')
-        else:
-            updated_date = datetime.strptime(date_str, '%Y-%m-%d')
-            updated_date = updated_date.replace(hour=23, minute=59)
-        updated_date = updated_date.replace(tzinfo=ZoneInfo("America/Argentina/Buenos_Aires"))
+        updated_date = validar_fecha(date_str)
 
         # --- Empleado ---
         barber_id = request.form.get('barber_id')
-        if not barber_id:
-            raise ValueError("Debe seleccionarse un empleado.")
+        validar_barber(barber_id)
 
-        # --- Métodos y montos ---
+        # --- Métodos del Pago ---
         method1_id = request.form.get('method1')
-        method2_id_raw = request.form.get('method2') or ""
         if not method1_id:
             raise ValueError("Debe seleccionarse un método de pago principal.")
+        method2_id_raw = request.form.get('method2') or ""
+        method2_id = int(method2_id_raw) if method2_id_raw else None
 
+        # --- Montos del Pago ---
         amount1 = limpiar_monto(request.form.get('amount1'))
         amount2 = limpiar_monto(request.form.get('amount2'))
         tip = limpiar_monto(request.form.get('tip'))
 
+        # --- Obtener precio de la membresía ---
+        membresia_tipo_id = request.form.get("membresia_id")
+        tipo_membresia = TipoMembresia.query.get(membresia_tipo_id)
+        if not tipo_membresia:
+            raise ValueError("Tipo de membresía no encontrado.")
+        precio_membresia = float(tipo_membresia.precio)
+
+        """
         if amount1 < 0 or amount2 < 0 or tip < 0:
             raise ValueError("Los montos y propinas no pueden ser negativos.")
         if amount2 > 0 and not method2_id_raw:
@@ -1620,7 +1626,6 @@ def edit_payment_membership(pago_id):
         tipo_membresia = TipoMembresia.query.get(membresia_tipo_id)
         if not tipo_membresia:
             raise ValueError("Tipo de membresía no encontrado.")
-
         precio_membresia = float(tipo_membresia.precio)
 
         # --- Validar coherencia con montos ---
@@ -1629,6 +1634,11 @@ def edit_payment_membership(pago_id):
             raise ValueError(
                 f"La suma de Monto 1 + Monto 2 (${amount1 + amount2:,.0f}) debe coincidir con el precio de la membresía + propina (${precio_membresia + tip:,.0f})."
             )
+
+        """
+
+        validar_montos_de_pago(method1_id, method2_id_raw, amount1, amount2, tip, precio_membresia)
+
 
         # --- Actualizar el pago ---
         pago.date = updated_date
