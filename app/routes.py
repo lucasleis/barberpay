@@ -218,6 +218,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
         porcentajes_productos = []
         pago_empleado_productos = 0
         total_propietarios_productos = 0
+        dni_membresia = None
   
         if pago.appointment and pago.appointment.service:
             pago_propietario_servicio = 0
@@ -331,6 +332,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
         if pago.membresia_comprada:
             empleado = pago.appointment.barber
             tipo = pago.membresia_comprada.tipo_membresia
+            dni_membresia = pago.membresia_comprada.dni or pago.membresia_comprada.id_usuario
 
             monto_pagado = (pago.amount_method1 or 0) + (pago.amount_method2 or 0)
             if monto_pagado == 0:
@@ -355,6 +357,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             tipo = pago.appointment.membresia.tipo_membresia
             empleado = pago.appointment.barber
             porcentaje = empleado.porcentaje
+            dni_membresia = pago.appointment.membresia.dni or pago.appointment.membresia.id_usuario
             # monto = float(tipo.precio) / tipo.usos
             servicio = Servicio.query.get(tipo.servicio_id)
             monto = servicio.precio if servicio else 0
@@ -378,6 +381,8 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             total_por_empleado[empleado.name]["monto_cortes"] += float(pago_empleado)
             total_por_empleado[empleado.name]["cortes"] += 1
             total_propietario -= float(pago_empleado)
+
+        pago_dict["dni"] = dni_membresia
 
         if pago.amount_tip and empleado:
             total_por_empleado[empleado.name]["propinas"] += pago.amount_tip
