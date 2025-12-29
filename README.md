@@ -76,6 +76,19 @@ SELECT pg_terminate_backend(<pid>);
 \du
 ```
 
+12. Eliminar membresias:
+Paso 1:
+```
+SELECT dni, usos_disponibles, tipo_membresia_id FROM membresias ORDER BY id DESC LIMIT 5;
+```
+Paso 2:
+```
+DELETE FROM pagos WHERE appointment_id IN ( SELECT id FROM turnos WHERE membresia_id IN ( SELECT id FROM membresias WHERE dni = '42024923' ) );
+```
+Paso 3:
+```
+DELETE FROM membresias WHERE dni = '42024923';
+```
 
 
 # Usuarios en db
