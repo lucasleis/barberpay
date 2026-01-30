@@ -1329,10 +1329,10 @@ def delete_payment(pago_id):
     salon_id = session.get("salon_id")
 
     # --- Validar permisos ---
-    user_role = session.get('rol')
-    if user_role != 'admin':
-        flash("No tienes permiso para editar pagos.", "danger")
-        return redirect(url_for('cierre_entre_dias', salon_id=salon_id))
+    # user_role = session.get('rol')
+    # if user_role != 'admin':
+    #     flash("No tienes permiso para editar pagos.", "danger")
+    #     return redirect(url_for('cierre_entre_dias', salon_id=salon_id))
     
     pago = Pago.query.get_or_404(pago_id)
 

@@ -361,13 +361,22 @@
               <td>
                 <button
                   type="button"
-                  class="edit-icon ${['servicio', 'membresia'].includes(p.tipo_pago) ? 'enabled' : 'disabled'}"
-                  title="${['servicio', 'membresia'].includes(p.tipo_pago)
-                    ? 'Editar pago'
-                    : 'Solo se pueden editar pagos de servicios o membresías'}"
-                  ${['servicio', 'membresia'].includes(p.tipo_pago)
-                    ? `onclick="openEditModal(${p.id}, '${p.fecha}', '${p.empleado}', '${p.metodo_pago.join(' - ')}', ${p.monto || 0}, ${p.propina || 0})"`
-                    : 'disabled'}
+                  class="edit-icon
+                    ${['servicio', 'membresia'].includes(p.tipo_pago) && '{{ role }}' === 'admin'
+                      ? 'enabled'
+                      : 'disabled'}"
+                  title="${
+                    '{{ role }}' !== 'admin'
+                      ? 'Solo los administradores pueden editar pagos'
+                      : ['servicio', 'membresia'].includes(p.tipo_pago)
+                        ? 'Editar pago'
+                        : 'Solo se pueden editar pagos de servicios o membresías'
+                  }"
+                  ${
+                    ['servicio', 'membresia'].includes(p.tipo_pago) && '{{ role }}' === 'admin'
+                      ? `onclick="openEditModal(${p.id}, '${p.fecha}', '${p.empleado}', '${p.metodo_pago.join(' - ')}', ${p.monto || 0}, ${p.propina || 0})"`
+                      : 'disabled'
+                  }
                 >
                   <i class="fas fa-pen"></i>
                 </button>
