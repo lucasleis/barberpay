@@ -283,6 +283,52 @@
     fields.style.display = check.checked ? 'block' : 'none';
   }
 
+  function formatearFecha(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  function inicializarFechas() {
+    const hoy = new Date();
+    const diaSemana = hoy.getDay(); // 0=domingo, 1=lunes, ..., 6=sábado
+
+    const diasAtras = diaSemana === 0 ? 7 : diaSemana;
+    const ultimoDomingo = new Date(hoy);
+    ultimoDomingo.setDate(hoy.getDate() - diasAtras);
+
+    const diasAdelante = diaSemana === 0 ? 7 : 7 - diaSemana;
+    const proximoDomingo = new Date(hoy);
+    proximoDomingo.setDate(hoy.getDate() + diasAdelante);
+
+    document.getElementById('fecha_inicio').value = formatearFecha(ultimoDomingo);
+    document.getElementById('fecha_fin').value = formatearFecha(proximoDomingo);
+  }
+
+  function calcularMontoFinal() {
+    const base = parseFloat(
+      document.getElementById('monto_base').value.replace('$', '').replace(',', '.')
+    ) || 0;
+    const descuento = parseFloat(document.getElementById('monto-descuento').value) || 0;
+    const agregado  = parseFloat(document.getElementById('monto-agregado').value)  || 0;
+
+    const resultado = Math.max(0, base - descuento + agregado);
+    document.getElementById('monto-final').value = '$' + resultado.toFixed(2);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    inicializarFechas();
+    calcularMontoFinal();
+
+    // monto_base es readonly; escuchar 'input' y 'change' cubre tanto
+    // edición manual en dev como actualizaciones programáticas vía .value + dispatchEvent
+    document.getElementById('monto_base').addEventListener('input',  calcularMontoFinal);
+    document.getElementById('monto_base').addEventListener('change', calcularMontoFinal);
+    document.getElementById('monto-descuento').addEventListener('input', calcularMontoFinal);
+    document.getElementById('monto-agregado').addEventListener('input',  calcularMontoFinal);
+  });
+
   function openDetalleModal(id) {
     const modal = document.getElementById('modal-detalle-' + id);
     modal.style.display = 'flex';
