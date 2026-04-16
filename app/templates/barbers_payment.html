@@ -1,0 +1,307 @@
+{% extends "layout.html" %}
+
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='barbers_payment.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<h2>Pagos a Barberos</h2>
+
+<!-- ================================================================
+     SECCIÓN 1: AGREGAR PAGO
+     ================================================================ -->
+<h3>Agregar Pago</h3>
+
+<div class="card mb-4">
+  <div class="card-header">
+    <strong>Nuevo Pago a Barbero</strong>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="#">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <!-- 1. Selector de Barbero -->
+      <!-- Opciones dinámicas generadas desde el backend -->
+      <div class="form-group">
+        <label for="barbero_id">Barbero a pagar:</label>
+        <select name="barbero_id" id="barbero_id" required>
+          <option value="" disabled selected>Seleccione un barbero</option>
+          {% for b in barberos %}
+            <option value="{{ b.id }}">{{ b.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- 2. Período de Pago - layout horizontal 2 columnas -->
+      <div class="form-group">
+        <label>Período de Pago:</label>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="fecha_inicio">Fecha Inicio</label>
+            <input type="date" name="fecha_inicio" id="fecha_inicio" required>
+          </div>
+          <div class="col-md-6">
+            <label for="fecha_fin">Fecha Fin</label>
+            <input type="date" name="fecha_fin" id="fecha_fin" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Monto Base (solo lectura) -->
+      <!-- Valor calculado dinámicamente desde el backend según cierres del período seleccionado -->
+      <div class="form-group">
+        <label for="monto_base">Monto a Pagar (según cierres):</label>
+        <input type="text" id="monto_base" name="monto_base" readonly value="$0.00" class="form-control">
+      </div>
+
+      <!-- 4 & 5. Toggles Descuento y Agregado - fila horizontal -->
+      <div class="form-group">
+        <div class="d-flex gap-4 align-items-center">
+          <label class="checkbox-label">
+            <input type="checkbox" id="checkbox-descuento" onchange="toggleDescuento()">
+            <span class="checkbox-text">Aplicar Descuento</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="checkbox-agregado" onchange="toggleAgregado()">
+            <span class="checkbox-text">Aplicar Agregado</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Campos de descuento - ocultos inicialmente -->
+      <div id="campos-descuento" style="display: none;">
+        <div class="form-group">
+          <label for="monto-descuento">Monto Descuento:</label>
+          <input type="number" name="monto_descuento" id="monto-descuento" min="0" step="0.01" value="0">
+        </div>
+        <div class="form-group">
+          <label for="justificacion-descuento">Justificación Descuento:</label>
+          <textarea name="justificacion_descuento" id="justificacion-descuento" rows="2" placeholder="Motivo del descuento (opcional)"></textarea>
+        </div>
+      </div>
+
+      <!-- Campos de agregado - ocultos inicialmente -->
+      <div id="campos-agregado" style="display: none;">
+        <div class="form-group">
+          <label for="monto-agregado">Monto Agregado:</label>
+          <input type="number" name="monto_agregado" id="monto-agregado" min="0" step="0.01" value="0">
+        </div>
+        <div class="form-group">
+          <label for="justificacion-agregado">Justificación Agregado:</label>
+          <textarea name="justificacion_agregado" id="justificacion-agregado" rows="2" placeholder="Motivo del agregado (opcional)"></textarea>
+        </div>
+      </div>
+
+      <!-- 6. Monto Final calculado (solo lectura) -->
+      <!-- Calculado dinámicamente: Monto Base - Descuento + Agregado -->
+      <div class="form-group">
+        <label for="monto-final">Monto Final a Pagar:</label>
+        <input type="text" id="monto-final" name="monto_final" readonly value="$0.00" class="form-control">
+      </div>
+
+      <!-- 7. Métodos de Pago (siempre visibles, sin checkboxes) -->
+      <div class="form-group">
+        <label>Método de Pago:</label>
+        <div class="payment-method-container">
+          <div class="payment-method-group">
+            <label for="pago-transferencia">Transferencia</label>
+            <input type="number" name="monto_transferencia" id="pago-transferencia" min="0" step="0.01" value="0">
+          </div>
+          <div class="payment-method-group">
+            <label for="pago-efectivo">Efectivo</label>
+            <input type="number" name="monto_efectivo" id="pago-efectivo" min="0" step="0.01" value="0">
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones del formulario - fila horizontal -->
+      <div class="form-group d-flex gap-2">
+        <button type="submit" class="btn-primary flex-grow-1">Guardar Pago</button>
+        <button type="button" class="btn btn-success flex-grow-1">
+          <i class="fas fa-envelope"></i> Guardar y Enviar Email
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     SECCIÓN 2: PAGOS REALIZADOS
+     ================================================================ -->
+<h3>Pagos Realizados</h3>
+
+<!-- Tabla generada dinámicamente desde el backend -->
+<table class="table table-striped table-bordered text-center" style="margin-top: 1rem;">
+  <thead>
+    <tr>
+      <th>Barbero</th>
+      <th>Período</th>
+      <th>Monto Base</th>
+      <th>Descuento <sup>*</sup></th>
+      <th>Agregado <sup>*</sup></th>
+      <th>Total Final</th>
+      <th>Fecha Pago</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Filas generadas dinámicamente desde el backend -->
+    {% for pago in pagos_barberos %}
+    <tr>
+      <td>{{ pago.barbero }}</td>
+      <td>{{ pago.fecha_inicio }} - {{ pago.fecha_fin }}</td>
+      <td>${{ pago.monto_base }}</td>
+      <td>${{ pago.monto_descuento }}</td>
+      <td>${{ pago.monto_agregado }}</td>
+      <td>${{ pago.total_final }}</td>
+      <td>{{ pago.fecha_pago }}</td>
+      <td>
+        <a href="#" class="btn btn-info btn-sm" title="Ver Detalle"
+           onclick="openDetalleModal('{{ pago.id }}'); return false;">
+          <i class="fas fa-eye"></i>
+        </a>
+        <a href="#" class="btn btn-warning btn-sm" title="Editar">
+          <i class="fas fa-pen"></i>
+        </a>
+        <a href="#" class="btn btn-danger btn-sm" title="Eliminar">
+          <i class="fas fa-trash-alt"></i>
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+<!-- ================================================================
+     MODALES: VER DETALLE
+     Un modal por cada pago, generados desde el backend
+     ================================================================ -->
+{% for pago in pagos_barberos %}
+<div id="modal-detalle-{{ pago.id }}" class="modal-cantidad">
+  <div class="modal-content">
+    <h3>Detalle de Pago</h3>
+    <span class="close-modal" onclick="closeDetalleModal('{{ pago.id }}')">&times;</span>
+
+    <div class="form-group">
+      <label>Barbero:</label>
+      <input type="text" readonly value="{{ pago.barbero }}" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>Período:</label>
+      <input type="text" readonly value="{{ pago.fecha_inicio }} - {{ pago.fecha_fin }}" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>Monto Base:</label>
+      <input type="text" readonly value="${{ pago.monto_base }}" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>Descuento:</label>
+      <input type="text" readonly value="${{ pago.monto_descuento }}" class="form-control">
+    </div>
+
+    <!-- Justificación Descuento (solo si existe) -->
+    {% if pago.justificacion_descuento %}
+    <div class="form-group">
+      <label>Justificación Descuento:</label>
+      <input type="text" readonly value="{{ pago.justificacion_descuento }}" class="form-control">
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label>Agregado:</label>
+      <input type="text" readonly value="${{ pago.monto_agregado }}" class="form-control">
+    </div>
+
+    <!-- Justificación Agregado (solo si existe) -->
+    {% if pago.justificacion_agregado %}
+    <div class="form-group">
+      <label>Justificación Agregado:</label>
+      <input type="text" readonly value="{{ pago.justificacion_agregado }}" class="form-control">
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label>Total Final:</label>
+      <input type="text" readonly value="${{ pago.total_final }}" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>Fecha de Pago:</label>
+      <input type="text" readonly value="{{ pago.fecha_pago }}" class="form-control">
+    </div>
+
+    <!-- Detalle de métodos de pago -->
+    <!-- Montos generados dinámicamente desde el backend -->
+    <div class="form-group">
+      <label>Detalle Métodos de Pago:</label>
+      {% if pago.monto_transferencia %}
+        <p>Transferencia: ${{ pago.monto_transferencia }}</p>
+      {% endif %}
+      {% if pago.monto_efectivo %}
+        <p>Efectivo: ${{ pago.monto_efectivo }}</p>
+      {% endif %}
+    </div>
+
+    <div class="buttons-wrapper">
+      <div class="modal-buttons">
+        <button type="button" class="btn btn-success">
+          <i class="fas fa-envelope"></i> Enviar Email
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="closeDetalleModal('{{ pago.id }}')">
+          Cerrar
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endfor %}
+
+
+<script>
+  function toggleDescuento() {
+    const check = document.getElementById('checkbox-descuento');
+    const fields = document.getElementById('campos-descuento');
+    fields.style.display = check.checked ? 'block' : 'none';
+  }
+
+  function toggleAgregado() {
+    const check = document.getElementById('checkbox-agregado');
+    const fields = document.getElementById('campos-agregado');
+    fields.style.display = check.checked ? 'block' : 'none';
+  }
+
+  function openDetalleModal(id) {
+    const modal = document.getElementById('modal-detalle-' + id);
+    modal.style.display = 'flex';
+    modal.offsetHeight;
+    modal.classList.add('active');
+  }
+
+  function closeDetalleModal(id) {
+    const modal = document.getElementById('modal-detalle-' + id);
+    modal.classList.remove('active');
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 300);
+  }
+
+  window.onclick = function(event) {
+    const modals = document.querySelectorAll('.modal-cantidad');
+    modals.forEach(modal => {
+      if (event.target === modal) {
+        const id = modal.id.replace('modal-detalle-', '');
+        closeDetalleModal(id);
+      }
+    });
+  }
+</script>
+
+{% endblock %}

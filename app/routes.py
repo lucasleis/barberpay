@@ -1760,7 +1760,14 @@ def list_users():
     salon_id = session.get('salon_id')
     users = Usuario.query.filter_by(salon_id=salon_id).all()
     return render_template('users.html', users=users)
-    
+
+
+@app.route('/barbers_payment')
+def barbers_payment():
+    if "user" not in session:
+        return redirect(url_for("login", next=request.path))
+    return render_template('barbers_payment.html')
+
 
 @app.route('/admin/users/add', methods=['POST'])
 def add_user():
