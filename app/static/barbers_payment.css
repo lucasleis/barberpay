@@ -168,6 +168,7 @@ input[readonly] {
 
 .payment-method-group {
   display: flex;
+  align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
 }
@@ -179,6 +180,15 @@ input[readonly] {
 .payment-method-group input {
   margin: 0;
   flex: 1;
+}
+
+/* Inputs de métodos de pago: ancho fijo, alineados a la derecha */
+#pago-transferencia,
+#pago-efectivo {
+  width: 150px;
+  flex: none;
+  margin-left: auto;
+  text-align: right;
 }
 
 /* ======================== BOTONES ======================== */

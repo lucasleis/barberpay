@@ -55,12 +55,18 @@
         <input type="text" id="monto_base" name="monto_base" readonly value="$0.00" class="form-control">
       </div>
 
-      <!-- 4. Toggle Descuento -->
+      <!-- 4 & 5. Toggles Descuento y Agregado - fila horizontal -->
       <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" id="checkbox-descuento" onchange="toggleDescuento()">
-          <span class="checkbox-text">Aplicar Descuento</span>
-        </label>
+        <div class="d-flex gap-4 align-items-center">
+          <label class="checkbox-label">
+            <input type="checkbox" id="checkbox-descuento" onchange="toggleDescuento()">
+            <span class="checkbox-text">Aplicar Descuento</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="checkbox-agregado" onchange="toggleAgregado()">
+            <span class="checkbox-text">Aplicar Agregado</span>
+          </label>
+        </div>
       </div>
 
       <!-- Campos de descuento - ocultos inicialmente -->
@@ -73,14 +79,6 @@
           <label for="justificacion-descuento">Justificación Descuento:</label>
           <textarea name="justificacion_descuento" id="justificacion-descuento" rows="2" placeholder="Motivo del descuento (opcional)"></textarea>
         </div>
-      </div>
-
-      <!-- 5. Toggle Agregado -->
-      <div class="form-group">
-        <label class="checkbox-label">
-          <input type="checkbox" id="checkbox-agregado" onchange="toggleAgregado()">
-          <span class="checkbox-text">Aplicar Agregado</span>
-        </label>
       </div>
 
       <!-- Campos de agregado - ocultos inicialmente -->
