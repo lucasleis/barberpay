@@ -55,17 +55,22 @@
         <input type="text" id="monto_base" name="monto_base" readonly value="$0.00" class="form-control">
       </div>
 
-      <!-- 4 & 5. Toggles Descuento y Agregado - fila horizontal -->
+      <!-- 4 & 5. Toggles Descuento y Agregado - 3 columnas iguales -->
       <div class="form-group">
-        <div class="d-flex gap-4 align-items-center">
-          <label class="checkbox-label">
-            <input type="checkbox" id="checkbox-descuento" onchange="toggleDescuento()">
-            <span class="checkbox-text">Aplicar Descuento</span>
-          </label>
-          <label class="checkbox-label">
-            <input type="checkbox" id="checkbox-agregado" onchange="toggleAgregado()">
-            <span class="checkbox-text">Aplicar Agregado</span>
-          </label>
+        <div class="row">
+          <div class="col-4">
+            <label class="checkbox-label">
+              <input type="checkbox" id="checkbox-descuento" onchange="toggleDescuento()">
+              <span class="checkbox-text">Aplicar Descuento</span>
+            </label>
+          </div>
+          <div class="col-4">
+            <label class="checkbox-label">
+              <input type="checkbox" id="checkbox-agregado" onchange="toggleAgregado()">
+              <span class="checkbox-text">Aplicar Agregado</span>
+            </label>
+          </div>
+          <div class="col-4"></div>
         </div>
       </div>
 
