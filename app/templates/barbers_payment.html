@@ -310,8 +310,16 @@
     const base = parseFloat(
       document.getElementById('monto_base').value.replace('$', '').replace(',', '.')
     ) || 0;
-    const descuento = parseFloat(document.getElementById('monto-descuento').value) || 0;
-    const agregado  = parseFloat(document.getElementById('monto-agregado').value)  || 0;
+
+    let descuento = 0;
+    if (document.getElementById('checkbox-descuento').checked) {
+      descuento = parseFloat(document.getElementById('monto-descuento').value) || 0;
+    }
+
+    let agregado = 0;
+    if (document.getElementById('checkbox-agregado').checked) {
+      agregado = parseFloat(document.getElementById('monto-agregado').value) || 0;
+    }
 
     const resultado = Math.max(0, base - descuento + agregado);
     document.getElementById('monto-final').value = '$' + resultado.toFixed(2);
@@ -325,8 +333,10 @@
     // edición manual en dev como actualizaciones programáticas vía .value + dispatchEvent
     document.getElementById('monto_base').addEventListener('input',  calcularMontoFinal);
     document.getElementById('monto_base').addEventListener('change', calcularMontoFinal);
-    document.getElementById('monto-descuento').addEventListener('input', calcularMontoFinal);
-    document.getElementById('monto-agregado').addEventListener('input',  calcularMontoFinal);
+    document.getElementById('monto-descuento').addEventListener('input',  calcularMontoFinal);
+    document.getElementById('monto-agregado').addEventListener('input',   calcularMontoFinal);
+    document.getElementById('checkbox-descuento').addEventListener('change', calcularMontoFinal);
+    document.getElementById('checkbox-agregado').addEventListener('change',  calcularMontoFinal);
   });
 
   function openDetalleModal(id) {
