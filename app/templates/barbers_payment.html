@@ -1,0 +1,272 @@
+{% extends "layout.html" %}
+
+{% block head %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<h2>Pagos a Barberos</h2>
+
+<!-- ================================================================
+     SECCIÓN 1: AGREGAR PAGO
+     ================================================================ -->
+<h3>Agregar Pago</h3>
+
+<div class="card mb-4">
+  <div class="card-header">
+    <strong>Nuevo Pago a Barbero</strong>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="#">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <!-- 1. Selector de Barbero -->
+      <!-- Opciones dinámicas generadas desde el backend -->
+      <div class="form-group">
+        <label for="barbero_id">Barbero a pagar:</label>
+        <select name="barbero_id" id="barbero_id" required>
+          <option value="" disabled selected>Seleccione un barbero</option>
+          {% for b in barberos %}
+            <option value="{{ b.id }}">{{ b.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- 2. Período de Pago -->
+      <div class="form-group">
+        <label>Período de Pago:</label>
+        <div class="rango-fechas">
+          <label for="fecha_inicio">Fecha Inicio</label>
+          <input type="date" name="fecha_inicio" id="fecha_inicio" required>
+          <label for="fecha_fin">Fecha Fin</label>
+          <input type="date" name="fecha_fin" id="fecha_fin" required>
+        </div>
+      </div>
+
+      <!-- 3. Monto Base (solo lectura) -->
+      <!-- Valor calculado dinámicamente desde el backend según cierres del período seleccionado -->
+      <div class="form-group">
+        <label for="monto_base">Monto a Pagar (según cierres):</label>
+        <input type="text" id="monto_base" name="monto_base" readonly value="$0.00" class="form-control">
+      </div>
+
+      <!-- 4. Descuentos -->
+      <div class="form-group">
+        <label for="monto_descuento">Monto Descuento:</label>
+        <input type="number" name="monto_descuento" id="monto_descuento" min="0" step="0.01" placeholder="$0.00">
+      </div>
+      <div class="form-group">
+        <label for="justificacion_descuento">Justificación Descuento:</label>
+        <textarea name="justificacion_descuento" id="justificacion_descuento" rows="2" placeholder="Motivo del descuento (opcional)"></textarea>
+      </div>
+
+      <!-- 5. Agregados -->
+      <div class="form-group">
+        <label for="monto_agregado">Monto Agregado:</label>
+        <input type="number" name="monto_agregado" id="monto_agregado" min="0" step="0.01" placeholder="$0.00">
+      </div>
+      <div class="form-group">
+        <label for="justificacion_agregado">Justificación Agregado:</label>
+        <textarea name="justificacion_agregado" id="justificacion_agregado" rows="2" placeholder="Motivo del agregado (opcional)"></textarea>
+      </div>
+
+      <!-- 6. Métodos de Pago -->
+      <div class="form-group">
+        <label>Método de Pago:</label>
+        <div class="payment-method-container">
+          <div class="payment-method-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="metodo_transferencia" id="metodo_transferencia">
+              <span class="checkbox-text">Transferencia</span>
+            </label>
+            <input type="number" name="monto_transferencia" id="monto_transferencia" min="0" step="0.01" placeholder="Monto $">
+          </div>
+          <div class="payment-method-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="metodo_efectivo" id="metodo_efectivo">
+              <span class="checkbox-text">Efectivo</span>
+            </label>
+            <input type="number" name="monto_efectivo" id="monto_efectivo" min="0" step="0.01" placeholder="Monto $">
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones del formulario -->
+      <div class="form-group">
+        <button type="submit" class="btn-primary">Guardar Pago</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" name="accion" value="guardar_email" class="btn btn-success">
+          <i class="fas fa-envelope"></i> Guardar y Enviar Email
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     SECCIÓN 2: PAGOS REALIZADOS
+     ================================================================ -->
+<h3>Pagos Realizados</h3>
+
+<!-- Tabla generada dinámicamente desde el backend -->
+<table class="table table-striped table-bordered text-center" style="margin-top: 1rem;">
+  <thead>
+    <tr>
+      <th>Barbero</th>
+      <th>Período</th>
+      <th>Monto Base</th>
+      <th>Descuento <sup>*</sup></th>
+      <th>Agregado <sup>*</sup></th>
+      <th>Total Final</th>
+      <th>Fecha Pago</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Filas generadas dinámicamente desde el backend -->
+    {% for pago in pagos_barberos %}
+    <tr>
+      <td>{{ pago.barbero }}</td>
+      <td>{{ pago.fecha_inicio }} - {{ pago.fecha_fin }}</td>
+      <td>${{ pago.monto_base }}</td>
+      <td>${{ pago.monto_descuento }}</td>
+      <td>${{ pago.monto_agregado }}</td>
+      <td>${{ pago.total_final }}</td>
+      <td>{{ pago.fecha_pago }}</td>
+      <td>
+        <a href="#" class="btn btn-info btn-sm" title="Ver Detalle"
+           onclick="openDetalleModal('{{ pago.id }}'); return false;">
+          <i class="fas fa-eye"></i>
+        </a>
+        <a href="#" class="btn btn-warning btn-sm" title="Editar">
+          <i class="fas fa-pen"></i>
+        </a>
+        <a href="#" class="btn btn-danger btn-sm" title="Eliminar">
+          <i class="fas fa-trash-alt"></i>
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+<!-- ================================================================
+     MODALES: VER DETALLE
+     Un modal por cada pago, generados desde el backend
+     ================================================================ -->
+{% for pago in pagos_barberos %}
+<div id="modal-detalle-{{ pago.id }}" class="modal-cantidad">
+  <div class="modal-content">
+    <h3>Detalle de Pago</h3>
+    <span class="close-modal" onclick="closeDetalleModal('{{ pago.id }}')">&times;</span>
+
+    <div class="form-group">
+      <label>Barbero:</label>
+      <input type="text" readonly value="{{ pago.barbero }}" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>Período:</label>
+      <input type="text" readonly value="{{ pago.fecha_inicio }} - {{ pago.fecha_fin }}" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>Monto Base:</label>
+      <input type="text" readonly value="${{ pago.monto_base }}" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>Descuento:</label>
+      <input type="text" readonly value="${{ pago.monto_descuento }}" class="form-control">
+    </div>
+
+    <!-- Justificación Descuento (solo si existe) -->
+    {% if pago.justificacion_descuento %}
+    <div class="form-group">
+      <label>Justificación Descuento:</label>
+      <input type="text" readonly value="{{ pago.justificacion_descuento }}" class="form-control">
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label>Agregado:</label>
+      <input type="text" readonly value="${{ pago.monto_agregado }}" class="form-control">
+    </div>
+
+    <!-- Justificación Agregado (solo si existe) -->
+    {% if pago.justificacion_agregado %}
+    <div class="form-group">
+      <label>Justificación Agregado:</label>
+      <input type="text" readonly value="{{ pago.justificacion_agregado }}" class="form-control">
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label>Total Final:</label>
+      <input type="text" readonly value="${{ pago.total_final }}" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>Fecha de Pago:</label>
+      <input type="text" readonly value="{{ pago.fecha_pago }}" class="form-control">
+    </div>
+
+    <!-- Detalle de métodos de pago -->
+    <!-- Montos generados dinámicamente desde el backend -->
+    <div class="form-group">
+      <label>Detalle Métodos de Pago:</label>
+      {% if pago.monto_transferencia %}
+        <p>Transferencia: ${{ pago.monto_transferencia }}</p>
+      {% endif %}
+      {% if pago.monto_efectivo %}
+        <p>Efectivo: ${{ pago.monto_efectivo }}</p>
+      {% endif %}
+    </div>
+
+    <div class="buttons-wrapper">
+      <div class="modal-buttons">
+        <button type="button" class="btn btn-success">
+          <i class="fas fa-envelope"></i> Enviar Email
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="closeDetalleModal('{{ pago.id }}')">
+          Cerrar
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endfor %}
+
+
+<script>
+  function openDetalleModal(id) {
+    const modal = document.getElementById('modal-detalle-' + id);
+    modal.style.display = 'flex';
+    modal.offsetHeight;
+    modal.classList.add('active');
+  }
+
+  function closeDetalleModal(id) {
+    const modal = document.getElementById('modal-detalle-' + id);
+    modal.classList.remove('active');
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 300);
+  }
+
+  window.onclick = function(event) {
+    const modals = document.querySelectorAll('.modal-cantidad');
+    modals.forEach(modal => {
+      if (event.target === modal) {
+        const id = modal.id.replace('modal-detalle-', '');
+        closeDetalleModal(id);
+      }
+    });
+  }
+</script>
+
+{% endblock %}
