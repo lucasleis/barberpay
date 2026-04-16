@@ -33,14 +33,18 @@
         </select>
       </div>
 
-      <!-- 2. Período de Pago -->
+      <!-- 2. Período de Pago - layout horizontal 2 columnas -->
       <div class="form-group">
         <label>Período de Pago:</label>
-        <div class="rango-fechas">
-          <label for="fecha_inicio">Fecha Inicio</label>
-          <input type="date" name="fecha_inicio" id="fecha_inicio" required>
-          <label for="fecha_fin">Fecha Fin</label>
-          <input type="date" name="fecha_fin" id="fecha_fin" required>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="fecha_inicio">Fecha Inicio</label>
+            <input type="date" name="fecha_inicio" id="fecha_inicio" required>
+          </div>
+          <div class="col-md-6">
+            <label for="fecha_fin">Fecha Fin</label>
+            <input type="date" name="fecha_fin" id="fecha_fin" required>
+          </div>
         </div>
       </div>
 
@@ -51,52 +55,72 @@
         <input type="text" id="monto_base" name="monto_base" readonly value="$0.00" class="form-control">
       </div>
 
-      <!-- 4. Descuentos -->
+      <!-- 4. Toggle Descuento -->
       <div class="form-group">
-        <label for="monto_descuento">Monto Descuento:</label>
-        <input type="number" name="monto_descuento" id="monto_descuento" min="0" step="0.01" placeholder="$0.00">
-      </div>
-      <div class="form-group">
-        <label for="justificacion_descuento">Justificación Descuento:</label>
-        <textarea name="justificacion_descuento" id="justificacion_descuento" rows="2" placeholder="Motivo del descuento (opcional)"></textarea>
+        <label class="checkbox-label">
+          <input type="checkbox" id="checkbox-descuento" onchange="toggleDescuento()">
+          <span class="checkbox-text">Aplicar Descuento</span>
+        </label>
       </div>
 
-      <!-- 5. Agregados -->
-      <div class="form-group">
-        <label for="monto_agregado">Monto Agregado:</label>
-        <input type="number" name="monto_agregado" id="monto_agregado" min="0" step="0.01" placeholder="$0.00">
-      </div>
-      <div class="form-group">
-        <label for="justificacion_agregado">Justificación Agregado:</label>
-        <textarea name="justificacion_agregado" id="justificacion_agregado" rows="2" placeholder="Motivo del agregado (opcional)"></textarea>
+      <!-- Campos de descuento - ocultos inicialmente -->
+      <div id="campos-descuento" style="display: none;">
+        <div class="form-group">
+          <label for="monto-descuento">Monto Descuento:</label>
+          <input type="number" name="monto_descuento" id="monto-descuento" min="0" step="0.01" value="0">
+        </div>
+        <div class="form-group">
+          <label for="justificacion-descuento">Justificación Descuento:</label>
+          <textarea name="justificacion_descuento" id="justificacion-descuento" rows="2" placeholder="Motivo del descuento (opcional)"></textarea>
+        </div>
       </div>
 
-      <!-- 6. Métodos de Pago -->
+      <!-- 5. Toggle Agregado -->
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="checkbox-agregado" onchange="toggleAgregado()">
+          <span class="checkbox-text">Aplicar Agregado</span>
+        </label>
+      </div>
+
+      <!-- Campos de agregado - ocultos inicialmente -->
+      <div id="campos-agregado" style="display: none;">
+        <div class="form-group">
+          <label for="monto-agregado">Monto Agregado:</label>
+          <input type="number" name="monto_agregado" id="monto-agregado" min="0" step="0.01" value="0">
+        </div>
+        <div class="form-group">
+          <label for="justificacion-agregado">Justificación Agregado:</label>
+          <textarea name="justificacion_agregado" id="justificacion-agregado" rows="2" placeholder="Motivo del agregado (opcional)"></textarea>
+        </div>
+      </div>
+
+      <!-- 6. Monto Final calculado (solo lectura) -->
+      <!-- Calculado dinámicamente: Monto Base - Descuento + Agregado -->
+      <div class="form-group">
+        <label for="monto-final">Monto Final a Pagar:</label>
+        <input type="text" id="monto-final" name="monto_final" readonly value="$0.00" class="form-control">
+      </div>
+
+      <!-- 7. Métodos de Pago (siempre visibles, sin checkboxes) -->
       <div class="form-group">
         <label>Método de Pago:</label>
         <div class="payment-method-container">
           <div class="payment-method-group">
-            <label class="checkbox-label">
-              <input type="checkbox" name="metodo_transferencia" id="metodo_transferencia">
-              <span class="checkbox-text">Transferencia</span>
-            </label>
-            <input type="number" name="monto_transferencia" id="monto_transferencia" min="0" step="0.01" placeholder="Monto $">
+            <label for="pago-transferencia">Transferencia</label>
+            <input type="number" name="monto_transferencia" id="pago-transferencia" min="0" step="0.01" value="0">
           </div>
           <div class="payment-method-group">
-            <label class="checkbox-label">
-              <input type="checkbox" name="metodo_efectivo" id="metodo_efectivo">
-              <span class="checkbox-text">Efectivo</span>
-            </label>
-            <input type="number" name="monto_efectivo" id="monto_efectivo" min="0" step="0.01" placeholder="Monto $">
+            <label for="pago-efectivo">Efectivo</label>
+            <input type="number" name="monto_efectivo" id="pago-efectivo" min="0" step="0.01" value="0">
           </div>
         </div>
       </div>
 
-      <!-- Botones del formulario -->
-      <div class="form-group">
-        <button type="submit" class="btn-primary">Guardar Pago</button>
-        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancelar</a>
-        <button type="submit" name="accion" value="guardar_email" class="btn btn-success">
+      <!-- Botones del formulario - fila horizontal -->
+      <div class="form-group d-flex gap-2">
+        <button type="submit" class="btn-primary flex-grow-1">Guardar Pago</button>
+        <button type="button" class="btn btn-success flex-grow-1">
           <i class="fas fa-envelope"></i> Guardar y Enviar Email
         </button>
       </div>
@@ -244,6 +268,18 @@
 
 
 <script>
+  function toggleDescuento() {
+    const check = document.getElementById('checkbox-descuento');
+    const fields = document.getElementById('campos-descuento');
+    fields.style.display = check.checked ? 'block' : 'none';
+  }
+
+  function toggleAgregado() {
+    const check = document.getElementById('checkbox-agregado');
+    const fields = document.getElementById('campos-agregado');
+    fields.style.display = check.checked ? 'block' : 'none';
+  }
+
   function openDetalleModal(id) {
     const modal = document.getElementById('modal-detalle-' + id);
     modal.style.display = 'flex';
