@@ -185,7 +185,7 @@ input[readonly] {
 /* Inputs de métodos de pago: ancho fijo, alineados a la derecha */
 #pago-transferencia,
 #pago-efectivo {
-  width: 150px;
+  /* width: 150px; */
   flex: none;
   margin-left: auto;
   text-align: right;

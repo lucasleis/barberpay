@@ -1761,14 +1761,6 @@ def list_users():
     users = Usuario.query.filter_by(salon_id=salon_id).all()
     return render_template('users.html', users=users)
 
-
-@app.route('/barbers_payment')
-def barbers_payment():
-    if "user" not in session:
-        return redirect(url_for("login", next=request.path))
-    return render_template('barbers_payment.html')
-
-
 @app.route('/admin/users/add', methods=['POST'])
 def add_user():
     if "user" not in session:
@@ -1798,7 +1790,6 @@ def add_user():
 
     flash("Usuario agregado correctamente.", "success")
     return redirect(url_for('list_users'))
-
 
 @app.route('/admin/users/delete/<int:id>')
 def delete_user(id):
@@ -2084,8 +2075,6 @@ def get_barber_availability_day(barber_id):
         "disponibilidad": disponibilidad
     })
 
-
-
 @app.route('/clientes/<int:client_dni>', methods=['GET'])
 def get_cliente_by_dni(client_dni):
     """
@@ -2107,7 +2096,6 @@ def get_cliente_by_dni(client_dni):
         "peluqueria_id": cliente.peluqueria_id,
         "created_at": cliente.created_at.isoformat()
     })
-
 
 @app.route('/clientes', methods=['POST'])
 @csrf.exempt
@@ -2146,6 +2134,19 @@ def crear_cliente():
         "peluqueria_id": nuevo_cliente.peluqueria_id,
         "created_at": nuevo_cliente.created_at.isoformat()
     }), 201
+
+
+
+### Barbers Payments ###
+@app.route('/barbers_payment')
+def barbers_payment():
+    if "user" not in session:
+        return redirect(url_for("login", next=request.path))
+    
+    salon_id = session.get('salon_id')
+    barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
+    
+    return render_template('barbers_payment.html', barbers=barbers)
 
 
 

@@ -27,7 +27,7 @@
         <label for="barbero_id">Barbero a pagar:</label>
         <select name="barbero_id" id="barbero_id" required>
           <option value="" disabled selected>Seleccione un barbero</option>
-          {% for b in barberos %}
+          {% for b in barbers %}
             <option value="{{ b.id }}">{{ b.name }}</option>
           {% endfor %}
         </select>
@@ -108,12 +108,12 @@
       <!-- 7. Métodos de Pago (siempre visibles, sin checkboxes) -->
       <div class="form-group">
         <label>Método de Pago:</label>
-        <div class="payment-method-container">
-          <div class="payment-method-group">
+        <div class="row g-3">
+          <div class="col-md-6">
             <label for="pago-transferencia">Transferencia</label>
             <input type="number" name="monto_transferencia" id="pago-transferencia" min="0" step="0.01" value="0">
           </div>
-          <div class="payment-method-group">
+          <div class="col-md-6">
             <label for="pago-efectivo">Efectivo</label>
             <input type="number" name="monto_efectivo" id="pago-efectivo" min="0" step="0.01" value="0">
           </div>
