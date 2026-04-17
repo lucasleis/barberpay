@@ -1,82 +1,97 @@
 # Tareas
 
-## 1. Editar movimientos [ ]
-- Poder editar los movimientos en la solapa de cierre. 
-    - [✅] Desarrollar servicios
-    - [✅] Desarrollar para membresia
-    - [ ] Desarrollar para producto
-        - [ ] Solo los que tengan rol de admin
+## 1. Editar movimientos
+- [ ] Poder editar los movimientos en la solapa de cierre
+  - [x] Desarrollar servicios
+  - [x] Desarrollar para membresía
+  - [ ] Desarrollar para producto
+    - [ ] Solo los que tengan rol de admin
 
+---
 
-## 2. valeXmembresia - Numeros de membresias con nro de dni
-    - [ ] Separar de alguna forma el tipo de membresia para almacenar varios tipos para el mismo user
+## 2. valeXmembresia - Números de membresía con DNI
+- [ ] Separar de alguna forma el tipo de membresía para almacenar varios tipos para el mismo usuario
 
+---
 
 ## 3. Fecha en formularios
-    - [ ] Las fechas en lose muestra como s formularios aparecen como mm/dd/aaaa. modificar para que sean dd/mm/aaaa
-    - [ ] Revisar entonrnos. 
-        - [✅] Maquina laburo: dd/mm/aaaa. 
-        - [ ] Maquina propia: mm/dd/aaaa
-        - [ ] Server: mm/dd/aaaa
+- [ ] Las fechas en los formularios aparecen como `mm/dd/aaaa`. Modificar para que sean `dd/mm/aaaa`
+- [ ] Revisar entornos
+  - [x] Máquina de trabajo → `dd/mm/aaaa`
+  - [ ] Máquina propia → `mm/dd/aaaa`
+  - [ ] Server → `mm/dd/aaaa`
 
+---
 
-## 4. Ocultar elementos de agregar pago, cierre y administrar 
-    - [ ] si no esta logueado elementos de agregar pago, cierre y administrar ocultos
+## 4. Ocultar elementos de navegación
+- [ ] Si no está logueado, ocultar:
+  - [ ] Agregar pago
+  - [ ] Cierre
+  - [ ] Administrar
 
+---
 
 ## 5. calcular_pagos_entre_fechas
-    - [ ] Factorizar funcion
+- [ ] Factorizar función
 
+---
 
-## 6. Multiples peluquerias
-    - [ ] Cambiar logo dependiendo de donde venga
+## 6. Múltiples peluquerías
+- [ ] Cambiar logo dependiendo de la peluquería desde donde se accede
 
+---
 
-## 7. Nuevo Modulo
+# 7. Nuevo módulo: Pagos a barberos
 
-- [ ] Agregar nueva seccion de pagos a barberos. Esta seccion va a tener 2 Partes:
-	- [ ] Agregar Pago
-	- [ ] Pagos Realizados
+## 7.1 Agregar Pago
 
-Agregar Pago
-	Seleccionar:
-		- [ ] Barbero a pagar
-		- [ ] Plazo que se le va a pagar
-			- [ ] Fecha Inicio 
-			- [ ] Fecha Fin
-	Mostrar:
-		- [ ] Monto a pagar (mismo metodo que hay en pagos)
-	Ingresar:
-		- [ ] Descuentos + Justificacion
-		- [ ] Agregados + Justificacion
-		- [ ] Monto y metodo de pago (Transferencia y/o efectivo)
-	Boton:
-		- [ ] Guardar
-		- [ ] Cancelar
-		- [ ] Enviar mail
-			Enviar mail con "recibo" a ambos
+### Seleccionar
+- [x] Barbero a pagar
+- [x] Plazo que se le va a pagar
+  - [x] Fecha inicio
+  - [x] Fecha fin
 
+### Mostrar
+- [x] Monto a pagar (mismo método que hay en pagos)
 
-Pagos Realizados
-	- [ ] Panel donde se muestren los pagos realizados. Similar a seccion pagos. Debe contener:
-		- Barbero
-		- Fecha Inicio
-		- Fecha Fin
-		- Monto por Rango
-		- Fecha Pago
-		- M. Descuento (*)
-		- M. Agregado (*)
-		- M. Final = Monto por Rango - M. Descuento + M. Agregado
-		- Boton para visualizar:
-			- Registro completo con todos los datos ingresados + : 
-				- M. Descuento (*)
-				- Justificacion Descuento
-				- M. Agregado (*)
-				- Justificacion Agregado
-			- Boton enviar mail
-		- Boton Editar
-			- Modificar
-			- Eliminar
-			
+### Ingresar
+- [x] Descuentos + justificación
+- [x] Agregados + justificación
+- [x] Monto y método de pago
+  - [x] Transferencia
+  - [x] Efectivo
 
+### Botones
+- [x] Guardar
+- [ ] Cancelar
+- [ ] Enviar mail
+  - [ ] Enviar mail con "recibo" a ambos
 
+---
+
+## 7.2 Pagos Realizados
+
+- [x] Panel donde se muestren los pagos realizados (similar a sección pagos)
+
+### Debe contener
+- [x] Barbero
+- [x] Fecha inicio
+- [x] Fecha fin
+- [x] Monto por rango
+- [x] Fecha pago
+- [x] Monto descuento (*)
+- [x] Monto agregado (*)
+- [x] Monto final = Monto por rango - Monto descuento + Monto agregado
+
+### Acciones
+- [ ] Botón para visualizar
+  - [x] Registro completo con todos los datos ingresados
+  - [x] Monto descuento (*)
+  - [x] Justificación descuento
+  - [x] Monto agregado (*)
+  - [x] Justificación agregado
+  - [ ] Botón enviar mail
+
+- [x] Botón editar
+  - [x] Modificar
+  - [x] Eliminar
