@@ -495,6 +495,13 @@ button:hover {
   box-sizing: border-box;
 }
 
+/* Mobile */
+@media (max-width: 768px) {
+  .buttons-wrapper {
+    padding-bottom: 0;
+  }
+}
+
 .modal-buttons {
   display: flex;
   justify-content: center;
@@ -527,7 +534,7 @@ button:hover {
   cursor: pointer;
   color: black;
   border: none;
-  padding: 0;
+  /* padding: 0; */
   margin: 0;
   line-height: 1;
   vertical-align: middle;
