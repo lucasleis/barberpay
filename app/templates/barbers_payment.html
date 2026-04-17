@@ -16,7 +16,7 @@
 
 <div class="card mb-4">
   <div class="card-header">
-    <strong>Nuevo Pago a Barbero</strong>
+    <strong id="card-titulo-pago">Nuevo Pago a Barbero</strong>
   </div>
   <div class="card-body">
     <form method="POST" action="#">
@@ -122,8 +122,8 @@
       </div>
 
       <!-- Botones del formulario - fila horizontal -->
-      <div class="form-group d-flex gap-2">
-        <button type="submit" class="btn-primary flex-grow-1">Guardar Pago</button>
+      <div id="botones-formulario" class="form-group d-flex gap-2">
+        <button type="submit" id="btn-guardar-pago" class="btn-primary flex-grow-1">Guardar Pago</button>
         <button type="button" class="btn btn-success flex-grow-1">
           <i class="fas fa-envelope"></i> Guardar y Enviar Email
         </button>
@@ -169,10 +169,12 @@
            onclick="openDetalleModal('{{ pago.id }}'); return false;">
           <i class="fas fa-eye"></i>
         </a>
-        <a href="#" class="btn btn-warning btn-sm" title="Editar">
+        <a href="#" class="btn btn-warning btn-sm" title="Editar"
+           onclick="editarPago({{ pago.id }}); return false;">
           <i class="fas fa-pen"></i>
         </a>
-        <a href="#" class="btn btn-danger btn-sm" title="Eliminar">
+        <a href="#" class="btn btn-danger btn-sm" title="Eliminar"
+           onclick="confirmarEliminar({{ pago.id }}); return false;">
           <i class="fas fa-trash-alt"></i>
         </a>
       </td>
@@ -269,6 +271,131 @@
   </div>
 </div>
 {% endfor %}
+
+
+<!-- ================================================================
+     MODAL: EDITAR PAGO A BARBERO
+     Misma estructura que cierres.html (modal-cantidad / active)
+     ================================================================ -->
+<div id="modal-editar-pago" class="modal-cantidad">
+  <div class="modal-content" id="modal-editar-pago-content">
+    <h3>Editar Pago a Barbero</h3>
+    <span class="close-modal" onclick="closeEditModal()">&times;</span>
+
+    <div class="error-wrapper">
+      <div id="edit-error-container"></div>
+    </div>
+
+    <input type="hidden" id="edit-payment-id">
+
+    <!-- Barbero -->
+    <div class="form-group">
+      <label for="edit-barbero">Barbero:</label>
+      <select id="edit-barbero" required>
+        <option value="" disabled>Seleccione un barbero</option>
+        {% for b in barbers %}
+          <option value="{{ b.id }}">{{ b.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Período -->
+    <div class="form-group">
+      <label>Período de Pago:</label>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="edit-fecha-inicio">Fecha Inicio</label>
+          <input type="date" id="edit-fecha-inicio" required>
+        </div>
+        <div class="col-md-6">
+          <label for="edit-fecha-fin">Fecha Fin</label>
+          <input type="date" id="edit-fecha-fin" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monto Base (readonly) -->
+    <div class="form-group">
+      <label for="edit-monto-base">Monto a Pagar (según cierres):</label>
+      <input type="text" id="edit-monto-base" readonly class="form-control">
+    </div>
+
+    <!-- Checkboxes descuento / agregado -->
+    <div class="form-group">
+      <div class="row">
+        <div class="col-4">
+          <label class="checkbox-label">
+            <input type="checkbox" id="edit-checkbox-descuento">
+            <span class="checkbox-text">Aplicar Descuento</span>
+          </label>
+        </div>
+        <div class="col-4">
+          <label class="checkbox-label">
+            <input type="checkbox" id="edit-checkbox-agregado">
+            <span class="checkbox-text">Aplicar Agregado</span>
+          </label>
+        </div>
+        <div class="col-4"></div>
+      </div>
+    </div>
+
+    <!-- Campos descuento -->
+    <div id="edit-campos-descuento" style="display: none;">
+      <div class="form-group">
+        <label for="edit-monto-descuento">Monto Descuento:</label>
+        <input type="number" id="edit-monto-descuento" min="0" step="0.01" value="0">
+      </div>
+      <div class="form-group">
+        <label for="edit-justificacion-descuento">Justificación Descuento:</label>
+        <textarea id="edit-justificacion-descuento" rows="2"></textarea>
+      </div>
+    </div>
+
+    <!-- Campos agregado -->
+    <div id="edit-campos-agregado" style="display: none;">
+      <div class="form-group">
+        <label for="edit-monto-agregado">Monto Agregado:</label>
+        <input type="number" id="edit-monto-agregado" min="0" step="0.01" value="0">
+      </div>
+      <div class="form-group">
+        <label for="edit-justificacion-agregado">Justificación Agregado:</label>
+        <textarea id="edit-justificacion-agregado" rows="2"></textarea>
+      </div>
+    </div>
+
+    <!-- Monto Final (readonly) -->
+    <div class="form-group">
+      <label for="edit-monto-final">Monto Final a Pagar:</label>
+      <input type="text" id="edit-monto-final" readonly class="form-control">
+    </div>
+
+    <!-- Métodos de pago -->
+    <div class="form-group">
+      <label>Método de Pago:</label>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="edit-pago-transferencia">Transferencia</label>
+          <input type="number" id="edit-pago-transferencia" min="0" step="0.01" value="0">
+        </div>
+        <div class="col-md-6">
+          <label for="edit-pago-efectivo">Efectivo</label>
+          <input type="number" id="edit-pago-efectivo" min="0" step="0.01" value="0">
+        </div>
+      </div>
+      <div id="edit-error-metodos-pago" class="error-metodos-pago" style="display: none;"></div>
+    </div>
+
+    <div class="buttons-wrapper">
+      <div class="modal-buttons">
+        <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
+        <button type="button" class="edit-button" onclick="guardarEdicionPago()">
+          <i class="fas fa-check"></i> Confirmar Cambios
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 
 <script>
@@ -369,6 +496,212 @@
     }
   }
 
+  // ---- Modal Editar Pago ----
+
+  function closeEditModal() {
+    const modal = document.getElementById('modal-editar-pago');
+    modal.classList.remove('active');
+    setTimeout(() => { modal.style.display = 'none'; }, 300);
+  }
+
+  function toggleEditDescuento() {
+    const checked = document.getElementById('edit-checkbox-descuento').checked;
+    document.getElementById('edit-campos-descuento').style.display = checked ? 'block' : 'none';
+    if (!checked) {
+      document.getElementById('edit-monto-descuento').value = 0;
+      document.getElementById('edit-justificacion-descuento').value = '';
+    }
+    calcularEditMontoFinal();
+  }
+
+  function toggleEditAgregado() {
+    const checked = document.getElementById('edit-checkbox-agregado').checked;
+    document.getElementById('edit-campos-agregado').style.display = checked ? 'block' : 'none';
+    if (!checked) {
+      document.getElementById('edit-monto-agregado').value = 0;
+      document.getElementById('edit-justificacion-agregado').value = '';
+    }
+    calcularEditMontoFinal();
+  }
+
+  function calcularEditMontoFinal() {
+    const base = parseFloat(
+      document.getElementById('edit-monto-base').value.replace('$', '').replace(/\./g, '')
+    ) || 0;
+    let descuento = 0;
+    if (document.getElementById('edit-checkbox-descuento').checked) {
+      descuento = parseFloat(document.getElementById('edit-monto-descuento').value) || 0;
+    }
+    let agregado = 0;
+    if (document.getElementById('edit-checkbox-agregado').checked) {
+      agregado = parseFloat(document.getElementById('edit-monto-agregado').value) || 0;
+    }
+    document.getElementById('edit-monto-final').value = formatearMoneda(Math.max(0, base - descuento + agregado));
+    validarEditMetodosPago();
+  }
+
+  function ocultarEditErrorPago() {
+    const msg = document.getElementById('edit-error-metodos-pago');
+    if (msg) msg.style.display = 'none';
+    document.getElementById('edit-pago-transferencia').classList.remove('input-error');
+    document.getElementById('edit-pago-efectivo').classList.remove('input-error');
+  }
+
+  function mostrarEditErrorPago(suma, esperado) {
+    const msg = document.getElementById('edit-error-metodos-pago');
+    const diff = esperado - suma;
+    const detalle = diff > 0 ? `Falta ${formatearMoneda(diff)}` : `Sobra ${formatearMoneda(Math.abs(diff))}`;
+    msg.textContent = `La suma (${formatearMoneda(suma)}) no coincide con el Monto Final (${formatearMoneda(esperado)}). ${detalle}`;
+    msg.style.display = 'block';
+    document.getElementById('edit-pago-transferencia').classList.add('input-error');
+    document.getElementById('edit-pago-efectivo').classList.add('input-error');
+  }
+
+  function validarEditMetodosPago() {
+    const montoFinal = parseFloat(
+      document.getElementById('edit-monto-final').value.replace('$', '').replace(/\./g, '')
+    ) || 0;
+    const suma = (parseFloat(document.getElementById('edit-pago-transferencia').value) || 0)
+               + (parseFloat(document.getElementById('edit-pago-efectivo').value) || 0);
+    if (Math.abs(suma - montoFinal) < 0.01) { ocultarEditErrorPago(); return true; }
+    mostrarEditErrorPago(suma, montoFinal);
+    return false;
+  }
+
+  async function actualizarEditMontoPagar() {
+    const barberoId = document.getElementById('edit-barbero').value;
+    const fechaInicio = document.getElementById('edit-fecha-inicio').value;
+    const fechaFin = document.getElementById('edit-fecha-fin').value;
+    if (!barberoId || !fechaInicio || !fechaFin) {
+      document.getElementById('edit-monto-base').value = formatearMoneda(0);
+      calcularEditMontoFinal();
+      return;
+    }
+    try {
+      const resp = await fetch(`/api/calcular_monto_barbero?barbero_id=${barberoId}&fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`);
+      const data = await resp.json();
+      document.getElementById('edit-monto-base').value = formatearMoneda(data.monto_total || 0);
+    } catch {
+      document.getElementById('edit-monto-base').value = formatearMoneda(0);
+    }
+    calcularEditMontoFinal();
+  }
+
+  async function editarPago(id) {
+    try {
+      const response = await fetch(`/barbers_payment/${id}`);
+      const pago = await response.json();
+      if (!response.ok) { alert('Error: ' + pago.error); return; }
+
+      document.getElementById('edit-payment-id').value = id;
+      document.getElementById('edit-barbero').value = pago.barber_id;
+      document.getElementById('edit-fecha-inicio').value = pago.fecha_inicio;
+      document.getElementById('edit-fecha-fin').value = pago.fecha_fin;
+      document.getElementById('edit-monto-base').value = formatearMoneda(pago.monto_periodo);
+
+      const tieneDescuento = pago.monto_descuento > 0;
+      document.getElementById('edit-checkbox-descuento').checked = tieneDescuento;
+      document.getElementById('edit-campos-descuento').style.display = tieneDescuento ? 'block' : 'none';
+      document.getElementById('edit-monto-descuento').value = tieneDescuento ? pago.monto_descuento : 0;
+      document.getElementById('edit-justificacion-descuento').value = pago.justificacion_descuento || '';
+
+      const tieneAgregado = pago.monto_agregado > 0;
+      document.getElementById('edit-checkbox-agregado').checked = tieneAgregado;
+      document.getElementById('edit-campos-agregado').style.display = tieneAgregado ? 'block' : 'none';
+      document.getElementById('edit-monto-agregado').value = tieneAgregado ? pago.monto_agregado : 0;
+      document.getElementById('edit-justificacion-agregado').value = pago.justificacion_agregado || '';
+
+      document.getElementById('edit-pago-transferencia').value = pago.metodo_transferencia;
+      document.getElementById('edit-pago-efectivo').value = pago.metodo_efectivo;
+
+      document.getElementById('edit-error-container').innerHTML = '';
+      ocultarEditErrorPago();
+      calcularEditMontoFinal();
+
+      const modal = document.getElementById('modal-editar-pago');
+      modal.style.display = 'flex';
+      modal.offsetHeight;
+      modal.classList.add('active');
+    } catch (error) {
+      console.error('Error al cargar pago:', error);
+      alert('Error de conexión al cargar el pago.');
+    }
+  }
+
+  async function guardarEdicionPago() {
+    if (!validarEditMetodosPago()) {
+      alert('La suma de los métodos de pago no coincide con el Monto Final.');
+      return;
+    }
+
+    const parsearMonto = (str) =>
+      parseFloat((str || '0').replace('$', '').replace(/\./g, '')) || 0;
+
+    const descuentoActivo = document.getElementById('edit-checkbox-descuento').checked;
+    const agregadoActivo = document.getElementById('edit-checkbox-agregado').checked;
+    const paymentId = document.getElementById('edit-payment-id').value;
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+    const data = {
+      barber_id: parseInt(document.getElementById('edit-barbero').value),
+      fecha_inicio: document.getElementById('edit-fecha-inicio').value,
+      fecha_fin: document.getElementById('edit-fecha-fin').value,
+      monto_periodo: parsearMonto(document.getElementById('edit-monto-base').value),
+      monto_descuento: descuentoActivo ? parseFloat(document.getElementById('edit-monto-descuento').value) || 0 : 0,
+      justificacion_descuento: descuentoActivo ? document.getElementById('edit-justificacion-descuento').value.trim() : null,
+      monto_agregado: agregadoActivo ? parseFloat(document.getElementById('edit-monto-agregado').value) || 0 : 0,
+      justificacion_agregado: agregadoActivo ? document.getElementById('edit-justificacion-agregado').value.trim() : null,
+      monto_final: parsearMonto(document.getElementById('edit-monto-final').value),
+      metodo_transferencia: parseFloat(document.getElementById('edit-pago-transferencia').value) || 0,
+      metodo_efectivo: parseFloat(document.getElementById('edit-pago-efectivo').value) || 0,
+    };
+
+    try {
+      const response = await fetch(`/barbers_payment/${paymentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (response.ok) {
+        closeEditModal();
+        window.location.reload();
+      } else {
+        const container = document.getElementById('edit-error-container');
+        const errorBox = document.createElement('div');
+        errorBox.className = 'error-message';
+        errorBox.textContent = result.error;
+        container.innerHTML = '';
+        container.appendChild(errorBox);
+        document.getElementById('modal-editar-pago-content').scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch (error) {
+      console.error('Error al guardar:', error);
+      alert('Error de conexión al guardar los cambios.');
+    }
+  }
+
+  async function confirmarEliminar(id) {
+    if (!confirm('¿Está seguro que desea eliminar este pago? Esta acción no se puede deshacer.')) return;
+
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+    try {
+      const response = await fetch(`/barbers_payment/${id}`, {
+        method: 'DELETE',
+        headers: { 'X-CSRFToken': csrfToken },
+      });
+      const result = await response.json();
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        alert('Error al eliminar: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error al eliminar:', error);
+      alert('Error de conexión al eliminar el pago.');
+    }
+  }
+
   async function guardarPago() {
     if (!validarMetodosPago()) {
       alert('La suma de los métodos de pago no coincide con el Monto Final.');
@@ -413,17 +746,13 @@
     try {
       const response = await fetch('/barbers_payment/save', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken,
-        },
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
         body: JSON.stringify(data),
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        alert('Pago guardado exitosamente.');
         window.location.reload();
       } else {
         alert('Error: ' + result.error);
@@ -483,6 +812,17 @@
       event.preventDefault();
       guardarPago();
     });
+
+    // Listeners del modal de edición
+    document.getElementById('edit-checkbox-descuento').addEventListener('change', toggleEditDescuento);
+    document.getElementById('edit-checkbox-agregado').addEventListener('change', toggleEditAgregado);
+    document.getElementById('edit-monto-descuento').addEventListener('input', calcularEditMontoFinal);
+    document.getElementById('edit-monto-agregado').addEventListener('input', calcularEditMontoFinal);
+    document.getElementById('edit-pago-transferencia').addEventListener('input', validarEditMetodosPago);
+    document.getElementById('edit-pago-efectivo').addEventListener('input', validarEditMetodosPago);
+    document.getElementById('edit-barbero').addEventListener('change', actualizarEditMontoPagar);
+    document.getElementById('edit-fecha-inicio').addEventListener('change', actualizarEditMontoPagar);
+    document.getElementById('edit-fecha-fin').addEventListener('change', actualizarEditMontoPagar);
   });
 
   function openDetalleModal(id) {
@@ -501,11 +841,13 @@
   }
 
   window.onclick = function(event) {
-    const modals = document.querySelectorAll('.modal-cantidad');
-    modals.forEach(modal => {
+    document.querySelectorAll('.modal-cantidad').forEach(modal => {
       if (event.target === modal) {
-        const id = modal.id.replace('modal-detalle-', '');
-        closeDetalleModal(id);
+        if (modal.id === 'modal-editar-pago') {
+          closeEditModal();
+        } else {
+          closeDetalleModal(modal.id.replace('modal-detalle-', ''));
+        }
       }
     });
   }

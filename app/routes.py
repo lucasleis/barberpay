@@ -2356,7 +2356,138 @@ def save_barber_payment():
 
 
 
-#### 
+@app.route('/barbers_payment/<int:payment_id>', methods=['GET'])
+def get_barber_payment(payment_id):
+    if "user" not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+
+    salon_id = session.get('salon_id')
+    pago = PagoBarbero.query.filter_by(id=payment_id, peluqueria_id=salon_id).first()
+    if not pago:
+        return jsonify({'error': 'Pago no encontrado'}), 404
+
+    return jsonify({
+        'id': pago.id,
+        'barber_id': pago.barber_id,
+        'barber_name': pago.barber.name,
+        'fecha_inicio': pago.fecha_inicio_periodo.strftime('%Y-%m-%d'),
+        'fecha_fin': pago.fecha_fin_periodo.strftime('%Y-%m-%d'),
+        'monto_periodo': float(pago.monto_periodo),
+        'monto_descuento': float(pago.monto_descuento),
+        'justificacion_descuento': pago.justificacion_descuento,
+        'monto_agregado': float(pago.monto_agregado),
+        'justificacion_agregado': pago.justificacion_agregado,
+        'monto_final': float(pago.monto_final),
+        'metodo_transferencia': float(pago.metodo_transferencia),
+        'metodo_efectivo': float(pago.metodo_efectivo),
+    }), 200
+
+
+@app.route('/barbers_payment/<int:payment_id>', methods=['PUT'])
+def update_barber_payment(payment_id):
+    if "user" not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+
+    salon_id = session.get('salon_id')
+    pago = PagoBarbero.query.filter_by(id=payment_id, peluqueria_id=salon_id).first()
+    if not pago:
+        return jsonify({'error': 'Pago no encontrado'}), 404
+
+    try:
+        data = request.get_json()
+
+        required = ['barber_id', 'fecha_inicio', 'fecha_fin', 'monto_periodo', 'monto_final',
+                    'metodo_transferencia', 'metodo_efectivo']
+        for field in required:
+            if field not in data or data[field] is None:
+                return jsonify({'error': f'Campo requerido faltante: {field}'}), 400
+
+        barber = Empleado.query.filter_by(id=data['barber_id'], peluqueria_id=salon_id).first()
+        if not barber:
+            return jsonify({'error': 'Barbero no encontrado'}), 404
+
+        fecha_inicio = datetime.strptime(data['fecha_inicio'], '%Y-%m-%d').date()
+        fecha_fin = datetime.strptime(data['fecha_fin'], '%Y-%m-%d').date()
+        if fecha_inicio >= fecha_fin:
+            return jsonify({'error': 'La fecha inicio debe ser anterior a la fecha fin'}), 400
+
+        monto_periodo = float(data['monto_periodo'])
+        monto_descuento = float(data.get('monto_descuento') or 0)
+        monto_agregado = float(data.get('monto_agregado') or 0)
+        monto_final = float(data['monto_final'])
+        metodo_transferencia = float(data['metodo_transferencia'])
+        metodo_efectivo = float(data['metodo_efectivo'])
+
+        for nombre, valor in [('monto_periodo', monto_periodo), ('monto_descuento', monto_descuento),
+                               ('monto_agregado', monto_agregado), ('monto_final', monto_final),
+                               ('metodo_transferencia', metodo_transferencia), ('metodo_efectivo', metodo_efectivo)]:
+            if valor < 0:
+                return jsonify({'error': f'{nombre} no puede ser negativo'}), 400
+
+        if abs((monto_periodo - monto_descuento + monto_agregado) - monto_final) > 0.01:
+            return jsonify({'error': 'Monto final no coincide con base - descuento + agregado'}), 400
+
+        if abs((metodo_transferencia + metodo_efectivo) - monto_final) > 0.01:
+            return jsonify({'error': 'La suma de métodos de pago no coincide con el monto final'}), 400
+
+        if monto_descuento > 0 and not data.get('justificacion_descuento', '').strip():
+            return jsonify({'error': 'Debe ingresar justificación para el descuento'}), 400
+        if monto_agregado > 0 and not data.get('justificacion_agregado', '').strip():
+            return jsonify({'error': 'Debe ingresar justificación para el agregado'}), 400
+
+        duplicado = PagoBarbero.query.filter(
+            PagoBarbero.id != payment_id,
+            PagoBarbero.barber_id == data['barber_id'],
+            PagoBarbero.peluqueria_id == salon_id,
+            PagoBarbero.fecha_inicio_periodo == fecha_inicio,
+            PagoBarbero.fecha_fin_periodo == fecha_fin,
+        ).first()
+        if duplicado:
+            return jsonify({'error': 'Ya existe otro pago para este barbero en ese período'}), 409
+
+        pago.barber_id = data['barber_id']
+        pago.fecha_inicio_periodo = fecha_inicio
+        pago.fecha_fin_periodo = fecha_fin
+        pago.monto_periodo = monto_periodo
+        pago.monto_descuento = monto_descuento
+        pago.justificacion_descuento = data.get('justificacion_descuento') or None
+        pago.monto_agregado = monto_agregado
+        pago.justificacion_agregado = data.get('justificacion_agregado') or None
+        pago.monto_final = monto_final
+        pago.metodo_transferencia = metodo_transferencia
+        pago.metodo_efectivo = metodo_efectivo
+
+        db.session.commit()
+        return jsonify({'success': True, 'payment_id': pago.id}), 200
+
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({'error': f'Formato de datos inválido: {str(e)}'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error interno: {str(e)}'}), 500
+
+
+@app.route('/barbers_payment/<int:payment_id>', methods=['DELETE'])
+def delete_barber_payment(payment_id):
+    if "user" not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+
+    salon_id = session.get('salon_id')
+    pago = PagoBarbero.query.filter_by(id=payment_id, peluqueria_id=salon_id).first()
+    if not pago:
+        return jsonify({'error': 'Pago no encontrado'}), 404
+
+    try:
+        db.session.delete(pago)
+        db.session.commit()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error al eliminar: {str(e)}'}), 500
+
+
+####
 @app.route("/landings/v2")
 def landing_v2():
     return render_template("/landing_v2/home.html")
