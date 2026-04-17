@@ -423,7 +423,9 @@ button:hover {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   position: relative;
   width: 90%;
-  max-width: 450px;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
   transform: translateY(-20px);
   transition: transform 0.3s ease;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -523,7 +525,7 @@ button:hover {
   font-weight: 600;
   border-radius: 8px;
   cursor: pointer;
-  color: white;
+  color: black;
   border: none;
   padding: 0;
   margin: 0;
@@ -531,6 +533,7 @@ button:hover {
   vertical-align: middle;
   box-sizing: border-box;
   transform: translateY(0);
+  border: 1px solid #ccc;
 }
 
 .modal-buttons .delete-button {
