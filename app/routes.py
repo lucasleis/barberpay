@@ -436,6 +436,93 @@ def calcular_pagos_entre_fechas(start_date, end_date):
         }
     }
 
+def calcular_pagos_barbero_entre_fechas(barbero_id, fecha_inicio, fecha_fin):
+    """Retorna el monto total a pagar al barbero (su % sobre cada pago) en el rango de fechas."""
+    salon_id = session.get('salon_id')
+
+    pagos = (
+        Pago.query.options(
+            joinedload(Pago.appointment).joinedload(Appointment.productos_turno).joinedload(AppointmentTurno.producto),
+            joinedload(Pago.appointment).joinedload(Appointment.barber),
+            joinedload(Pago.appointment).joinedload(Appointment.service),
+            joinedload(Pago.membresia_comprada).joinedload(Membresia.tipo_membresia),
+            joinedload(Pago.appointment).joinedload(Appointment.membresia).joinedload(Membresia.tipo_membresia),
+        )
+        .join(Appointment, Pago.appointment_id == Appointment.id)
+        .filter(
+            Pago.date >= fecha_inicio,
+            Pago.date <= fecha_fin,
+            Pago.peluqueria_id == salon_id,
+            Appointment.barber_id == barbero_id
+        )
+        .order_by(desc(Pago.date))
+        .all()
+    )
+
+    total_barbero = 0.0
+
+    for pago in pagos:
+        pago_empleado_servicio = Decimal('0')
+        pago_empleado_productos = 0.0
+
+        if pago.appointment and pago.appointment.service:
+            servicio = pago.appointment.service
+            empleado = pago.appointment.barber
+            pago_empleado_servicio = (servicio.precio * empleado.porcentaje) / 100
+            total_barbero += float(pago_empleado_servicio)
+
+        if pago.appointment and pago.appointment.productos_turno:
+            for pt in pago.appointment.productos_turno:
+                monto_producto = pt.precio_unitario * pt.cantidad
+                pago_empleado_productos += float((monto_producto * float(pt.producto.comision_empleado)) / 100)
+            total_barbero += pago_empleado_productos
+
+        if pago.appointment and pago.appointment.membresia and not pago.appointment.service:
+            tipo = pago.appointment.membresia.tipo_membresia
+            empleado = pago.appointment.barber
+            servicio = Servicio.query.get(tipo.servicio_id)
+            monto = servicio.precio if servicio else 0
+            total_barbero += float((monto * empleado.porcentaje) / 100)
+
+        if pago.amount_tip:
+            total_barbero += float(pago.amount_tip)
+
+    return round(total_barbero, 2)
+
+
+@app.route('/api/calcular_monto_barbero')
+def api_calcular_monto_barbero():
+    if "user" not in session:
+        return jsonify({"error": "No autorizado"}), 401
+
+    barbero_id = request.args.get('barbero_id', type=int)
+    fecha_inicio_str = request.args.get('fecha_inicio')
+    fecha_fin_str = request.args.get('fecha_fin')
+
+    if not barbero_id or not fecha_inicio_str or not fecha_fin_str:
+        return jsonify({"error": "Parámetros requeridos: barbero_id, fecha_inicio, fecha_fin"}), 400
+
+    try:
+        fecha_inicio = datetime.fromisoformat(fecha_inicio_str).replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_fin = datetime.fromisoformat(fecha_fin_str).replace(hour=23, minute=59, second=59, microsecond=999999)
+    except ValueError:
+        return jsonify({"error": "Formato de fecha inválido, use YYYY-MM-DD"}), 400
+
+    salon_id = session.get('salon_id')
+    barbero = Empleado.query.filter_by(id=barbero_id, peluqueria_id=salon_id).first()
+    if not barbero:
+        return jsonify({"error": "Barbero no encontrado"}), 404
+
+    monto_total = calcular_pagos_barbero_entre_fechas(barbero_id, fecha_inicio, fecha_fin)
+
+    return jsonify({
+        "monto_total": monto_total,
+        "barbero_id": barbero_id,
+        "fecha_inicio": fecha_inicio_str,
+        "fecha_fin": fecha_fin_str
+    })
+
+
 @app.template_filter('moneda')
 def moneda(valor):
     try:

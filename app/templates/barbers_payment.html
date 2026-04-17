@@ -325,6 +325,31 @@
     document.getElementById('monto-final').value = '$' + resultado.toFixed(2);
   }
 
+  async function actualizarMontoPagar() {
+    const barberoId = document.getElementById('barbero_id').value;
+    const fechaInicio = document.getElementById('fecha_inicio').value;
+    const fechaFin = document.getElementById('fecha_fin').value;
+
+    if (!barberoId || !fechaInicio || !fechaFin) {
+      document.getElementById('monto_base').value = '$0.00';
+      calcularMontoFinal();
+      return;
+    }
+
+    try {
+      const url = `/api/calcular_monto_barbero?barbero_id=${barberoId}&fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      const monto = data.monto_total || 0;
+      document.getElementById('monto_base').value = '$' + monto.toFixed(2);
+    } catch (error) {
+      console.error('Error al calcular monto:', error);
+      document.getElementById('monto_base').value = '$0.00';
+    }
+
+    calcularMontoFinal();
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     inicializarFechas();
     calcularMontoFinal();
@@ -337,6 +362,10 @@
     document.getElementById('monto-agregado').addEventListener('input',   calcularMontoFinal);
     document.getElementById('checkbox-descuento').addEventListener('change', calcularMontoFinal);
     document.getElementById('checkbox-agregado').addEventListener('change',  calcularMontoFinal);
+
+    document.getElementById('barbero_id').addEventListener('change', actualizarMontoPagar);
+    document.getElementById('fecha_inicio').addEventListener('change', actualizarMontoPagar);
+    document.getElementById('fecha_fin').addEventListener('change', actualizarMontoPagar);
   });
 
   function openDetalleModal(id) {
