@@ -196,6 +196,23 @@ def ensure_database_and_tables():
             precio_aplicado NUMERIC(10,2)
         );
 
+        CREATE TABLE IF NOT EXISTS pagos_barberos (
+            id SERIAL PRIMARY KEY,
+            peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
+            barber_id INTEGER NOT NULL REFERENCES barberos(id),
+            fecha_inicio_periodo DATE NOT NULL,
+            fecha_fin_periodo DATE NOT NULL,
+            fecha_pago TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+            monto_periodo NUMERIC(10, 2) NOT NULL,
+            monto_descuento NUMERIC(10, 2) DEFAULT 0,
+            justificacion_descuento TEXT,
+            monto_agregado NUMERIC(10, 2) DEFAULT 0,
+            justificacion_agregado TEXT,
+            monto_final NUMERIC(10, 2) NOT NULL,
+            metodo_transferencia NUMERIC(10, 2) DEFAULT 0,
+            metodo_efectivo NUMERIC(10, 2) DEFAULT 0
+        );
+
 
     """)
     conn.commit()

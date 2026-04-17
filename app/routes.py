@@ -1,7 +1,7 @@
 from flask import current_app as app, render_template, request, redirect, url_for, session, flash, jsonify, Blueprint, send_from_directory
 from . import db
 from . import csrf
-from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno, Usuario, TurnoCliente, Cliente
+from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno, Usuario, TurnoCliente, Cliente, PagoBarbero
 from .auth import login_required
 from sqlalchemy import desc, text, case, nullsfirst, nullslast
 from sqlalchemy.sql import extract, func
@@ -2229,11 +2229,130 @@ def crear_cliente():
 def barbers_payment():
     if "user" not in session:
         return redirect(url_for("login", next=request.path))
-    
+
     salon_id = session.get('salon_id')
     barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
-    
-    return render_template('barbers_payment.html', barbers=barbers)
+
+    pagos_raw = (
+        PagoBarbero.query
+        .filter_by(peluqueria_id=salon_id)
+        .order_by(desc(PagoBarbero.fecha_pago))
+        .all()
+    )
+
+    pagos_barberos = [{
+        'id': p.id,
+        'barbero': p.barber.name,
+        'fecha_inicio': p.fecha_inicio_periodo.strftime('%d/%m/%Y'),
+        'fecha_fin': p.fecha_fin_periodo.strftime('%d/%m/%Y'),
+        'monto_base': p.monto_periodo,
+        'monto_descuento': p.monto_descuento,
+        'monto_agregado': p.monto_agregado,
+        'total_final': p.monto_final,
+        'fecha_pago': p.fecha_pago.strftime('%d/%m/%Y %H:%M'),
+        'monto_transferencia': p.metodo_transferencia,
+        'monto_efectivo': p.metodo_efectivo,
+        'justificacion_descuento': p.justificacion_descuento,
+        'justificacion_agregado': p.justificacion_agregado,
+    } for p in pagos_raw]
+
+    return render_template('barbers_payment.html', barbers=barbers, pagos_barberos=pagos_barberos)
+
+
+@app.route('/barbers_payment/save', methods=['POST'])
+def save_barber_payment():
+    if "user" not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+
+    salon_id = session.get('salon_id')
+
+    try:
+        data = request.get_json()
+
+        # Campos requeridos
+        required = ['barber_id', 'fecha_inicio', 'fecha_fin', 'monto_periodo', 'monto_final',
+                    'metodo_transferencia', 'metodo_efectivo']
+        for field in required:
+            if field not in data or data[field] is None:
+                return jsonify({'error': f'Campo requerido faltante: {field}'}), 400
+
+        # Barbero existe y pertenece al salón
+        barber = Empleado.query.filter_by(id=data['barber_id'], peluqueria_id=salon_id).first()
+        if not barber:
+            return jsonify({'error': 'Barbero no encontrado'}), 404
+
+        # Parsear fechas
+        fecha_inicio = datetime.strptime(data['fecha_inicio'], '%Y-%m-%d').date()
+        fecha_fin = datetime.strptime(data['fecha_fin'], '%Y-%m-%d').date()
+        if fecha_inicio >= fecha_fin:
+            return jsonify({'error': 'La fecha inicio debe ser anterior a la fecha fin'}), 400
+
+        monto_periodo = float(data['monto_periodo'])
+        monto_descuento = float(data.get('monto_descuento') or 0)
+        monto_agregado = float(data.get('monto_agregado') or 0)
+        monto_final = float(data['monto_final'])
+        metodo_transferencia = float(data['metodo_transferencia'])
+        metodo_efectivo = float(data['metodo_efectivo'])
+
+        # Montos no negativos
+        for nombre, valor in [('monto_periodo', monto_periodo), ('monto_descuento', monto_descuento),
+                               ('monto_agregado', monto_agregado), ('monto_final', monto_final),
+                               ('metodo_transferencia', metodo_transferencia), ('metodo_efectivo', metodo_efectivo)]:
+            if valor < 0:
+                return jsonify({'error': f'{nombre} no puede ser negativo'}), 400
+
+        # Monto final correcto
+        monto_calculado = monto_periodo - monto_descuento + monto_agregado
+        if abs(monto_calculado - monto_final) > 0.01:
+            return jsonify({'error': f'Monto final incorrecto. Esperado: {monto_calculado:.2f}'}), 400
+
+        # Suma de métodos de pago
+        if abs((metodo_transferencia + metodo_efectivo) - monto_final) > 0.01:
+            return jsonify({'error': 'La suma de métodos de pago no coincide con el monto final'}), 400
+
+        # Justificaciones requeridas si hay monto
+        if monto_descuento > 0 and not data.get('justificacion_descuento', '').strip():
+            return jsonify({'error': 'Debe ingresar justificación para el descuento'}), 400
+        if monto_agregado > 0 and not data.get('justificacion_agregado', '').strip():
+            return jsonify({'error': 'Debe ingresar justificación para el agregado'}), 400
+
+        # Pago duplicado
+        duplicado = PagoBarbero.query.filter_by(
+            barber_id=data['barber_id'],
+            peluqueria_id=salon_id,
+            fecha_inicio_periodo=fecha_inicio,
+            fecha_fin_periodo=fecha_fin
+        ).first()
+        if duplicado:
+            return jsonify({'error': 'Ya existe un pago registrado para este barbero en este período'}), 409
+
+        nuevo_pago = PagoBarbero(
+            peluqueria_id=salon_id,
+            barber_id=data['barber_id'],
+            fecha_inicio_periodo=fecha_inicio,
+            fecha_fin_periodo=fecha_fin,
+            fecha_pago=now_buenos_aires(),
+            monto_periodo=monto_periodo,
+            monto_descuento=monto_descuento,
+            justificacion_descuento=data.get('justificacion_descuento') or None,
+            monto_agregado=monto_agregado,
+            justificacion_agregado=data.get('justificacion_agregado') or None,
+            monto_final=monto_final,
+            metodo_transferencia=metodo_transferencia,
+            metodo_efectivo=metodo_efectivo,
+        )
+
+        db.session.add(nuevo_pago)
+        db.session.commit()
+
+        return jsonify({'success': True, 'payment_id': nuevo_pago.id}), 201
+
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({'error': f'Formato de datos inválido: {str(e)}'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error interno: {str(e)}'}), 500
 
 
 

@@ -207,3 +207,30 @@ class TurnoCliente(db.Model):
     barber = db.relationship('Empleado', backref=db.backref('turnos_clientes', lazy=True))
     service = db.relationship('Servicio', backref=db.backref('turnos_clientes', lazy=True))
     peluqueria = db.relationship('Peluqueria', backref=db.backref('turnos_clientes', lazy=True))
+
+
+class PagoBarbero(db.Model):
+    __tablename__ = 'pagos_barberos'
+
+    id = db.Column(db.Integer, primary_key=True)
+    peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
+    barber_id = db.Column(db.Integer, db.ForeignKey('barberos.id'), nullable=False)
+
+    fecha_inicio_periodo = db.Column(db.Date, nullable=False)
+    fecha_fin_periodo = db.Column(db.Date, nullable=False)
+    fecha_pago = db.Column(db.DateTime(timezone=True), default=now_buenos_aires)
+
+    monto_periodo = db.Column(db.Numeric(10, 2), nullable=False)
+    monto_descuento = db.Column(db.Numeric(10, 2), default=0)
+    justificacion_descuento = db.Column(db.Text, nullable=True)
+    monto_agregado = db.Column(db.Numeric(10, 2), default=0)
+    justificacion_agregado = db.Column(db.Text, nullable=True)
+    monto_final = db.Column(db.Numeric(10, 2), nullable=False)
+
+    metodo_transferencia = db.Column(db.Numeric(10, 2), default=0)
+    metodo_efectivo = db.Column(db.Numeric(10, 2), default=0)
+
+    barber = db.relationship('Empleado', backref=db.backref('pagos_barberos', lazy=True))
+
+    def __repr__(self):
+        return f'<PagoBarbero {self.id} - Barbero {self.barber_id} - ${self.monto_final}>'

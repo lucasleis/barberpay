@@ -369,6 +369,71 @@
     }
   }
 
+  async function guardarPago() {
+    if (!validarMetodosPago()) {
+      alert('La suma de los métodos de pago no coincide con el Monto Final.');
+      return;
+    }
+
+    const barberoId = parseInt(document.getElementById('barbero_id').value);
+    if (!barberoId) {
+      alert('Debe seleccionar un barbero.');
+      return;
+    }
+
+    const fechaInicio = document.getElementById('fecha_inicio').value;
+    const fechaFin = document.getElementById('fecha_fin').value;
+    if (!fechaInicio || !fechaFin) {
+      alert('Debe completar las fechas del período.');
+      return;
+    }
+
+    const parsearMonto = (str) =>
+      parseFloat((str || '0').replace('$', '').replace(/\./g, '')) || 0;
+
+    const descuentoActivo = document.getElementById('checkbox-descuento').checked;
+    const agregadoActivo = document.getElementById('checkbox-agregado').checked;
+
+    const data = {
+      barber_id: barberoId,
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin,
+      monto_periodo: parsearMonto(document.getElementById('monto_base').value),
+      monto_descuento: descuentoActivo ? parseFloat(document.getElementById('monto-descuento').value) || 0 : 0,
+      justificacion_descuento: descuentoActivo ? document.getElementById('justificacion-descuento').value.trim() : null,
+      monto_agregado: agregadoActivo ? parseFloat(document.getElementById('monto-agregado').value) || 0 : 0,
+      justificacion_agregado: agregadoActivo ? document.getElementById('justificacion-agregado').value.trim() : null,
+      monto_final: parsearMonto(document.getElementById('monto-final').value),
+      metodo_transferencia: parseFloat(document.getElementById('pago-transferencia').value) || 0,
+      metodo_efectivo: parseFloat(document.getElementById('pago-efectivo').value) || 0,
+    };
+
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+    try {
+      const response = await fetch('/barbers_payment/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert('Pago guardado exitosamente.');
+        window.location.reload();
+      } else {
+        alert('Error: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error al guardar pago:', error);
+      alert('Error de conexión al guardar el pago.');
+    }
+  }
+
   async function actualizarMontoPagar() {
     const barberoId = document.getElementById('barbero_id').value;
     const fechaInicio = document.getElementById('fecha_inicio').value;
@@ -415,10 +480,8 @@
     document.getElementById('pago-efectivo').addEventListener('input', validarMetodosPago);
 
     document.querySelector('form').addEventListener('submit', function(event) {
-      if (!validarMetodosPago()) {
-        event.preventDefault();
-        alert('La suma de los métodos de pago no coincide con el Monto Final. Por favor, corríjala antes de guardar.');
-      }
+      event.preventDefault();
+      guardarPago();
     });
   });
 
