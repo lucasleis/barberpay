@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 
 {% block head %}
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="{{ url_for('static', filename='../static/js/utils.js') }}" defer></script>
 {% endblock %}
 
@@ -366,7 +368,7 @@
       <td class="borrar-pago">
         <form method="POST" action="{{ url_for('delete_payment', pago_id=pago.id) }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <button type="submit" class="btn btn-danger" title="Eliminar">🗑️</button>
+          <button type="submit" class="btn btn-danger btn-sm" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
         </form>
       </td>
     </tr>

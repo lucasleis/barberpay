@@ -548,11 +548,17 @@ td.borrar-pago {
 td.borrar-pago form {
     margin: 0;
     padding: 0;
+    display: inline-block;
 }
 
 td.borrar-pago button.btn-danger {
-    padding: 0.2rem 0.25rem; 
-    font-size: 1.2rem; 
+    width: auto;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .productCant-container {
