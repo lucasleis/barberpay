@@ -3,6 +3,7 @@
 {% block head %}
   <link rel="stylesheet" href="{{ url_for('static', filename='barbers_payment.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="{{ url_for('static', filename='../static/js/utils.js') }}" defer></script>
 {% endblock %}
 
 {% block content %}
@@ -308,7 +309,7 @@
 
   function calcularMontoFinal() {
     const base = parseFloat(
-      document.getElementById('monto_base').value.replace('$', '').replace(',', '.')
+      document.getElementById('monto_base').value.replace('$', '').replace(/\./g, '')
     ) || 0;
 
     let descuento = 0;
@@ -322,7 +323,7 @@
     }
 
     const resultado = Math.max(0, base - descuento + agregado);
-    document.getElementById('monto-final').value = '$' + resultado.toFixed(2);
+    document.getElementById('monto-final').value = formatearMoneda(resultado);
     validarMetodosPago();
   }
 
@@ -343,9 +344,9 @@
     }
     const diff = esperado - suma;
     const detalle = diff > 0
-      ? `Falta $${diff.toFixed(2)}`
-      : `Sobra $${Math.abs(diff).toFixed(2)}`;
-    msg.textContent = `La suma de los métodos de pago ($${suma.toFixed(2)}) no coincide con el Monto Final ($${esperado.toFixed(2)}). ${detalle}`;
+      ? `Falta ${formatearMoneda(diff)}`
+      : `Sobra ${formatearMoneda(Math.abs(diff))}`;
+    msg.textContent = `La suma de los métodos de pago (${formatearMoneda(suma)}) no coincide con el Monto Final (${formatearMoneda(esperado)}). ${detalle}`;
     msg.style.display = 'block';
     document.getElementById('pago-transferencia').classList.add('input-error');
     document.getElementById('pago-efectivo').classList.add('input-error');
@@ -353,7 +354,7 @@
 
   function validarMetodosPago() {
     const montoFinal = parseFloat(
-      document.getElementById('monto-final').value.replace('$', '').replace(',', '.')
+      document.getElementById('monto-final').value.replace('$', '').replace(/\./g, '')
     ) || 0;
     const transferencia = parseFloat(document.getElementById('pago-transferencia').value) || 0;
     const efectivo = parseFloat(document.getElementById('pago-efectivo').value) || 0;
@@ -374,7 +375,7 @@
     const fechaFin = document.getElementById('fecha_fin').value;
 
     if (!barberoId || !fechaInicio || !fechaFin) {
-      document.getElementById('monto_base').value = '$0.00';
+      document.getElementById('monto_base').value = formatearMoneda(0);
       calcularMontoFinal();
       return;
     }
@@ -384,10 +385,10 @@
       const response = await fetch(url);
       const data = await response.json();
       const monto = data.monto_total || 0;
-      document.getElementById('monto_base').value = '$' + monto.toFixed(2);
+      document.getElementById('monto_base').value = formatearMoneda(monto);
     } catch (error) {
       console.error('Error al calcular monto:', error);
-      document.getElementById('monto_base').value = '$0.00';
+      document.getElementById('monto_base').value = formatearMoneda(0);
     }
 
     calcularMontoFinal();
