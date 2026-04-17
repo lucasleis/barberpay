@@ -158,6 +158,19 @@ input[readonly] {
   accent-color: #28a745;
 }
 
+/* Validación métodos de pago */
+.input-error {
+  border-color: #dc3545 !important;
+  outline-color: #dc3545 !important;
+}
+
+.error-metodos-pago {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: none;
+}
+
 /* Métodos de pago */
 .payment-method-container {
   position: relative;

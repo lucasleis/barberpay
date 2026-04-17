@@ -323,6 +323,49 @@
 
     const resultado = Math.max(0, base - descuento + agregado);
     document.getElementById('monto-final').value = '$' + resultado.toFixed(2);
+    validarMetodosPago();
+  }
+
+  function ocultarErrorPago() {
+    const msg = document.getElementById('error-metodos-pago');
+    if (msg) msg.style.display = 'none';
+    document.getElementById('pago-transferencia').classList.remove('input-error');
+    document.getElementById('pago-efectivo').classList.remove('input-error');
+  }
+
+  function mostrarErrorPago(suma, esperado) {
+    let msg = document.getElementById('error-metodos-pago');
+    if (!msg) {
+      msg = document.createElement('div');
+      msg.id = 'error-metodos-pago';
+      msg.className = 'error-metodos-pago';
+      document.getElementById('pago-efectivo').closest('.form-group').appendChild(msg);
+    }
+    const diff = esperado - suma;
+    const detalle = diff > 0
+      ? `Falta $${diff.toFixed(2)}`
+      : `Sobra $${Math.abs(diff).toFixed(2)}`;
+    msg.textContent = `La suma de los métodos de pago ($${suma.toFixed(2)}) no coincide con el Monto Final ($${esperado.toFixed(2)}). ${detalle}`;
+    msg.style.display = 'block';
+    document.getElementById('pago-transferencia').classList.add('input-error');
+    document.getElementById('pago-efectivo').classList.add('input-error');
+  }
+
+  function validarMetodosPago() {
+    const montoFinal = parseFloat(
+      document.getElementById('monto-final').value.replace('$', '').replace(',', '.')
+    ) || 0;
+    const transferencia = parseFloat(document.getElementById('pago-transferencia').value) || 0;
+    const efectivo = parseFloat(document.getElementById('pago-efectivo').value) || 0;
+    const suma = transferencia + efectivo;
+
+    if (Math.abs(suma - montoFinal) < 0.01) {
+      ocultarErrorPago();
+      return true;
+    } else {
+      mostrarErrorPago(suma, montoFinal);
+      return false;
+    }
   }
 
   async function actualizarMontoPagar() {
@@ -366,6 +409,16 @@
     document.getElementById('barbero_id').addEventListener('change', actualizarMontoPagar);
     document.getElementById('fecha_inicio').addEventListener('change', actualizarMontoPagar);
     document.getElementById('fecha_fin').addEventListener('change', actualizarMontoPagar);
+
+    document.getElementById('pago-transferencia').addEventListener('input', validarMetodosPago);
+    document.getElementById('pago-efectivo').addEventListener('input', validarMetodosPago);
+
+    document.querySelector('form').addEventListener('submit', function(event) {
+      if (!validarMetodosPago()) {
+        event.preventDefault();
+        alert('La suma de los métodos de pago no coincide con el Monto Final. Por favor, corríjala antes de guardar.');
+      }
+    });
   });
 
   function openDetalleModal(id) {
