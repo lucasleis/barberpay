@@ -280,6 +280,29 @@
 
 
 <!-- ================================================================
+     MODAL: CONFIRMAR ELIMINACIÓN
+     ================================================================ -->
+<div id="modal-confirmar-eliminar" class="modal-cantidad">
+  <div class="modal-content">
+    <h3>Confirmar Eliminación</h3>
+    <span class="close-modal" onclick="closeEliminarModal()">&times;</span>
+
+    <p>¿Está seguro que desea eliminar este pago?</p>
+    <p style="color: #e53e3e;"><strong>Esta acción no se puede deshacer.</strong></p>
+
+    <input type="hidden" id="payment-id-to-delete">
+
+    <div class="buttons-wrapper">
+      <div class="modal-buttons">
+        <button type="button" class="btn btn-secondary" onclick="closeEliminarModal()">Cancelar</button>
+        <button type="button" class="btn btn-danger" onclick="ejecutarEliminacion()">Confirmar Eliminación</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================================================================
      MODAL: EDITAR PAGO A BARBERO
      Misma estructura que cierres.html (modal-cantidad / active)
      ================================================================ -->
@@ -687,8 +710,26 @@
     }
   }
 
-  async function confirmarEliminar(id) {
-    if (!confirm('¿Está seguro que desea eliminar este pago? Esta acción no se puede deshacer.')) return;
+  function confirmarEliminar(id) {
+    document.getElementById('payment-id-to-delete').value = id;
+    const modal = document.getElementById('modal-confirmar-eliminar');
+    modal.style.display = 'flex';
+    modal.offsetHeight;
+    modal.classList.add('active');
+  }
+
+  function closeEliminarModal() {
+    const modal = document.getElementById('modal-confirmar-eliminar');
+    modal.classList.remove('active');
+    setTimeout(() => {
+      modal.style.display = 'none';
+      document.getElementById('payment-id-to-delete').value = '';
+    }, 300);
+  }
+
+  async function ejecutarEliminacion() {
+    const id = document.getElementById('payment-id-to-delete').value;
+    if (!id) return;
 
     const csrfToken = document.querySelector('input[name="csrf_token"]').value;
     try {
@@ -698,6 +739,7 @@
       });
       const result = await response.json();
       if (response.ok) {
+        closeEliminarModal();
         window.location.reload();
       } else {
         alert('Error al eliminar: ' + result.error);
@@ -851,6 +893,8 @@
       if (event.target === modal) {
         if (modal.id === 'modal-editar-pago') {
           closeEditModal();
+        } else if (modal.id === 'modal-confirmar-eliminar') {
+          closeEliminarModal();
         } else {
           closeDetalleModal(modal.id.replace('modal-detalle-', ''));
         }
