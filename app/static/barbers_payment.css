@@ -489,7 +489,7 @@ button:hover {
 }
 
 .buttons-wrapper {
-  padding: 2rem;
+  /* padding: 2rem;*/
   padding-bottom: 3rem;
   width: 100%;
   box-sizing: border-box;

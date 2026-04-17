@@ -301,6 +301,18 @@ def create_app():
         # from . import mp_test
         # app.register_blueprint(mp_test.mercadopago_routes)
 
+    @app.template_filter('formato_peso')
+    def formato_peso(value):
+        try:
+            v = float(value or 0)
+            if v == int(v):
+                formatted = f"{int(v):,}".replace(',', '.')
+            else:
+                formatted = f"{v:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            return f"${formatted}"
+        except (ValueError, TypeError):
+            return f"${value}"
+
     # Inyectar CSRF token en todos los templates
     @app.context_processor
     def inject_csrf_token():
