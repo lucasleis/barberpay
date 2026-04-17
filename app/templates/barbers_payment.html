@@ -121,12 +121,18 @@
         </div>
       </div>
 
-      <!-- Botones del formulario - fila horizontal -->
-      <div id="botones-formulario" class="form-group d-flex gap-2">
-        <button type="submit" id="btn-guardar-pago" class="btn btn-primary flex-grow-1">Guardar Pago</button>
-        <button type="button" class="btn btn-success flex-grow-1">
-          <i class="fas fa-envelope"></i> Guardar y Enviar Email
-        </button>
+      <!-- Botones del formulario - misma estructura que fechas/métodos de pago -->
+      <div id="botones-formulario" class="form-group">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <button type="submit" id="btn-guardar-pago" class="btn btn-primary w-100">Guardar Pago</button>
+          </div>
+          <div class="col-md-6">
+            <button type="button" class="btn btn-success w-100">
+              <i class="fas fa-envelope"></i> Guardar y Enviar Email
+            </button>
+          </div>
+        </div>
       </div>
 
     </form>
