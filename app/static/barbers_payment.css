@@ -611,7 +611,14 @@ button:hover {
   button, .btn-primary {
     font-size: 0.95rem;
     padding: 0.3rem 0.5rem;
-    /* height: 32px; */
+    white-space: normal;
+    height: auto;
+    min-height: 44px;
+    line-height: 1.4;
+  }
+
+  #botones-formulario {
+    flex-direction: column;
   }
 
   .rango-fechas {
