@@ -608,7 +608,7 @@ button:hover {
   button, .btn-primary {
     font-size: 0.95rem;
     padding: 0.3rem 0.5rem;
-    height: 32px;
+    /* height: 32px; */
   }
 
   .rango-fechas {
