@@ -70,6 +70,9 @@ def ensure_database_and_tables():
             active BOOLEAN DEFAULT TRUE
         );
 
+        ALTER TABLE barberos
+        ADD COLUMN IF NOT EXISTS mail VARCHAR(50);
+
         CREATE TABLE IF NOT EXISTS metodos_pago (
             id SERIAL PRIMARY KEY,
             peluqueria_id INTEGER NOT NULL REFERENCES peluquerias(id) ON DELETE CASCADE,
