@@ -71,7 +71,7 @@ def ensure_database_and_tables():
         );
 
         ALTER TABLE barberos
-        ADD COLUMN IF NOT EXISTS mail VARCHAR(50);
+        ADD COLUMN IF NOT EXISTS email VARCHAR(254);
 
         CREATE TABLE IF NOT EXISTS metodos_pago (
             id SERIAL PRIMARY KEY,

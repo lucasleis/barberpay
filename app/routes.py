@@ -769,6 +769,7 @@ def list_barbers():
     barbers = Empleado.query.filter_by(active=True, peluqueria_id=salon_id).all()
     return render_template('barbers.html', barbers=barbers)
 
+# added email read, validation, and model field
 @app.route('/admin/barbers/add', methods=['POST'])
 def add_barber():
     if "user" in session:
@@ -776,8 +777,12 @@ def add_barber():
         porcentaje = request.form.get('porcentaje')
         if not porcentaje:
             return "Porcentaje es requerido", 400
+        email = request.form.get('email', '').strip()
+        if not email or not re.match(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$', email) or len(email) > 254:
+            flash("Correo electrónico inválido.")
+            return redirect(url_for('list_barbers'))
         salon_id = session.get('salon_id')
-        db.session.add(Empleado(name=name, peluqueria_id=salon_id, porcentaje=porcentaje))
+        db.session.add(Empleado(name=name, peluqueria_id=salon_id, porcentaje=porcentaje, email=email))
         db.session.commit()
         return redirect(url_for('list_barbers'))
     else:
@@ -793,13 +798,14 @@ def delete_barber(id):
     else:
         return redirect(url_for("login"))
 
+# added email read, validation, and model field
 @app.route('/admin/barbers/update/<int:id>', methods=['POST'])
 def update_barber(id):
     if "user" not in session:
         return redirect(url_for("login"))
 
     original = Empleado.query.get_or_404(id)
-    original.active = False  
+    original.active = False
 
     name = request.form.get('name')
     try:
@@ -807,11 +813,17 @@ def update_barber(id):
     except ValueError:
         porcentaje = 0
 
+    email = request.form.get('email', '').strip()
+    if not email or not re.match(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$', email) or len(email) > 254:
+        flash("Correo electrónico inválido.")
+        return redirect(url_for('list_barbers'))
+
     nuevo = Empleado(
         name=name,
         porcentaje=porcentaje,
         peluqueria_id=original.peluqueria_id,
-        active=True
+        active=True,
+        email=email
     )
 
     db.session.add(nuevo)
