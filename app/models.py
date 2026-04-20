@@ -32,6 +32,7 @@ class Empleado(db.Model):
     name = db.Column(db.String(100), nullable=False)
     active = db.Column(db.Boolean, default=True)
     porcentaje = db.Column(db.Integer, nullable=False)
+    email = db.Column(db.String(254), nullable=True)
     peluqueria_id = db.Column(db.Integer, db.ForeignKey('peluquerias.id'), nullable=False)
 
 
