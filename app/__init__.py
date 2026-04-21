@@ -1,7 +1,8 @@
 from flask import Flask
-from flask_wtf import CSRFProtect 
+from flask_wtf import CSRFProtect
 from flask_wtf.csrf import generate_csrf
 from flask_cors import CORS
+from flask_mail import Mail
 from .models import db
 import os
 from datetime import timedelta
@@ -250,6 +251,7 @@ def ensure_database_and_tables():
 # ==============================
 
 csrf = CSRFProtect()
+mail = Mail()
 
 def create_app():
     ensure_database_and_tables() 
@@ -278,6 +280,20 @@ def create_app():
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+    # Configuración Flask-Mail (SMTP)
+    # Para Gmail necesitás una App Password, no la contraseña real.
+    # Ver: https://support.google.com/accounts/answer/185833
+    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'true').lower() == 'true'
+    app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', 'false').lower() == 'true'
+    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+    app.config['MAIL_DEFAULT_SENDER'] = (
+        os.environ.get('MAIL_SENDER_NAME', 'BarberPay'),
+        os.environ.get('MAIL_USERNAME', '')
+    )
+
     # Clave secreta para sesiones y CSRF
     app.secret_key = os.environ.get('SECRET_KEY', 'clave_segura_default')
     app.config['ADMIN_USERNAME'] = DB_USER
@@ -289,6 +305,9 @@ def create_app():
     # Inicializar CSRF Protection
     #csrf = CSRFProtect()
     csrf.init_app(app)
+
+    # Inicializar Flask-Mail
+    mail.init_app(app)
 
     # Inicializar extensión SQLAlchemy
     db.init_app(app)

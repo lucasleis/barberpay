@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recibo de Pago</title>
+  <!--[if mso]>
+  <noscript>
+    <xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+  </noscript>
+  <![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#1a202c;">
+
+  <!-- Wrapper -->
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6f8;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <!-- Card -->
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#1e3a5f;padding:32px 40px;text-align:center;">
+              <p style="margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:1px;">
+                BarberPay
+              </p>
+              <p style="margin:8px 0 0;font-size:13px;color:#94b8d8;letter-spacing:0.5px;text-transform:uppercase;">
+                Recibo de Pago
+              </p>
+            </td>
+          </tr>
+
+          <!-- Intro -->
+          <tr>
+            <td style="padding:32px 40px 0;">
+              <p style="margin:0;font-size:15px;color:#4a5568;line-height:1.6;">
+                Hola, <strong style="color:#1a202c;">{{ barbero.name }}</strong>.<br>
+                A continuación encontrás el detalle de tu pago correspondiente al período
+                <strong style="color:#1a202c;">{{ periodo_inicio }}</strong> al
+                <strong style="color:#1a202c;">{{ periodo_fin }}</strong>.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:24px 40px 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr><td style="height:1px;background-color:#e2e8f0;"></td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Desglose financiero -->
+          <tr>
+            <td style="padding:24px 40px 0;">
+              <p style="margin:0 0 12px;font-size:12px;font-weight:600;color:#718096;text-transform:uppercase;letter-spacing:0.8px;">
+                Desglose del Pago
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-radius:6px;overflow:hidden;border:1px solid #e2e8f0;">
+
+                <!-- Header de tabla -->
+                <tr style="background-color:#f7fafc;">
+                  <th align="left" style="padding:10px 16px;font-size:12px;font-weight:600;color:#4a5568;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e2e8f0;">
+                    Concepto
+                  </th>
+                  <th align="right" style="padding:10px 16px;font-size:12px;font-weight:600;color:#4a5568;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e2e8f0;">
+                    Monto
+                  </th>
+                </tr>
+
+                <!-- Monto base -->
+                <tr style="background-color:#ffffff;">
+                  <td style="padding:12px 16px;font-size:14px;color:#2d3748;border-bottom:1px solid #edf2f7;">
+                    Monto del período
+                  </td>
+                  <td align="right" style="padding:12px 16px;font-size:14px;color:#2d3748;border-bottom:1px solid #edf2f7;">
+                    {{ pago.monto_periodo | formato_peso }}
+                  </td>
+                </tr>
+
+                <!-- Descuento -->
+                {% if pago.monto_descuento | float > 0 %}
+                <tr style="background-color:#fffaf0;">
+                  <td style="padding:12px 16px;font-size:14px;color:#c05621;border-bottom:1px solid #edf2f7;">
+                    Descuento
+                    {% if pago.justificacion_descuento %}
+                    <br><span style="font-size:12px;color:#a0aec0;font-style:italic;">{{ pago.justificacion_descuento }}</span>
+                    {% endif %}
+                  </td>
+                  <td align="right" style="padding:12px 16px;font-size:14px;color:#c05621;border-bottom:1px solid #edf2f7;">
+                    &minus;&nbsp;{{ pago.monto_descuento | formato_peso }}
+                  </td>
+                </tr>
+                {% endif %}
+
+                <!-- Agregado -->
+                {% if pago.monto_agregado | float > 0 %}
+                <tr style="background-color:#f0fff4;">
+                  <td style="padding:12px 16px;font-size:14px;color:#276749;border-bottom:1px solid #edf2f7;">
+                    Agregado
+                    {% if pago.justificacion_agregado %}
+                    <br><span style="font-size:12px;color:#a0aec0;font-style:italic;">{{ pago.justificacion_agregado }}</span>
+                    {% endif %}
+                  </td>
+                  <td align="right" style="padding:12px 16px;font-size:14px;color:#276749;border-bottom:1px solid #edf2f7;">
+                    +&nbsp;{{ pago.monto_agregado | formato_peso }}
+                  </td>
+                </tr>
+                {% endif %}
+
+                <!-- Total final -->
+                <tr style="background-color:#1e3a5f;">
+                  <td style="padding:14px 16px;font-size:15px;font-weight:700;color:#ffffff;">
+                    Total a cobrar
+                  </td>
+                  <td align="right" style="padding:14px 16px;font-size:15px;font-weight:700;color:#ffffff;">
+                    {{ pago.monto_final | formato_peso }}
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+
+          <!-- Métodos de pago -->
+          <tr>
+            <td style="padding:24px 40px 0;">
+              <p style="margin:0 0 12px;font-size:12px;font-weight:600;color:#718096;text-transform:uppercase;letter-spacing:0.8px;">
+                Métodos de Pago Utilizados
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;">
+
+                {% if pago.metodo_transferencia | float > 0 %}
+                <tr style="background-color:#f7fafc;">
+                  <td style="padding:11px 16px;font-size:14px;color:#4a5568;border-bottom:{% if pago.metodo_efectivo | float > 0 %}1px solid #edf2f7{% else %}none{% endif %};">
+                    <span style="display:inline-block;width:10px;height:10px;background-color:#3182ce;border-radius:50%;margin-right:8px;vertical-align:middle;"></span>
+                    Transferencia
+                  </td>
+                  <td align="right" style="padding:11px 16px;font-size:14px;color:#2d3748;font-weight:600;border-bottom:{% if pago.metodo_efectivo | float > 0 %}1px solid #edf2f7{% else %}none{% endif %};">
+                    {{ pago.metodo_transferencia | formato_peso }}
+                  </td>
+                </tr>
+                {% endif %}
+
+                {% if pago.metodo_efectivo | float > 0 %}
+                <tr style="background-color:#ffffff;">
+                  <td style="padding:11px 16px;font-size:14px;color:#4a5568;">
+                    <span style="display:inline-block;width:10px;height:10px;background-color:#48bb78;border-radius:50%;margin-right:8px;vertical-align:middle;"></span>
+                    Efectivo
+                  </td>
+                  <td align="right" style="padding:11px 16px;font-size:14px;color:#2d3748;font-weight:600;">
+                    {{ pago.metodo_efectivo | formato_peso }}
+                  </td>
+                </tr>
+                {% endif %}
+
+              </table>
+            </td>
+          </tr>
+
+          <!-- Fecha de emisión -->
+          <tr>
+            <td style="padding:20px 40px 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f7fafc;border-radius:6px;border:1px solid #e2e8f0;">
+                <tr>
+                  <td style="padding:12px 16px;font-size:13px;color:#718096;">
+                    Fecha de pago
+                  </td>
+                  <td align="right" style="padding:12px 16px;font-size:13px;color:#4a5568;font-weight:600;">
+                    {{ pago.fecha_pago.strftime('%d/%m/%Y %H:%M') }}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Spacer -->
+          <tr><td style="height:32px;"></td></tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 40px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr><td style="height:1px;background-color:#e2e8f0;"></td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 40px 32px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:12px;color:#a0aec0;">
+                Este es un comprobante generado automáticamente por BarberPay.
+              </p>
+              <p style="margin:0;font-size:12px;color:#cbd5e0;">
+                Si tenés alguna consulta, contactanos por los canales habituales.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+        <!-- /Card -->
+
+        <!-- Branding -->
+        <p style="margin:30px 0 0;font-size:11px;color:#666666;text-align:center;">
+          Desarrollado por <a href="https://nivalistechlab.com/" target="_blank" rel="noopener noreferrer" style="color:#666666;text-decoration:none;">Nivalis</a>
+        </p>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

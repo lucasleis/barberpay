@@ -798,14 +798,10 @@ def delete_barber(id):
     else:
         return redirect(url_for("login"))
 
-# added email read, validation, and model field
 @app.route('/admin/barbers/update/<int:id>', methods=['POST'])
 def update_barber(id):
     if "user" not in session:
         return redirect(url_for("login"))
-
-    original = Empleado.query.get_or_404(id)
-    original.active = False
 
     name = request.form.get('name')
     try:
@@ -818,15 +814,10 @@ def update_barber(id):
         flash("Correo electrónico inválido.")
         return redirect(url_for('list_barbers'))
 
-    nuevo = Empleado(
-        name=name,
-        porcentaje=porcentaje,
-        peluqueria_id=original.peluqueria_id,
-        active=True,
-        email=email
-    )
-
-    db.session.add(nuevo)
+    barbero = Empleado.query.get_or_404(id)
+    barbero.name = name
+    barbero.porcentaje = porcentaje
+    barbero.email = email
     db.session.commit()
 
     return redirect(url_for('list_barbers'))
@@ -2497,6 +2488,42 @@ def delete_barber_payment(payment_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al eliminar: {str(e)}'}), 500
+
+
+@app.route('/api/enviar_recibo_pago/<int:pago_id>', methods=['POST'])
+def api_enviar_recibo_pago(pago_id):
+    if "user" not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+
+    salon_id = session.get('salon_id')
+    pago = PagoBarbero.query.filter_by(id=pago_id, peluqueria_id=salon_id).first()
+    if not pago:
+        return jsonify({'error': 'Pago no encontrado'}), 404
+
+    barbero = pago.barber
+    email_destino = barbero.email or ''
+
+    # Fallback: si el barbero referenciado no tiene email (fue creado antes del campo email),
+    # buscamos el barbero activo con el mismo nombre en el mismo salón.
+    if not email_destino:
+        barbero_activo = Empleado.query.filter_by(
+            name=barbero.name,
+            peluqueria_id=pago.peluqueria_id,
+            active=True
+        ).first()
+        if barbero_activo:
+            email_destino = barbero_activo.email or ''
+
+    if not email_destino:
+        return jsonify({'error': f'El barbero {barbero.name} no tiene email configurado'}), 422
+
+    from .email_utils import enviar_recibo_pago
+    resultado = enviar_recibo_pago(pago_id, email_destino=email_destino)
+
+    if resultado['success']:
+        return jsonify({'success': True, 'message': f'Email enviado a {email_destino}'}), 200
+    else:
+        return jsonify({'error': resultado['error']}), 500
 
 
 ####

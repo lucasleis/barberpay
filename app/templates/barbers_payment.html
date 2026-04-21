@@ -128,7 +128,8 @@
             <button type="submit" id="btn-guardar-pago" class="btn btn-primary w-100">Guardar Pago</button>
           </div>
           <div class="col-md-6">
-            <button type="button" class="btn btn-success w-100">
+            <button type="button" id="btn-guardar-enviar" class="btn btn-success w-100"
+                    onclick="guardarYEnviarEmail()">
               <i class="fas fa-envelope"></i> Guardar y Enviar Email
             </button>
           </div>
@@ -274,7 +275,8 @@
         <button type="button" class="btn btn-secondary" onclick="closeDetalleModal('{{ pago.id }}')">
           Cerrar
         </button>
-        <button type="button" class="btn btn-success">
+        <button type="button" id="btn-enviar-email-{{ pago.id }}" class="btn btn-success"
+                onclick="enviarReciboEmail({{ pago.id }}, this)">
           <i class="fas fa-envelope"></i> Enviar Email
         </button>
       </div>
@@ -425,6 +427,10 @@
         <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
         <button type="button" class="edit-button" onclick="guardarEdicionPago()">
           <i class="fas fa-check"></i> Confirmar Cambios
+        </button>
+        <button type="button" id="btn-edit-guardar-enviar" class="btn btn-success"
+                onclick="guardarEdicionYEnviarEmail()">
+          <i class="fas fa-envelope"></i> Guardar y Enviar Email
         </button>
       </div>
     </div>
@@ -906,6 +912,218 @@
         }
       }
     });
+  }
+
+  // ---- Email: utilidades ----
+
+  function mostrarToast(tipo, mensaje) {
+    let toast = document.getElementById('email-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'email-toast';
+      toast.style.cssText = [
+        'position:fixed', 'top:20px', 'right:20px', 'z-index:9999',
+        'padding:14px 20px', 'border-radius:8px', 'font-size:14px',
+        'font-weight:500', 'max-width:360px', 'box-shadow:0 4px 12px rgba(0,0,0,0.15)',
+        'transition:opacity 0.3s', 'line-height:1.4'
+      ].join(';');
+      document.body.appendChild(toast);
+    }
+    const estilos = {
+      success: 'background:#276749;color:#fff',
+      error:   'background:#c53030;color:#fff',
+      warning: 'background:#c05621;color:#fff',
+      info:    'background:#2b6cb0;color:#fff',
+    };
+    toast.style.cssText += ';' + (estilos[tipo] || estilos.info);
+    toast.textContent = mensaje;
+    toast.style.opacity = '1';
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => { toast.style.opacity = '0'; }, 4000);
+  }
+
+  function setBtnLoading(btn, loading) {
+    if (!btn) return;
+    if (loading) {
+      btn.disabled = true;
+      btn._originalHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = btn._originalHtml || btn.innerHTML;
+    }
+  }
+
+  async function enviarEmailApi(pagoId, btn) {
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+    setBtnLoading(btn, true);
+    try {
+      const resp = await fetch(`/api/enviar_recibo_pago/${pagoId}`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+      });
+      const result = await resp.json();
+      if (resp.ok) {
+        mostrarToast('success', result.message || 'Email enviado correctamente.');
+        return true;
+      } else {
+        mostrarToast('error', result.error || 'No se pudo enviar el email.');
+        return false;
+      }
+    } catch {
+      mostrarToast('error', 'Error de conexión al enviar el email.');
+      return false;
+    } finally {
+      setBtnLoading(btn, false);
+    }
+  }
+
+  async function enviarReciboEmail(pagoId, btn) {
+    await enviarEmailApi(pagoId, btn);
+  }
+
+  async function guardarYEnviarEmail() {
+    if (!validarMetodosPago()) {
+      alert('La suma de los métodos de pago no coincide con el Monto Final.');
+      return;
+    }
+
+    const barberoId = parseInt(document.getElementById('barbero_id').value);
+    if (!barberoId) { alert('Debe seleccionar un barbero.'); return; }
+    const fechaInicio = document.getElementById('fecha_inicio').value;
+    const fechaFin = document.getElementById('fecha_fin').value;
+    if (!fechaInicio || !fechaFin) { alert('Debe completar las fechas del período.'); return; }
+
+    const parsearMonto = (str) =>
+      parseFloat((str || '0').replace('$', '').replace(/\./g, '')) || 0;
+    const descuentoActivo = document.getElementById('checkbox-descuento').checked;
+    const agregadoActivo = document.getElementById('checkbox-agregado').checked;
+
+    const data = {
+      barber_id: barberoId,
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin,
+      monto_periodo: parsearMonto(document.getElementById('monto_base').value),
+      monto_descuento: descuentoActivo ? parseFloat(document.getElementById('monto-descuento').value) || 0 : 0,
+      justificacion_descuento: descuentoActivo ? document.getElementById('justificacion-descuento').value.trim() : null,
+      monto_agregado: agregadoActivo ? parseFloat(document.getElementById('monto-agregado').value) || 0 : 0,
+      justificacion_agregado: agregadoActivo ? document.getElementById('justificacion-agregado').value.trim() : null,
+      monto_final: parsearMonto(document.getElementById('monto-final').value),
+      metodo_transferencia: parseFloat(document.getElementById('pago-transferencia').value) || 0,
+      metodo_efectivo: parseFloat(document.getElementById('pago-efectivo').value) || 0,
+    };
+
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+    const btn = document.getElementById('btn-guardar-enviar');
+    setBtnLoading(btn, true);
+
+    try {
+      const saveResp = await fetch('/barbers_payment/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify(data),
+      });
+      const saveResult = await saveResp.json();
+
+      if (!saveResp.ok) {
+        mostrarToast('error', 'Error al guardar: ' + saveResult.error);
+        setBtnLoading(btn, false);
+        return;
+      }
+
+      const pagoId = saveResult.payment_id;
+      const emailResp = await fetch(`/api/enviar_recibo_pago/${pagoId}`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+      });
+      const emailResult = await emailResp.json();
+
+      setBtnLoading(btn, false);
+
+      if (emailResp.ok) {
+        mostrarToast('success', emailResult.message || 'Pago guardado y email enviado.');
+      } else {
+        mostrarToast('warning', 'Pago guardado, pero no se pudo enviar el email: ' + emailResult.error);
+      }
+
+      setTimeout(() => window.location.reload(), 2500);
+    } catch {
+      setBtnLoading(btn, false);
+      mostrarToast('error', 'Error de conexión.');
+    }
+  }
+
+  async function guardarEdicionYEnviarEmail() {
+    if (!validarEditMetodosPago()) {
+      alert('La suma de los métodos de pago no coincide con el Monto Final.');
+      return;
+    }
+
+    const parsearMonto = (str) =>
+      parseFloat((str || '0').replace('$', '').replace(/\./g, '')) || 0;
+    const descuentoActivo = document.getElementById('edit-checkbox-descuento').checked;
+    const agregadoActivo = document.getElementById('edit-checkbox-agregado').checked;
+    const paymentId = document.getElementById('edit-payment-id').value;
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+    const data = {
+      barber_id: parseInt(document.getElementById('edit-barbero').value),
+      fecha_inicio: document.getElementById('edit-fecha-inicio').value,
+      fecha_fin: document.getElementById('edit-fecha-fin').value,
+      monto_periodo: parsearMonto(document.getElementById('edit-monto-base').value),
+      monto_descuento: descuentoActivo ? parseFloat(document.getElementById('edit-monto-descuento').value) || 0 : 0,
+      justificacion_descuento: descuentoActivo ? document.getElementById('edit-justificacion-descuento').value.trim() : null,
+      monto_agregado: agregadoActivo ? parseFloat(document.getElementById('edit-monto-agregado').value) || 0 : 0,
+      justificacion_agregado: agregadoActivo ? document.getElementById('edit-justificacion-agregado').value.trim() : null,
+      monto_final: parsearMonto(document.getElementById('edit-monto-final').value),
+      metodo_transferencia: parseFloat(document.getElementById('edit-pago-transferencia').value) || 0,
+      metodo_efectivo: parseFloat(document.getElementById('edit-pago-efectivo').value) || 0,
+    };
+
+    const btn = document.getElementById('btn-edit-guardar-enviar');
+    setBtnLoading(btn, true);
+
+    try {
+      const saveResp = await fetch(`/barbers_payment/${paymentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify(data),
+      });
+      const saveResult = await saveResp.json();
+
+      if (!saveResp.ok) {
+        const container = document.getElementById('edit-error-container');
+        const errorBox = document.createElement('div');
+        errorBox.className = 'error-message';
+        errorBox.textContent = saveResult.error;
+        container.innerHTML = '';
+        container.appendChild(errorBox);
+        document.getElementById('modal-editar-pago-content').scrollTo({ top: 0, behavior: 'smooth' });
+        setBtnLoading(btn, false);
+        return;
+      }
+
+      closeEditModal();
+
+      const emailResp = await fetch(`/api/enviar_recibo_pago/${paymentId}`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+      });
+      const emailResult = await emailResp.json();
+
+      setBtnLoading(btn, false);
+
+      if (emailResp.ok) {
+        mostrarToast('success', emailResult.message || 'Cambios guardados y email enviado.');
+      } else {
+        mostrarToast('warning', 'Cambios guardados, pero no se pudo enviar el email: ' + emailResult.error);
+      }
+
+      setTimeout(() => window.location.reload(), 2500);
+    } catch {
+      setBtnLoading(btn, false);
+      mostrarToast('error', 'Error de conexión al guardar los cambios.');
+    }
   }
 </script>
 
