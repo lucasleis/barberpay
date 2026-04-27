@@ -29,6 +29,10 @@ header {
     line-height: 1.2;
 }
 
+.brand-logo-sub {
+    padding-left: 1.2em;
+}
+
 nav a {
     color: #fff;
     text-decoration: none;
