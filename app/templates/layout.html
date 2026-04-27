@@ -16,10 +16,7 @@
     <header>
         <div class="text-center my-3">
             {% if logo_url.startswith('Gestor') %}
-                <span class="brand-logo-text">
-                    <i class="fa-regular fa-credit-card"></i>
-                    <span>{{ logo_url }}</span>
-                </span>
+                <span class="brand-logo-text">{{ logo_url }}</span>
             {% else %}
                 <img src="{{ logo_url }}" alt="Logo" class="img-fluid logo">
             {% endif %}
