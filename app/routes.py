@@ -565,9 +565,11 @@ def inject_logo():
     dominio = request.host
     if 'barbacompany' in dominio:
         logo_url = url_for('static', filename='Barba&Co_logo.png')
+        favicon_path = url_for('static', filename='logo.ico')
     else:
         logo_url = 'Gestor de pagos'
-    return {'logo_url': logo_url}
+        favicon_path = url_for('static', filename='nivalis_logo.ico')
+    return {'logo_url': logo_url, 'favicon_path': favicon_path}
 
 
 
