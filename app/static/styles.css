@@ -592,11 +592,15 @@ td.borrar-pago button.btn-danger {
 }
 
 .site-footer {
-    background-color: #e8e8e8;
+    background-color: #0a0a0a;
+    border-top: 1px solid #1f1f1f;
     text-align: center;
     padding: 12px 1rem;
     font-size: 0.875rem;
-    color: #888;
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+    color: #a0a0a0;
 }
 
 .site-footer p {
@@ -604,14 +608,15 @@ td.borrar-pago button.btn-danger {
 }
 
 .site-footer a {
-    color: #888;
+    color: #ffffff;
+    font-weight: 500;
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
 .site-footer a:hover {
     color: #28a745;
-    text-decoration: underline;
+    text-decoration: none;
 }
 
 /* ------------------------ ESTILOS RESPONSIVE (MOBILE) ------------------------ */
