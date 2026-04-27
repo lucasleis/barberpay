@@ -563,14 +563,13 @@ def obtener_id_usuario_disponible(peluqueria_id):
 @app.context_processor
 def inject_logo():
     dominio = request.host
-
-    logos_por_dominio = {
-        'barbacompany.com.ar': './static/Barba&Co_logo.png',
-    }
-
-    return {
-        'logo_url': logos_por_dominio.get(dominio, '')  # Retorna vacío si no está
-    }
+    if 'barbacompany' in dominio:
+        logo_url = url_for('static', filename='Barba&Co_logo.png')
+        favicon_path = url_for('static', filename='logo.ico')
+    else:
+        logo_url = 'Gestor de pagos'
+        favicon_path = url_for('static', filename='nivalis_logo.ico')
+    return {'logo_url': logo_url, 'favicon_path': favicon_path}
 
 
 
