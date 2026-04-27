@@ -591,6 +591,29 @@ td.borrar-pago button.btn-danger {
   margin: 0.5rem 0 1rem 0;
 }
 
+.site-footer {
+    background-color: #e8e8e8;
+    text-align: center;
+    padding: 12px 1rem;
+    font-size: 0.875rem;
+    color: #888;
+}
+
+.site-footer p {
+    margin: 0;
+}
+
+.site-footer a {
+    color: #888;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.site-footer a:hover {
+    color: #28a745;
+    text-decoration: underline;
+}
+
 /* ------------------------ ESTILOS RESPONSIVE (MOBILE) ------------------------ */
 
 @media (max-width: 768px) {
@@ -804,6 +827,10 @@ td.borrar-pago button.btn-danger {
         height: 0.875rem;
         background-size: 0.875rem;
         right: 0.75rem;
+    }
+
+    .site-footer {
+        font-size: 0.8rem;
     }
 
 }
