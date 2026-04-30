@@ -22,6 +22,11 @@
     </div>
 
     <div class="form-group">
+      <label for="email">Email (opcional):</label>
+      <input type="email" name="email" id="email" placeholder="usuario@ejemplo.com" pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}" maxlength="254" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; height: 38px; font-size: 16px; margin: 0;">
+    </div>
+
+    <div class="form-group">
       <label for="rol">Rol:</label>
       <select name="rol" id="rol" required>
         <option value="" disabled selected>-- Seleccionar rol --</option>
@@ -36,8 +41,12 @@
   <ul class="barber-list">
     {% for user in users %}
       <li class="barber-item">
-        <span>{{ user.username }} - Rol: {{ user.rol }}</span>
+        <span>{{ user.username }} - Rol: {{ user.rol }} | Email: {{ user.email or '-' }}</span>
         <div class="action-buttons">
+          <a href="#" class="edit-icon" title="Editar email" onclick="openEmailModal('{{ user.id }}'); return false;">
+            <i class="fas fa-envelope"></i>
+          </a>
+          <span class="separator">|</span>
           <a href="#" class="edit-icon" title="Cambiar contraseña" onclick="openPasswordModal('{{ user.id }}'); return false;">
             <i class="fas fa-key"></i>
           </a>
@@ -47,6 +56,24 @@
           </a>
         </div>
       </li>
+
+      <!-- Modal para editar email -->
+      <div id="modal-email-{{ user.id }}" class="modal-cantidad">
+        <div class="modal-content">
+          <h3>Editar Email</h3>
+          <span class="close-modal" onclick="closeEmailModal('{{ user.id }}')">&times;</span>
+          <form method="POST" action="{{ url_for('update_user_email', id=user.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-group">
+              <label for="email_{{ user.id }}">Correo electrónico:</label>
+              <input type="email" name="email" id="email_{{ user.id }}" value="{{ user.email or '' }}" placeholder="usuario@ejemplo.com" pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}" maxlength="254" style="width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; height: 38px; font-size: 16px; margin: 0;">
+            </div>
+            <button type="submit" class="edit-button">
+              <i class="fas fa-check"></i> Confirmar
+            </button>
+          </form>
+        </div>
+      </div>
 
       <!-- Modal para editar contraseña -->
       <div id="modal-{{ user.id }}" class="modal-cantidad">
@@ -69,6 +96,21 @@
   </ul>
 
   <script>
+    function openEmailModal(id) {
+      const modal = document.getElementById('modal-email-' + id);
+      modal.style.display = 'flex';
+      modal.offsetHeight;
+      modal.classList.add('active');
+    }
+
+    function closeEmailModal(id) {
+      const modal = document.getElementById('modal-email-' + id);
+      modal.classList.remove('active');
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 300);
+    }
+
     function openPasswordModal(id) {
       const modal = document.getElementById('modal-' + id);
       modal.style.display = 'flex';
@@ -88,7 +130,8 @@
       const modals = document.querySelectorAll(".modal-cantidad");
       modals.forEach(modal => {
         if (event.target === modal) {
-          const id = modal.id.replace('modal-', '');
+          const id = modal.id.replace('modal-email-', '').replace('modal-', '');
+          closeEmailModal(id);
           closePasswordModal(id);
         }
       });

@@ -170,7 +170,10 @@ def ensure_database_and_tables():
             salon_id INTEGER,
             rol VARCHAR(20) NOT NULL
         );
-                
+
+        ALTER TABLE usuario
+        ADD COLUMN IF NOT EXISTS email VARCHAR(254);
+
         CREATE TABLE IF NOT EXISTS clientes (
             id SERIAL PRIMARY KEY,
             nombre VARCHAR(100) NOT NULL,

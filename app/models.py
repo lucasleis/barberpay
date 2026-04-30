@@ -165,8 +165,9 @@ class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)  # almacena el hash
-    salon_id = db.Column(db.Integer) 
-    rol = db.Column(db.String(20), nullable=False)  
+    salon_id = db.Column(db.Integer)
+    rol = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(254), nullable=True)
 
 
 

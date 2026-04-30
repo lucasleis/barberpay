@@ -1,6 +1,8 @@
 from flask import current_app as app, render_template, request, redirect, url_for, session, flash, jsonify, Blueprint, send_from_directory
 from . import db
 from . import csrf
+from . import mail
+from flask_mail import Message
 from .models import Empleado, Servicio, MetodoPago, Pago, Appointment, Producto, Membresia, TipoMembresia, AppointmentTurno, Usuario, TurnoCliente, Cliente, PagoBarbero
 from .auth import login_required
 from sqlalchemy import desc, text, case, nullsfirst, nullslast
@@ -1859,9 +1861,14 @@ def add_user():
     password = request.form['password']
     rol = request.form['rol']
     salon_id = session.get('salon_id')
+    email = request.form.get('email', '').strip() or None
 
     if not username or not password or not rol:
         flash("Faltan datos obligatorios.", "danger")
+        return redirect(url_for('list_users'))
+
+    if email and (not re.match(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$', email) or len(email) > 254):
+        flash("El formato del email es inválido.", "danger")
         return redirect(url_for('list_users'))
 
     # Validar si ya existe usuario con mismo nombre en este salón
@@ -1872,7 +1879,7 @@ def add_user():
 
     # Crear nuevo usuario
     hashed_pw = generate_password_hash(password)
-    nuevo = Usuario(username=username, password=hashed_pw, rol=rol, salon_id=salon_id)
+    nuevo = Usuario(username=username, password=hashed_pw, rol=rol, salon_id=salon_id, email=email)
 
     db.session.add(nuevo)
     db.session.commit()
@@ -1904,6 +1911,24 @@ def update_user_password(id):
     user.password = generate_password_hash(new_password)
     db.session.commit()
 
+    return redirect(url_for('list_users'))
+
+@app.route('/admin/users/update_email/<int:id>', methods=['POST'])
+def update_user_email(id):
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    user = Usuario.query.get_or_404(id)
+    email = request.form.get('email', '').strip() or None
+
+    if email and (not re.match(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$', email) or len(email) > 254):
+        flash("El formato del email es inválido.", "danger")
+        return redirect(url_for('list_users'))
+
+    user.email = email
+    db.session.commit()
+
+    flash("Email actualizado correctamente.", "success")
     return redirect(url_for('list_users'))
 
 
@@ -2489,6 +2514,78 @@ def delete_barber_payment(payment_id):
         return jsonify({'error': f'Error al eliminar: {str(e)}'}), 500
 
 
+def obtener_emails_administradores():
+    """Retorna lista de emails de todos los usuarios con rol 'admin' que tengan email configurado."""
+    try:
+        admins = Usuario.query.filter_by(rol='admin').all()
+        emails = [a.email for a in admins if a.email]
+        return emails
+    except Exception as e:
+        logger.warning('No se pudieron obtener emails de administradores: %s', str(e))
+        return []
+
+
+def enviar_recibo_pago(pago_id, email_destino=None):
+    """
+    Envía el recibo de pago de un barbero por email.
+
+    Args:
+        pago_id: ID del PagoBarbero a enviar.
+        email_destino: Email destino opcional; si no se provee, usa el del barbero.
+
+    Returns:
+        dict con 'success' (bool) y 'error' (str, solo si falla).
+    """
+    try:
+        pago = PagoBarbero.query.get(pago_id)
+        if not pago:
+            return {'success': False, 'error': 'Pago no encontrado'}
+
+        barbero = pago.barber
+        email = email_destino or barbero.email
+
+        if not email:
+            return {
+                'success': False,
+                'error': f'El barbero {barbero.name} no tiene email configurado'
+            }
+
+        periodo_inicio = pago.fecha_inicio_periodo.strftime('%d/%m/%Y')
+        periodo_fin = pago.fecha_fin_periodo.strftime('%d/%m/%Y')
+        subject = f'Recibo de Pago — {barbero.name} ({periodo_inicio} al {periodo_fin})'
+
+        html_body = render_template(
+            'emails/recibo_pago.html',
+            pago=pago,
+            barbero=barbero,
+            periodo_inicio=periodo_inicio,
+            periodo_fin=periodo_fin,
+        )
+
+        emails_admins = obtener_emails_administradores()
+
+        msg = Message(
+            subject=subject,
+            recipients=[email],
+            bcc=emails_admins,
+            html=html_body,
+        )
+
+        mail.send(msg)
+        logger.info(
+            'Recibo de pago %d enviado a %s con copia a %d administrador(es)',
+            pago_id, email, len(emails_admins)
+        )
+        return {'success': True}
+
+    except Exception as e:
+        logger.error('Error al enviar recibo de pago %d: %s', pago_id, str(e))
+        return {
+            'success': False,
+            'error': 'No se pudo enviar el email. Verificá la configuración SMTP o intentá más tarde.'
+        }
+
+
 @app.route('/api/enviar_recibo_pago/<int:pago_id>', methods=['POST'])
 def api_enviar_recibo_pago(pago_id):
     if "user" not in session:
@@ -2516,7 +2613,6 @@ def api_enviar_recibo_pago(pago_id):
     if not email_destino:
         return jsonify({'error': f'El barbero {barbero.name} no tiene email configurado'}), 422
 
-    from .email_utils import enviar_recibo_pago
     resultado = enviar_recibo_pago(pago_id, email_destino=email_destino)
 
     if resultado['success']:

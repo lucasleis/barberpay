@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(python3 *)",
-      "Bash(PGPASSWORD=admin123 psql -h localhost -U admin -d peluqueria_db -c \"SELECT id, name, email FROM barberos LIMIT 10;\")"
+      "Bash(PGPASSWORD=admin123 psql -h localhost -U admin -d peluqueria_db -c \"SELECT id, name, email FROM barberos LIMIT 10;\")",
+      "Bash(git stash *)"
     ]
   }
 }
