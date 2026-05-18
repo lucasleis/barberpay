@@ -6,6 +6,9 @@ body {
     padding: 0;
     background-color: #f4f4f4;
     color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 header {
@@ -41,6 +44,7 @@ nav a {
 
 main {
     padding: 2rem;
+    flex: 1;
 }
 
 form {
