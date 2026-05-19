@@ -848,6 +848,13 @@ td.borrar-pago button.btn-danger {
 
 }
 
+@media (max-width: 768px) {
+    h2 {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+}
+
 .btn-edit {
   background-color: transparent;
   /* border: 2px solid #1B1E3C; */

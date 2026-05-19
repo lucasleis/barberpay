@@ -63,3 +63,10 @@
 .h2, h2 {
   font-size: 1.3rem
 }
+
+@media (max-width: 768px) {
+  h2 {
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+  }
+}
