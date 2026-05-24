@@ -356,6 +356,7 @@ def calcular_pagos_entre_fechas(start_date, end_date):
             total_general += monto
 
         elif pago.appointment and pago.appointment.membresia:
+            print(f"CIERRE MEMBRESIA - pago_id: {pago.id}, turno_id: {pago.appointment_id}")
             tipo = pago.appointment.membresia.tipo_membresia
             empleado = pago.appointment.barber
             porcentaje = empleado.porcentaje
@@ -480,6 +481,7 @@ def calcular_pagos_barbero_entre_fechas(barbero_id, fecha_inicio, fecha_fin):
             total_barbero += pago_empleado_productos
 
         if pago.appointment and pago.appointment.membresia and not pago.appointment.service:
+            print(f"PAGOS BARBERO MEMBRESIA - pago_id: {pago.id}, turno_id: {pago.appointment_id}")
             tipo = pago.appointment.membresia.tipo_membresia
             empleado = pago.appointment.barber
             servicio = Servicio.query.get(tipo.servicio_id)
