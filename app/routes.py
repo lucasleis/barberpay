@@ -480,9 +480,7 @@ def calcular_pagos_barbero_entre_fechas(barbero_id, fecha_inicio, fecha_fin):
                 pago_empleado_productos += float((monto_producto * float(pt.producto.comision_empleado)) / 100)
             total_barbero += pago_empleado_productos
 
-        #if pago.appointment and pago.appointment.membresia and not pago.appointment.service:
-        if pago.appointment and pago.appointment.membresia and not pago.appointment.service and not pago.membresia_comprada:
-
+        if pago.appointment and pago.appointment.membresia and not pago.appointment.service:
             print(f"PAGOS BARBERO MEMBRESIA - pago_id: {pago.id}, turno_id: {pago.appointment_id}")
             tipo = pago.appointment.membresia.tipo_membresia
             empleado = pago.appointment.barber
