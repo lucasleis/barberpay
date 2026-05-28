@@ -1,0 +1,117 @@
+# BarberPay — Marketing Brief para Agencia
+
+> Este documento describe el producto BarberPay para uso interno de la agencia en la creación de campañas y materiales de comunicación. No es documentación técnica — es una guía de qué es, para quién, y qué hace el producto.
+
+---
+
+## Qué es BarberPay
+
+BarberPay es un **sistema de gestión de pagos y operaciones** diseñado específicamente para barberías. Permite al dueño y al equipo registrar cada cobro del día, calcular automáticamente cuánto le corresponde a cada barbero, y cerrar el período con un reporte claro de ganancias.
+
+En términos simples: **reemplaza la libreta, la calculadora y las conversaciones incómodas de fin de semana sobre el reparto de plata.**
+
+---
+
+## A quién va dirigido
+
+### Usuario primario: el dueño de la barbería
+- Necesita saber cuánto ganó, cuánto le debe a cada barbero y cuánto entra por cada medio de pago.
+- Quiere evitar errores en el reparto y tener un registro claro.
+- Actualmente lo resuelve con Excel, anotaciones en papel, o de memoria.
+
+### Usuario secundario: el barbero / empleado
+- Registra los cobros durante el día desde la misma app.
+- Ve su propio resumen, no los números del dueño.
+- No necesita formación técnica para usarlo.
+
+---
+
+## Qué problema resuelve
+
+Las barberías manejan dinero en efectivo, tarjeta y billeteras digitales, con distintos precios según el cliente (precio normal, precio amigo, precio con descuento), y con empleados que cobran un porcentaje diferente por cada servicio o producto. Hacer ese cálculo bien, todos los días, es tedioso y propenso a errores.
+
+BarberPay hace ese cálculo automáticamente, guarda el historial, y genera reportes de cierre de período con un clic.
+
+---
+
+## Qué hace el producto — en lenguaje no técnico
+
+### 1. Registro de cobros del día
+Cada vez que un cliente paga, el empleado registra en la app:
+- Qué servicio se realizó (corte, barba, combo, etc.)
+- Qué productos se vendieron (si aplica)
+- Quién fue el barbero
+- Cómo pagó el cliente (efectivo, tarjeta, Mercado Pago, combinación de dos métodos)
+- Si dejó propina
+
+El sistema calcula solo cuánto le corresponde al barbero y cuánto queda para el dueño.
+
+### 2. Membresías prepagadas
+Los clientes pueden comprar paquetes de servicios por adelantado (por ejemplo, "10 cortes"). El sistema registra cuántos usos le quedan a cada cliente y los descuenta automáticamente al momento del cobro, sin necesidad de tarjetas físicas ni papeles.
+
+### 3. Cierre de período
+Al final de la semana (o el período que el dueño elija), el sistema muestra:
+- Todos los cobros del período
+- Cuánto ganó cada barbero
+- Cuánto entró por cada medio de pago
+- La ganancia total del dueño
+
+Todo esto filtrado por fechas, con la posibilidad de corregir errores si los hubo.
+
+### 4. Pago a barberos
+El sistema calcula automáticamente cuánto hay que pagarle a cada barbero al cierre. El dueño puede aplicar descuentos o bonos con justificación escrita, especificar si paga por transferencia o efectivo, y enviar al barbero un comprobante de pago por email.
+
+### 5. Catálogo de servicios y productos
+El dueño administra los precios de servicios, productos en stock, medios de pago aceptados y empleados desde la misma app.
+
+### 6. Métricas
+Un panel con datos de los últimos 30 días que muestra:
+- En qué horarios hay más trabajo
+- Qué servicios se venden más
+- Qué productos rotan más
+- Qué membresías se venden más
+
+
+---
+
+## Cómo se usa (flujo típico de un día)
+
+1. El barbero atiende a un cliente.
+2. Abre BarberPay en el celular o computadora.
+3. Selecciona el servicio, el medio de pago y si hubo propina.
+4. Confirma el cobro. Listo — el sistema registró todo.
+5. Al final del día, el dueño ve el resumen completo.
+6. Al final de la semana, cierra el período y ve cuánto le debe a cada barbero.
+7. Registra el pago al barbero y le manda el comprobante por mail.
+
+---
+
+## Diferenciadores clave para comunicar
+
+| Qué | Por qué importa |
+|---|---|
+| **Hecho para barberías** | No es un sistema genérico de gestión. Entiende el modelo de negocio: comisiones por servicio, precios por tipo de cliente, membresías de cortes. |
+| **Cálculo automático de comisiones** | Elimina el error humano y las discusiones sobre el reparto. |
+| **Multi-medio de pago + propinas** | Registra efectivo, tarjeta y Mercado Pago en el mismo cobro, incluso combinados. |
+| **Membresías integradas** | Sistema propio de fidelización sin necesitar apps de terceros. |
+| **Roles diferenciados** | El barbero ve lo suyo. El dueño ve todo. Sin conflictos de información. |
+| **Cierre de período en un clic** | De días de cálculos manuales a un reporte en segundos. |
+| **Comprobante de pago al barbero** | Profesionaliza la relación laboral dentro del local. |
+
+---
+
+## Lo que el producto NO es (para evitar mensajes equivocados)
+
+- ❌ No es un sistema de turnos online.
+- ❌ No procesa pagos con tarjeta directamente — registra el cobro, no lo procesa.
+- ❌ No es una app móvil nativa — es una web app que funciona en celular y computadora.
+- ❌ No es un sistema contable ni facturador.
+
+---
+
+## Tono y personalidad sugeridos para la comunicación
+
+El producto resuelve un problema cotidiano, concreto y financiero en un ambiente informal (la barbería). El tono debería ser:
+
+
+
