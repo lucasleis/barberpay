@@ -15,7 +15,7 @@
 <body>
     <header>
         <div class="text-center my-3">
-            <img src="{{ url_for('static', filename='Barba&Co_logo.png') }}" alt="Barba&Co Logo" class="img-fluid logo">
+            <img src="{{ logo_url }}" alt="Logo" class="img-fluid logo">
         </div>
         <nav>
             {#  <!-- <a href="{{ url_for('app_landing') }}">Inicio</a> |      --> #}
@@ -49,21 +49,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      (function () {
-        if (window.location.hostname !== 'barbacompany.com.ar') {
-          var logo = document.querySelector('.logo');
-          if (logo) {
-            logo.style.display = 'none';
-            var fallback = document.createElement('span');
-            fallback.textContent = 'Gestor de Pagos';
-            fallback.className = 'brand-logo-text';
-            fallback.style.fontFamily = "'Azeret Mono', monospace";
-            fallback.style.fontWeight = '500';
-            logo.parentNode.insertBefore(fallback, logo.nextSibling);
-          }
-        }
-      })();
-
       // Oculta alertas automáticamente después de 15 segundos
       setTimeout(() => {
         const alerts = document.querySelectorAll('.alert');

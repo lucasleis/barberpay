@@ -3,7 +3,14 @@
     "allow": [
       "Bash(python3 *)",
       "Bash(PGPASSWORD=admin123 psql -h localhost -U admin -d peluqueria_db -c \"SELECT id, name, email FROM barberos LIMIT 10;\")",
-      "Bash(git stash *)"
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(git restore *)",
+      "Bash(sed -n '2546,5185p' /mnt/c/Users/lucas/Codigos/barberpay/app/routes.py)",
+      "Read(//tmp/**)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(awk '/max-width: 768px/{found=1} found && /h2/{print NR\": \"$0} /^}$/{found=0}' /mnt/c/Users/lucas/Codigos/barberpay/app/static/barbers_payment.css)"
     ]
   }
 }
