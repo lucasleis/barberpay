@@ -2517,10 +2517,10 @@ def delete_barber_payment(payment_id):
         return jsonify({'error': f'Error al eliminar: {str(e)}'}), 500
 
 
-def obtener_emails_administradores():
-    """Retorna lista de emails de todos los usuarios con rol 'admin' que tengan email configurado."""
+def obtener_emails_administradores(salon_id):
+    """Retorna lista de emails de los usuarios con rol 'admin' del salón indicado que tengan email configurado."""
     try:
-        admins = Usuario.query.filter_by(rol='admin').all()
+        admins = Usuario.query.filter_by(rol='admin', peluqueria_id=salon_id).all()
         emails = [a.email for a in admins if a.email]
         return emails
     except Exception as e:
@@ -2565,7 +2565,7 @@ def enviar_recibo_pago(pago_id, email_destino=None):
             periodo_fin=periodo_fin,
         )
 
-        emails_admins = obtener_emails_administradores()
+        emails_admins = obtener_emails_administradores(pago.peluqueria_id)
 
         msg = Message(
             subject=subject,
