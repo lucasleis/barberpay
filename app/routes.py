@@ -14,7 +14,7 @@ from collections import defaultdict
 # from backports.zoneinfo import ZoneInfo
 from zoneinfo import ZoneInfo
 from decimal import Decimal
-import loggingf
+import logging
 from werkzeug.security import check_password_hash
 from functools import wraps
 from werkzeug.security import generate_password_hash
@@ -1166,53 +1166,51 @@ def update_membresia(membresia_id):
         return redirect(url_for("login"))
 
     salon_id = session.get('salon_id')
-    # nueva_id_usuario = request.form.get('id_usuario')
-    nueva_id_usuario = request.form.get('id_usuario') or request.form.get('dni')
+    nueva_id_usuario = (request.form.get('id_usuario') or request.form.get('dni') or '').strip()
     usos_disponibles = request.form.get('usos_disponibles')
 
-    # Validación básica
     if not nueva_id_usuario or not usos_disponibles:
         flash('Debes completar todos los campos.', 'warning')
         return redirect(url_for('list_memberships'))
 
     try:
-        nueva_id_usuario = int(nueva_id_usuario)
         usos_disponibles = int(usos_disponibles)
     except ValueError:
-        flash('Los valores ingresados deben ser numéricos.', 'danger')
+        flash('Los usos disponibles deben ser un número.', 'danger')
         return redirect(url_for('list_memberships'))
 
     membresia = Membresia.query.filter_by(id=membresia_id, peluqueria_id=salon_id).first()
+    if not membresia:
+        flash('Membresía no encontrada.', 'warning')
+        return redirect(url_for('list_memberships'))
 
-    if membresia:
-        # Verificar que el nuevo id_usuario no esté en uso por otra membresía
+    es_numerico = nueva_id_usuario.isdigit()  # ← se llama sobre el string, antes de convertir
+
+    if es_numerico:
         existente = Membresia.query.filter(
-            Membresia.id_usuario == nueva_id_usuario,
+            Membresia.id_usuario == int(nueva_id_usuario),
             Membresia.id != membresia_id,
             Membresia.peluqueria_id == salon_id
         ).first()
-
         if existente:
             flash(f'El ID de usuario {nueva_id_usuario} ya está en uso.', 'danger')
             return redirect(url_for('list_memberships'))
-
-        if nueva_id_usuario.isdigit():
-            membresia.id_usuario = int(nueva_id_usuario)
-        else:
-            membresia.dni = nueva_id_usuario
-
-        membresia.usos_disponibles = usos_disponibles
-        try:
-            db.session.commit()
-            flash('Membresía actualizada correctamente.', 'success')
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Error al actualizar: {str(e)}', 'danger')
+        membresia.id_usuario = int(nueva_id_usuario)
+        membresia.dni = None
     else:
-        flash('Membresía no encontrada.', 'warning')
+        membresia.dni = nueva_id_usuario
+        membresia.id_usuario = None
+
+    membresia.usos_disponibles = usos_disponibles
+
+    try:
+        db.session.commit()
+        flash('Membresía actualizada correctamente.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al actualizar: {str(e)}', 'danger')
 
     return redirect(url_for('list_memberships'))
-
 
 ### Pagos ###
 @app.route('/payments/new', methods=['GET', 'POST'])
