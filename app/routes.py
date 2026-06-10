@@ -14,7 +14,7 @@ from collections import defaultdict
 # from backports.zoneinfo import ZoneInfo
 from zoneinfo import ZoneInfo
 from decimal import Decimal
-import logging
+import loggingf
 from werkzeug.security import check_password_hash
 from functools import wraps
 from werkzeug.security import generate_password_hash
@@ -1166,7 +1166,8 @@ def update_membresia(membresia_id):
         return redirect(url_for("login"))
 
     salon_id = session.get('salon_id')
-    nueva_id_usuario = request.form.get('id_usuario')
+    # nueva_id_usuario = request.form.get('id_usuario')
+    nueva_id_usuario = request.form.get('id_usuario') or request.form.get('dni')
     usos_disponibles = request.form.get('usos_disponibles')
 
     # Validación básica
