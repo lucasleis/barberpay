@@ -106,6 +106,7 @@
     </thead>
     <tbody>
       {% for m in membresias %}
+        {% if m.usos_disponibles > 0 %}
         <tr>
           <td>{{ m.dni if m.dni else m.id_usuario }}</td>
           <td>{{ m.tipo_membresia.nombre }}</td>
@@ -116,12 +117,14 @@
             </a>
           </td>
         </tr>
+        {% endif %}
       {% endfor %}
     </tbody>
   </table>
 
   <!-- Modales de membresías activas fuera de la tabla para evitar problemas de estructura -->
   {% for m in membresias %}
+    {% if m.usos_disponibles > 0 %}
     <div id="modal-membresia-{{ m.id }}" class="modal-cantidad">
       <div class="modal-content">
         <h3>Editar Membresía Comprada</h3>
@@ -129,12 +132,12 @@
         <form method="POST" action="{{ url_for('update_membresia', membresia_id=m.id) }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <div class="form-group">
-            {% if m.dni %}
+            {% if m.dni is not none and m.dni != "" %}
               <label for="dni_{{ m.id }}">DNI del cliente:</label>
               <input type="text" name="dni" id="dni_{{ m.id }}" value="{{ m.dni }}" pattern="\d{7,8}" inputmode="numeric" required>
             {% else %}
               <label for="id_usuario_{{ m.id }}">ID Usuario (1–100):</label>
-              <input type="number" name="id_usuario" id="id_usuario_{{ m.id }}" value="{{ m.id_usuario }}" required min="1" max="100">
+              <input type="number" name="id_usuario" id="id_usuario_{{ m.id }}" value="{{ m.id_usuario }}" required min="1">
             {% endif %}
           </div>
           <div class="form-group">
@@ -147,6 +150,7 @@
         </form>
       </div>
     </div>
+    {% endif %}
   {% endfor %}
 
   <script>
